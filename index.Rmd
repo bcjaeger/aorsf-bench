@@ -1,0 +1,160 @@
+---
+title: "Preliminary results: Accelerating ORSF pilot study"
+description: |
+  Partial model fitting improves computation time and prognostic accuracy for the ORSF.
+author:
+  - name: Byron C. Jaeger
+affiliation: Wake Forest School of Medicine
+date: "`r Sys.Date()`"
+output:
+  distill::distill_article:
+  toc: true
+toc_depth: 2
+code_folding: true
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = FALSE)
+
+source(here::here("packages.R"))
+
+source("R/sim_surv.R")
+
+rspec <- round_spec() |> 
+  round_using_magnitude(digits = c(3, 2, 2, 1),
+                        breaks = c(1, 10, 100, Inf))
+
+names(rspec) <- paste('table.glue', names(rspec), sep = '.')
+
+options(rspec)
+
+tar_load(names = data_results)
+
+```
+
+# Introduction
+
+This document shows the full preliminary results that I have included in a response to reviewers for my submission to the Wake Forest Center for Biomedical Informatics Pilot Award. In my response, I present a table that aggregates results over three datasets. In this document, all three datasets are described and the results for each dataset are tabulated.
+
+# Datasets
+
+## Mayo Clinic Primary Biliary Cholangitis Data, N = 276
+
+Primary sclerosing cholangitis is an autoimmune disease leading to destruction of the small bile ducts in the liver. Progression is slow but inexhortable, eventually leading to cirrhosis and liver decompensation. The condition has been recognised since at least 1851 and was named "primary biliary cirrhosis" in 1949. Because cirrhosis is a feature only of advanced disease, a change of its name to "primary biliary cholangitis" was proposed by patient advocacy groups in 2014.
+
+This data is from the Mayo Clinic trial in PBC conducted between 1974 and 1984. A total of 424 PBC patients, referred to Mayo Clinic during that ten-year interval, met eligibility criteria for the randomized placebo controlled trial of the drug D-penicillamine. The first 312 cases in the data set participated in the randomized trial and contain largely complete data. The additional 112 cases did not participate in the clinical trial, but consented to have basic measurements recorded and to be followed for survival. Six of those cases were lost to follow-up shortly after diagnosis, so the data here are on an additional 106 cases as well as the 312 randomized participants. The `pbc_orsf` data includes 276 participants who had no missing data for the study covariates. The first 10 rows of the data are printed here:
+
+```{r}
+as_tibble(pbc_orsf)
+```
+
+
+## Rotterdam Breast Cancer Data, N = 2,982
+
+The `rotterdam` data set includes 2982 primary breast cancers patients whose records were included in the Rotterdam tumor bank. These data sets are used in a paper by Royston and Altman that is referenced below. The first 10 rows of the data are printed here:
+
+```{r}
+as_tibble(survival::rotterdam)
+```
+
+
+## Simulated data with interactions, N = 5,000
+
+A simulated dataset with normally distributed predictor variables was generated. Predictor variables $z_1$, $\dots$, $z_{10}$ were negatively associated with the outcome, and $x_1$, $\dots$, $x_{10}$ were positively associated with the outcome. Predictor variables $g_1$, $\dots$, $g_5$ were unrelated to the outcome, but each of the $g_i$ variables had an interaction effect with $x_i$ (i.e., $g_1$ interacted with $x_1$, $g_2$ interacted with $x_2$, and so on, with $g_5$ interacting with $x_5$). An example of these simulated data are presented below.
+
+```{r}
+
+as_tibble(sim_surv(n=10))
+
+```
+
+# Methods
+
+I compare four different modeling techniques: 
+
+1. `aorsf` - the software I propose to develop further.
+
+1. `obliqueRSF` - the software I previously developed for ORSFs.
+
+1. `randomForestSRC` - A standard package for random forests.
+
+1. `ranger` - Another standard package for random forests.
+
+These techniques are compared based on their discrimination (C-statistic) and scaled Brier score, which are computed using the `riskRegression` package, and specifically `riskRegression::Score()`. Computational time required for model fitting and model predictions are also presented. Results are averaged over 25 runs of Monte-Carlo Cross-validation. In each run of Monte-Carlo Cross-validation, the current data are separated into a training and testing set, all modeling techniques are applied to the training set, and model predictions are evaluated in the testing set. 
+
+# Results
+
+Overall, `aorsf` and `obliqueRSF` had the highest prognostic accuracy, but `aorsf` is __much__ faster. In addition, while `obliqueRSF` was more accurate overall than `ranger` and `randomForestSRC`, it was not as accurate as `aorsf`! 
+
+```{r}
+
+results_overall <- data_results |> 
+  group_by(model) |>
+  summarize(
+    across(
+      .cols = c(cstat, IPA, time_fit, time_prd),
+      .fns = list(mean = mean, sd = sd)
+    )
+  ) |> 
+  mutate(data = 'Overall')
+
+data_tbl <- data_results |> 
+  group_by(model, data) |>
+  summarize(
+    across(
+      .cols = c(cstat, IPA, time_fit, time_prd),
+      .fns = list(mean = mean, sd = sd)
+    )
+  ) |> 
+  bind_rows(results_overall) |> 
+  group_by(data) |> 
+  mutate(
+    across(.cols = starts_with("time"), .fns = as.numeric),
+    time_fit_ratio = time_fit_mean / time_fit_mean[model == 'aorsf'],
+    time_prd_ratio = time_prd_mean / time_prd_mean[model == 'aorsf']
+  ) |> 
+  transmute(
+    model, 
+    data = recode(
+      data,
+      'pbc_orsf' = 'Mayo Clinic Primary Biliary Cholangitis Data, N = 276',
+      'rotterdam' = 'Rotterdam Breast Cancer Data, N = 2,982',
+      'sim' = 'Simulated data with interactions, N = 5,000'
+    ),
+    cstat = table_glue("{cstat_mean} ({cstat_sd})"),
+    ipa = table_glue("{IPA_mean} ({IPA_sd})"),
+    time_fit_mean = format(round(time_fit_mean, 4), nsmall = 4),
+    time_fit_ratio = table_value(time_fit_ratio),
+    time_prd_mean = format(round(time_prd_mean, 4), nsmall = 4),
+    time_prd_ratio = table_value(time_prd_ratio)
+  )
+
+gt(data_tbl, rowname_col = 'model', groupname_col = 'data') |> 
+  cols_label(cstat = 'C-Statistic (SD)',
+             ipa = 'Scaled Brier Score (SD)',
+             time_fit_mean = 'Mean, seconds',
+             time_fit_ratio = 'Ratio',
+             time_prd_mean = 'Mean, seconds',
+             time_prd_ratio = 'Ratio') |> 
+  cols_align(align = 'center') |> 
+  tab_spanner(label = 'Model prediction accuracy',
+              columns = c('cstat', 'ipa')) |> 
+  tab_spanner(label = 'Model fit time',
+              columns = c('time_fit_mean', 'time_fit_ratio')) |> 
+  tab_spanner(label = 'Risk prediction time',
+              columns = c('time_prd_mean', 'time_prd_ratio')) 
+
+
+```
+
+# Conclusion
+
+The novelty of `aorsf` is its use of partially trained models in non-terminal nodes of decision trees. While `obliqueRSF` develops fully trained models, which require iteration until a convergence criteria is met, `aorsf` just completes one iteration and moves along. Initially I thought this computational shortcut would hurt the accuracy of the model, but the reality is that using partially trained models appears to improve the accuracy of the ORSF by increasing the diversity of trees in the ensemble.  
+
+# REFERENCES
+
+1. Source for `pbc_orsf` data: T Therneau and P Grambsch (2000), Modeling Survival Data: Extending the Cox Model, Springer-Verlag, New York. ISBN: 0-387-98784-3.
+
+1. Source for `rotterdam` data: Patrick Royston and Douglas Altman, External validation of a Cox prognostic model: principles and methods. BMC Medical Research Methodology 2013, 13:33
+
