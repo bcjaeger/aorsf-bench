@@ -19,12 +19,26 @@ model_pred <- function(fit, type, test, pred_horizon) {
     'aorsf' = {
       predict(fit$model, new_data = test, pred_horizon = pred_horizon)
     },
+
+    'xgboost' = {
+
+      .test <- model.matrix(~. -1L, data = test) |>
+        as_tibble() |>
+        select(-time, -status) |>
+        as.matrix()
+
+      1-predict(fit$model, new_data = .test, eval_times = pred_horizon)
+
+    },
+
     'obliqueRSF' = {
       1-predict(fit$model, newdata = test, times = pred_horizon)
     },
+
     'randomForestSRC' = {
       predictRisk(fit$model, newdata = test, times = pred_horizon)
     },
+
     'ranger' = {
       predictRisk(fit$model, newdata = test, times = pred_horizon)
     }

@@ -18,12 +18,32 @@ model_fit <- function(type, train) {
     'aorsf' = {
       res <- orsf(Surv(time, status) ~ ., data = train)
     },
+
+    'xgboost' = {
+
+
+      xmat <- model.matrix(~. -1, data = train) |>
+        as_tibble() |>
+        as_sgb_data(status = status, time = time)
+
+
+      res <- sgb_fit(sgb_df = xmat,
+                     verbose = 0,
+                     params = list(max_depth=2,
+                                   eta = 0.01,
+                                   objective = 'survival:cox',
+                                   eval_metric = 'cox-nloglik'))
+
+    },
+
     'obliqueRSF' = {
       res <- ORSF(train, ntree = 500, verbose = FALSE)
     },
+
     'randomForestSRC' = {
       res <- rfsrc(Surv(time, status) ~ ., data = train)
     },
+
     'ranger' = {
       res <- ranger(
         Surv(time, status) ~ ., data = train, splitrule = 'extratrees'

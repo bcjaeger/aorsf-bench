@@ -5,7 +5,10 @@
 #' @title
 #' @param source
 #' @param run_seed
-analysis_run <- function(source, run_seed, test_prop = 1/2) {
+varsel_run <- function(source = source,
+                       run_seed = run_seed,
+                       test_prop = 1/2,
+                       keep_prop = 1/2) {
 
   switch(
 
@@ -49,19 +52,32 @@ analysis_run <- function(source, run_seed, test_prop = 1/2) {
   models <- set_names(
     c(
       'aorsf',
-      'obliqueRSF',
       'randomForestSRC',
       'ranger'
     )
   )
 
-  fits <- map(models, model_fit, train = as.data.frame(train))
+  vis <- map(models,
+             .f = model_varsel,
+             train = as.data.frame(train))
+
+  vis$aorsf$vi
+
+  fits <- map2(
+    models,
+    vars,
+    .f = ~model_fit(.x, train = as.data.frame(train[, .y$vars]))
+  )
 
   prds <- map2(.x = fits,
                .y = models,
                .f = model_pred,
                test = as.data.frame(test),
                pred_horizon = pred_horizon)
+
+  times_sel <- vars |>
+    map_dfr('time') |>
+    mutate(action = 'var_sel')
 
   times_fit <- fits |>
     map_dfr('time') |>
@@ -72,7 +88,7 @@ analysis_run <- function(source, run_seed, test_prop = 1/2) {
     mutate(action = 'prd')
 
   times <-
-    bind_rows(times_fit, times_prd) |>
+    bind_rows(times_sel, times_fit, times_prd) |>
     mutate(data = source, run = run_seed) |>
     pivot_longer(cols = any_of(models),
                  names_to = 'model',
@@ -105,5 +121,3 @@ analysis_run <- function(source, run_seed, test_prop = 1/2) {
   score
 
 }
-
-
