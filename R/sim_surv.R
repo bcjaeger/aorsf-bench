@@ -5,11 +5,12 @@
 #' @title
 
 sim_surv <- function(n_obs = 2500,
-                     n_z = 25,
-                     n_x = 25,
-                     n_g = 25,
-                     n_w = 25,
-                     n_v = 25,
+                     n_z = 20,
+                     n_x = 20,
+                     n_g = 20,
+                     n_w = 20,
+                     n_v = 20,
+                     n_c = 10,
                      correlated_x = 0,
                      pred_horiz = 2.5) {
 
@@ -24,6 +25,7 @@ sim_surv <- function(n_obs = 2500,
   g_names <- paste0('g', seq(n_g))
   w_names <- paste0('w', seq(n_w))
   v_names <- paste0('v', seq(n_v))
+  c_names <- paste0('c', seq(n_c))
 
   .names <- c(z_names, x_names)
 
@@ -33,7 +35,9 @@ sim_surv <- function(n_obs = 2500,
 
   if(n_v > 0) .names <- c(.names, v_names)
 
-  n_vars <- n_z + n_x + n_g + n_w + n_v
+  if(n_c > 0) .names <- c(.names, c_names)
+
+  n_vars <- n_z + n_x + n_g + n_w + n_v + n_c
 
   if(correlated_x > 0){
 
@@ -50,8 +54,7 @@ sim_surv <- function(n_obs = 2500,
             min = -correlated_x,
             max = correlated_x)
 
-
-
+    # symmetry
     mat_covar[upper.tri(mat_covar)] <- t(mat_covar)[upper.tri(mat_covar)]
 
     mat_covar <- Matrix::nearPD(mat_covar)$mat
@@ -73,7 +76,7 @@ sim_surv <- function(n_obs = 2500,
 
   covs <- as.data.frame(covs)
 
-  # Interaction variables
+  # Interaction variables ----
 
   vars_interaction <- c()
 
@@ -95,7 +98,7 @@ sim_surv <- function(n_obs = 2500,
 
   }
 
-  # Non-linear variables
+  # Non-linear variables ----
 
   if(n_w > 0){
 
@@ -112,7 +115,7 @@ sim_surv <- function(n_obs = 2500,
 
   }
 
-  # linear combination variables
+  # linear combination variables ----
 
   random_sign <- function(x) {
 
@@ -169,6 +172,7 @@ sim_surv <- function(n_obs = 2500,
   if(n_g > 0)  int_effect <- 3 / n_g else int_effect <- 0
   if(n_w > 0)  nl_effect  <- 3 / n_w else nl_effect  <- 0
   if(n_v > 0)  lc_effect  <- 3 / n_v else lc_effect  <- 0
+  if(n_c > 0)  c_effect   <- 3 / n_c else c_effect   <- 0
 
   betas[str_detect(names(betas), '^x')] <- x_effect
 
@@ -181,6 +185,8 @@ sim_surv <- function(n_obs = 2500,
   if(n_lc > 0)
     betas[str_detect(names(betas), '^lc')] <- lc_effect
 
+  if(n_c > 0)
+    betas[str_detect(names(betas), '^c')] <- c_effect
 
   s1 <- simsurv(lambdas = 0.1,
                 gammas = 1.5,
@@ -188,9 +194,25 @@ sim_surv <- function(n_obs = 2500,
                 x = covs,
                 maxt = pred_horiz * 2)
 
-  keep <- grep(pattern = '^z|^x|^g|^w|^v', x = names(covs))
+  # after generating outcomes using continuous values of c variables,
+  # cut those variables into categories
 
-  vars_signal <- names(betas)[grep(pattern = '^x|^g|^w|^v',
+  if(n_c > 0){
+    for(.c in c_names){
+
+      covs[[.c]] <- cut(covs[[.c]],
+                        breaks = c(-Inf, -1/2, 1/2, Inf),
+                        labels = letters[1:3])
+
+    }
+  }
+
+
+
+
+  keep <- grep(pattern = '^z|^x|^g|^w|^v|^c', x = names(covs))
+
+  vars_signal <- names(betas)[grep(pattern = '^x|^g|^w|^v|^c',
                                    x = names(betas))]
 
   list(

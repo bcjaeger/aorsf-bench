@@ -13,40 +13,34 @@ model_varsel <- function(model, train) {
 
   start_time <- Sys.time()
 
+  if(model %in% c('aorsf', 'aorsf_menze')){
+    fit <- orsf(Surv(time, status) ~ ., data_train = train,
+                control = orsf_control_cph(iter_max = 10))
+  }
+
   switch(
     model,
 
     'aorsf' = {
 
-      fit <- orsf(Surv(time, status) ~ .,
-                  data_train = train,
-                  importance = TRUE)
-
-      vi <- fit$importance
-
+      vi <- orsf_vi_negate(fit)
 
     },
 
     'aorsf_menze' = {
 
-      fit <- orsf(Surv(time, status) ~ ., data_train = train,
-                  control = orsf_control_cph(iter_max = 20))
-
-      vi <- orsf_vi_pvalue(fit)
-
-    },
-
-    'aorsf_pv' = {
-
-      fit <- orsf(Surv(time, status) ~ ., data_train = train,
-                  control = orsf_control_cph(iter_max = 20))
-      vi <- aorsf:::orsf_vi_pv(fit)
+      vi <- orsf_vi_anova(fit)
 
     },
 
     'xgboost' = {
 
-      xmat <- as.matrix(select(train, -time, -status))
+      xmat <- train |>
+        as.data.table() |>
+        one_hot() |>
+        select(-time, -status) |>
+        as.matrix()
+
       ymat <- train$time
       ymat[train$status == 0] <- ymat[train$status == 0] * (-1)
 
@@ -60,7 +54,7 @@ model_varsel <- function(model, train) {
                        early_stopping_rounds = 25)
 
       fit_final <- xgboost(data = xmat, label = ymat,
-                           params = list(eta = 0.02),
+                           params = list(eta = 0.05),
                            nrounds = fit_cv$best_iteration,
                            objective = 'survival:cox',
                            eval_metric = 'cox-nloglik',
@@ -70,7 +64,14 @@ model_varsel <- function(model, train) {
         predict(fit_final, newdata = xmat, predcontrib = TRUE) |>
         apply(MARGIN = 2, function(x) mean(abs(x)))
 
-      vi <- fit_shap[-which(names(fit_shap)=='BIAS')]
+      vi <- fit_shap[-which(names(fit_shap)=='BIAS')] |>
+        enframe() |>
+        separate(name, into = c('var', 'cat'),
+                 sep = '_',
+                 fill = 'right') |>
+        group_by(var) |>
+        summarize(value = mean(value)) |>
+        deframe()
 
 
     },

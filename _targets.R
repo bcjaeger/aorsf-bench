@@ -18,9 +18,9 @@ analyses_pred <- expand_grid(data_source = c("pbc_orsf",
 
 analyses_vi <- expand_grid(data_source = 'sim',
                            n_obs = c(2500, 5000),
-                           n_z = c(25),
-                           correlated_x = c(0, 0.1, 0.2, 0.3, 0.4), #, 0.1, 0.2),
-                           run_seed = 1:100)
+                           n_z = c(20),
+                           correlated_x = c(0, 0.1, 0.2, 0.3, 0.4),
+                           run_seed = 1:50)
 
 
 ## tar_plan supports drake-style targets and also tar_target()

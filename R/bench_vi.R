@@ -53,8 +53,6 @@ bench_vi <- function(data_source,
     mutate(vi_true = if_else(vi_id %in% vars_signal, 1, 0),
            vi_true = factor(vi_true))
 
-  library(yardstick)
-
   vars_data <- enframe(vars) |>
     unnest_wider(col = value) |>
     unnest_longer(col = vi) |>
@@ -91,6 +89,13 @@ bench_vi <- function(data_source,
               auc = .estimate,
               var_type = 'v')
 
+  roc_c <- vars_data |>
+    filter(var_type %in% c('z', 'c')) |>
+    roc_auc(vi, truth = vi_true, event_level = 'second') |>
+    transmute(model = name,
+              auc = .estimate,
+              var_type = 'c')
+
   roc_overall <- vars_data |>
     group_by(name) |>
     roc_auc(vi, truth = vi_true, event_level = 'second') |>
@@ -102,7 +107,8 @@ bench_vi <- function(data_source,
                    roc_x,
                    roc_w,
                    roc_g,
-                   roc_v) |>
+                   roc_v,
+                   roc_c) |>
     pivot_wider(names_from = var_type,
                 values_from = auc)
 

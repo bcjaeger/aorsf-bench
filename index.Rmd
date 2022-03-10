@@ -77,7 +77,7 @@ __Data generation__: There are no tests for this step, just a glimpse of the sim
 
 ```{r}
 
-set.seed(329)
+set.seed(32987)
 
 ss_demo <-
   sim_surv(
@@ -86,14 +86,16 @@ ss_demo <-
     n_x = 3,
     n_g = 3,
     n_w = 3,
-    n_v = 3
+    n_v = 3,
+    # omit categorical variables; these are tested separately
+    n_c = 0 
   )
 
 glimpse(ss_demo$data)
 
 ```
 
-__Column means__: This test verifies that the mean of each predictor is close to zero, and that roughly 40% of outcomes were censored.
+__Column means__: This test verifies that the mean of each predictor is close to zero, and that roughly 45% of outcomes were censored.
 
 ```{r}
 
@@ -107,7 +109,9 @@ data_sim$true_v <-
       v3 * ss_demo$coefs_lc[[1]][3] 
   )
 
-data_means <- apply(data_sim, 2, mean) |> 
+data_means <- data_sim |> 
+  select(where(is.numeric)) |> 
+  apply(2, mean) |> 
   round(3) |> 
   enframe()
 
@@ -226,19 +230,19 @@ data_gt <-
   benchmark_vi_smry |>
   ungroup() |> 
   mutate(xcorr = recode(xcorr, 
-                        '0.0' = '|Corr(linear effects, irrelevant effect)| = 0',
-                        '0.1' = '|Corr(linear effects, irrelevant effect)| \u2264 0.10',
-                        '0.2' = '|Corr(linear effects, irrelevant effect)| \u2264 0.20',
-                        '0.3' = '|Corr(linear effects, irrelevant effect)| \u2264 0.30',
-                        '0.4' = '|Corr(linear effects, irrelevant effect)| \u2264 0.40'),
+                        '0.0' = '|Corr(linear effect variables, irrelevant variables)| = 0',
+                        '0.1' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.10',
+                        '0.2' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.20',
+                        '0.3' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.30',
+                        '0.4' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.40'),
          model = recode(model,
                         'aorsf' = 'Negation importance',
                         'aorsf_menze' = 'ANOVA importance',
                         'xgboost' = 'SHAP importance',
                         'randomForestSRC' = 'Permutation importance')) |> 
-  select(n_obs, model, xcorr, overall, x, w, g, v) |> 
+  select(n_obs, model, xcorr, overall, x, w, g, v, c) |> 
   pivot_wider(names_from = n_obs, 
-              values_from = c(overall, x, w, g, v)) |> 
+              values_from = c(overall, x, w, g, v, c)) |> 
   select(xcorr,
          model,
          overall_2500,
@@ -246,11 +250,13 @@ data_gt <-
          w_2500,
          g_2500,
          v_2500,
+         c_2500,
          overall_5000,
          x_5000,
          w_5000,
          g_5000,
-         v_5000) |> 
+         v_5000,
+         c_5000) |> 
   arrange(xcorr, model)
 
 cols_to_highlight <- c("overall_2500",
@@ -258,11 +264,13 @@ cols_to_highlight <- c("overall_2500",
                        "w_2500",
                        "g_2500",
                        "v_2500",
+                       "c_2500",
                        "overall_5000",
                        "x_5000",
                        "w_5000",
                        "g_5000",
-                       "v_5000")
+                       "v_5000",
+                       "c_5000")
 
 max_row_positions <- data_gt |>
   group_by(xcorr) |> 
@@ -293,24 +301,28 @@ results_tbl_1 <- data_gt |>
                           "x_2500",
                           "w_2500",
                           "g_2500",
-                          "v_2500")) |> 
+                          "v_2500",
+                          "c_2500")) |> 
   tab_spanner(label = 'N = 5,000', 
               columns = c("overall_5000",
                           "x_5000",
                           "w_5000",
                           "g_5000",
-                          "v_5000")) |> 
+                          "v_5000",
+                          "c_5000")) |> 
   cols_label(
     overall_2500 = "All effects",
     x_2500 = "Linear effects",
     w_2500 = "Non-linear effects",
     g_2500 = "Interaction effects",
     v_2500 = "Combo effects",
+    c_2500 = "Categorical effects",
     overall_5000 = "All effects",
     x_5000 = "Linear effects",
     w_5000 = "Non-linear effects",
     g_5000 = "Interaction effects",
-    v_5000 = "Combo effects"
+    v_5000 = "Combo effects",
+    c_5000 = "Categorical effects"
   ) |> 
   cols_align(align = 'center')
 
@@ -326,26 +338,51 @@ eval(rlang::parse_expr(code_to_run))
 
 Due to space constraints, the pilot application presents a summary of the results in Table 1. This summary aggregates the results from the 6 scenarios presented above, and it is shown here here to verify.
 
-Table 2: Discrimination between relevant and irrelevant predictor variables for each VI technique. Negation importance obtains the highest C-statistic for each variable type except non-linear variables, where it closely trails SHAP importance.
-
 ```{r}
 
 data_fig <- benchmark_vi_smry |>
   ungroup() |> 
-  mutate(model = recode(model,
-                        'aorsf' = 'Negation importance',
-                        'aorsf_menze' = 'ANOVA importance',
-                        'xgboost' = 'SHAP importance',
-                        'randomForestSRC' = 'Permutation importance')) |> 
-  select(n_obs, model, xcorr, overall) |> 
-  group_by(n_obs, model, xcorr) |> 
-  summarize(value = mean(overall))
+  mutate(
+    n_obs = recode(n_obs,
+                   '2500' = 'Training data sample size = 2,500',
+                   '5000' = 'Training data sample size = 5,000'),
+    model = factor(model,
+                   levels = c('aorsf',
+                              'aorsf_menze',
+                              'xgboost',
+                              'randomForestSRC'),
+                   labels = c('Negation importance',
+                              'ANOVA importance',
+                              'SHAP importance',
+                              'Permutation importance'))
+  )
 
-ggplot(data_fig) + 
-  aes(x = xcorr, y = value, col = model) + 
+fig <- ggplot(data_fig) + 
+  aes(x = xcorr, y = overall, col = model) + 
   geom_line() +
-  facet_wrap(~n_obs)
+  geom_point(size = 2) +
+  scale_color_manual(values = c("purple", "orange", "grey", "limegreen")) +
+  facet_wrap(~n_obs) + 
+  labs(x = "max( |Corr(linear effect variables, irrelevant variables)| )",
+       y = "Discrimination between relevant\nand irrelevant predictor variables",
+       color = 'Variable importance\nestimated using') + 
+  theme_bw() + 
+  theme(panel.grid = element_blank())
 
+ggsave(filename = 'plot_violet.png',
+       plot = fig,
+       device = 'png',
+       width = 9,
+       height = 4,
+       dpi = 600)
+
+fig
+
+```
+
+Table 2: Discrimination between relevant and irrelevant predictor variables for each VI technique. Negation importance obtains the highest C-statistic for each variable type except non-linear variables, where it closely trails SHAP importance.
+
+```{r}
 
 results_tbl_2 <- benchmark_vi_smry |>
   ungroup() |> 
@@ -354,11 +391,11 @@ results_tbl_2 <- benchmark_vi_smry |>
                         'aorsf_menze' = 'ANOVA importance',
                         'xgboost' = 'SHAP importance',
                         'randomForestSRC' = 'Permutation importance')) |> 
-  select(n_obs, model, xcorr, overall, x, w, g, v) |> 
+  select(n_obs, model, xcorr, overall, x, w, g, v, c) |> 
   group_by(model) |> 
   summarize(
     across(
-      c(overall, x, w, g, v),
+      c(overall, x, w, g, v, c),
       ~table_value(mean(.x))
     )
   ) |> 
@@ -369,7 +406,8 @@ results_tbl_2 <- benchmark_vi_smry |>
     x = "Linear effects",
     w = "Non-linear effects",
     g = "Interaction effects",
-    v = "Combo effects"
+    v = "Combo effects",
+    c = "Categorical effects"
   ) |> 
   cols_align(align = 'center')
 
