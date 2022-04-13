@@ -11,29 +11,30 @@ plan(callr)
 ## Load your R files
 lapply(list.files("./R", full.names = TRUE), base::source)
 
-analyses_pred <- expand_grid(data_source = c("pbc_orsf",
-                                             "rotterdam",
-                                             "sim"),
-                             run_seed = 1:100)
+analyses_real <- expand_grid(data_source = c("pbc_orsf",
+                                             "rotterdam"),
+                             run_seed = 1:15)
 
-analyses_vi <- expand_grid(data_source = 'sim',
-                           n_obs = c(2500, 5000),
-                           n_z = c(20),
-                           correlated_x = c(0, 0.1, 0.2, 0.3, 0.4),
-                           run_seed = 1:50)
+analyses_sim <- expand_grid(data_source = 'sim',
+                            n_obs = c(1000),
+                            n_z = c(20),
+                            correlated_x = c(0.1),
+                            run_seed = 1:15)
 
 
-## tar_plan supports drake-style targets and also tar_target()
 tar_plan(
 
-  # benchmark_pred <- tar_map(
-  #   values = analyses_pred,
-  #   tar_target(res_pred, bench_pred(data_source = data_source,
-  #                                   run_seed = run_seed))
-  # ),
+  bm_pred <- tar_map(
+    values = bind_rows(analyses_sim, analyses_real),
+    tar_target(res_pred, bench_pred(data_source = data_source,
+                                    n_obs = n_obs,
+                                    n_z = n_z,
+                                    correlated_x = correlated_x,
+                                    run_seed = run_seed))
+  ),
 
-  benchmark_vi <- tar_map(
-    values = analyses_vi,
+  bm_vi <- tar_map(
+    values = analyses_sim,
     tar_target(res_vi, bench_vi(data_source = data_source,
                                 n_obs = n_obs,
                                 n_z = n_z,
@@ -42,16 +43,16 @@ tar_plan(
 
   ),
 
-  tar_combine(
-    benchmark_vi_comb,
-    benchmark_vi[[1]],
-    command = bind_rows(!!!.x)
-  ),
 
-  tar_target(
-    benchmark_vi_smry,
-    bench_vi_summarize(benchmark_vi_comb)
-  )
+  tar_combine(bm_pred_comb, bm_pred[[1]]),
+
+  tar_combine(bm_vi_comb, bm_vi[[1]])
+
+  #
+  # tar_target(
+  #   benchmark_vi_smry,
+  #   bench_vi_summarize(benchmark_vi_comb)
+  # )
 
 )
 

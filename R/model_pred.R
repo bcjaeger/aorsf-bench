@@ -20,6 +20,11 @@ model_pred <- function(fit, type, test, pred_horizon) {
       predict(fit$model, new_data = test, pred_horizon = pred_horizon)
     },
 
+    'cif' = {
+      leaves <- predict(fit$model, newdata = test, type = 'prob')
+      map_dbl(leaves, ~ 1-.x$surv[max(which(.x$time <= pred_horizon))])
+    },
+
     'xgboost' = {
 
       .test <- model.matrix(~. -1L, data = test) |>
@@ -50,3 +55,6 @@ model_pred <- function(fit, type, test, pred_horizon) {
   list(prediction = as.numeric(res), time = end_time - start_time)
 
 }
+
+
+

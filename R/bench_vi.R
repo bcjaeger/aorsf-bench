@@ -39,8 +39,8 @@ bench_vi <- function(data_source,
       'aorsf',
       'aorsf_menze',
       'xgboost',
-      'randomForestSRC'
-      # 'ranger'
+      'randomForestSRC',
+      'ranger'
     )
   )
 
@@ -89,12 +89,12 @@ bench_vi <- function(data_source,
               auc = .estimate,
               var_type = 'v')
 
-  roc_c <- vars_data |>
-    filter(var_type %in% c('z', 'c')) |>
-    roc_auc(vi, truth = vi_true, event_level = 'second') |>
-    transmute(model = name,
-              auc = .estimate,
-              var_type = 'c')
+  # roc_c <- vars_data |>
+  #   filter(var_type %in% c('z', 'c')) |>
+  #   roc_auc(vi, truth = vi_true, event_level = 'second') |>
+  #   transmute(model = name,
+  #             auc = .estimate,
+  #             var_type = 'c')
 
   roc_overall <- vars_data |>
     group_by(name) |>
@@ -103,12 +103,14 @@ bench_vi <- function(data_source,
               auc = .estimate,
               var_type = 'overall')
 
-  roc <- bind_rows(roc_overall,
-                   roc_x,
-                   roc_w,
-                   roc_g,
-                   roc_v,
-                   roc_c) |>
+  roc <- bind_rows(
+    roc_overall,
+    roc_x,
+    roc_w,
+    roc_g,
+    roc_v
+    # roc_c
+  ) |>
     pivot_wider(names_from = var_type,
                 values_from = auc)
 

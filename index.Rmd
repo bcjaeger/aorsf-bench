@@ -1,7 +1,7 @@
 ---
-title: "Variable Importance for Oblique Learning Ensembles of Trees (VIOLET)"
+title: "Benchmarking the accelerated oblique random survival forest"
 description: |
-  Preliminary results for BERD pilot application
+  Comparing prediction accuracy and identification of relevant predictor variables
 author:
   - name: Byron C. Jaeger
 affiliation: Wake Forest School of Medicine
@@ -29,49 +29,95 @@ names(rspec) <- paste('table.glue', names(rspec), sep = '.')
 
 options(rspec)
 
-tar_load(names = benchmark_vi_smry)
+tar_load(names = c(bm_pred_comb, bm_vi_comb))
 
 ```
 
+# Benchmarking aorsf
 
+Welcome! This benchmark experiment is under construction and will eventually be the basis of a paper that formally introduces the novel mechanisms at play in the {`aorsf`} package.  
 
-## Introduction
+## Methods
 
-This document shows the full preliminary results that I have included in my application for the Biostatistics, Epidemiology, and Research Design (BERD) Program's Methods Pilot Award. The data simulation process is described in full detail, followed by an outline of the proposed simulation study. Last, results are tabulated for each simulation scenario described, and also in aggregate form. The final aggregate table is presented in the BERD application.  
+### Machine learning algorithms
 
-## Data Simulation 
+The benchmark experiment uses real and simulated data to compare the following machine learning algorithms {`R package`}:
 
-A simulated data set with five types of predictor variables was generated in each run for the current simulation study. The size of each predictor set was fixed at 25 for our analysis. 
+1. accelerated oblique random survival forests {`aorsf`}
+1. original oblique random survival forests {`obliqueRSF`}
+1. axis-based random survival forests {`randomForestSRC` & `ranger`}
+1. axis-based conditional inference forests {`party`}
+1. gradient boosted decision trees {`xgboost`}
 
-- $z$ (irrelevant) variables $z_1$, $\dots$, $z_{25}$ had no relationship with the outcome.
+__Note__ Presently, the original oblique random survival forest is not included in the benchmark results. This is because the original oblique random survival forest runs very slowly, turning a 10-minute benchmark into a 6 hour benchmark. I will include it once the project is more stable. 
 
-- $x$ (linear effect) variables $x_1$, $\dots$, $x_{25}$ had a linear relationship with the outcome.
+__Note__ {`xgboost`} requires careful tuning to obtain ideal performance. While we do tune the number of boosting steps in this benchmark, we do not go beyond that and instead use default setting for hyper-parameters.
 
-- $w$ (non-linear effect) variables $w_1$, $\dots$, $w_{25}$ had a non-linear relationship with the outcome. The non-linear relationship followed a sinusoidal curve with varying period length.
+### Prediction accuracy 
 
-- $g$ (conditional linear) variables $g_1$, $\dots$, $g_{25}$ had a conditional linear relationship with the outcome. In other words, for each $i \in \{1, \ldots, 25\}$,  $g_i$ had no relationship to the outcome, but $g_i * x_i$ was linearly related to the outcome.
+The machine learning algorithms above are compared based on their discrimination (C-statistic) and scaled Brier score, which are computed using the `riskRegression` package, and specifically `riskRegression::Score()`. Computational time required for model fitting and model predictions are also presented. Results are averaged over 15 runs of Monte-Carlo Cross-validation. In each run of Monte-Carlo Cross-validation, the current data are separated into a training and testing set, all modeling techniques are applied to the training set, and model predictions are evaluated in the testing set. 
 
-- $v$ (combination linear) variables $v_1$, $\dots$, $v_{25}$ had a combination linear relationship with the outcome. In other words, $v_1, v_2, v_3$ each had no effect on the outcome individually, but the latent variable $v_1*c_1* + v_2*c_2 + v_3 * c_3$ was linearly related to the outcome. Coefficients $c_i$ were generated at random uniformly from -1 to -0.5 and 0.5 to 1.
+### Variable importance 
 
-__Mean and standard deviation__ The multivariate normal distribution that generated values for the predictor matrix had a mean of zero and standard deviation of 1 for each variable. 
+I compare four different techniques to measure variable importance (VI).
 
-__Correlation__: The correlation among $z$ variables was allowed to be non-zero as was the correlation among $x$ variables and the correlation between $x$ and $z$ variables. For all non-zero correlations, a value was selected at random uniformly between a lower and upper boundary. We simulated five scenarios by varying the boundaries of correlation:
+1. `Negation importance`: the method I propose to develop further with this pilot application. This is computed using an accelerated oblique random survival forest model.
 
-1. lower bound: 0; upper bound: 0
-1. lower bound: -0.1; upper bound: 0.1
-2. lower bound: -0.2; upper bound: 0.2
-1. lower bound: -0.3; upper bound: 0.3
-3. lower bound: -0.4; upper bound: 0.4
+1. `ANOVA importance`: A method introduced by Menze et al. This is computed using an accelerated oblique random survival forest model.
 
-The correlations were generated symmetrically and were adjusted if needed to create the nearest positive definite covariance matrix using `Matrix::nearPD()`.
+1. `SHAP importance`: A method introduced by Lundberg et al. SHAP importance is widely regarded as a gold standard due to its excellent asymptotic properties. This is computed using a boosting model.
 
-__Effect sizes__: A total effect of 3 was distributed evenly across each predictor group. For example, with 25 $x$ predictors, the increase in log-hazard associated with a 1 unit increased in each $x$ variable was $3 / 25 = 0.12$. 
+1. `Permutation importance`: A method introduced by Leo Breiman. This is computed using a standard random survival forest model.
 
-__Outcomes__: A censored outcome variable was generated with the `simsurv::simsurv()` using a predictor matrix that included all relevant predictors. After the outcome was generated the interactions, non-linear transformations, and linear combinations of relevant predictors were dropped from the data. 
+__Evaluation of variable importance techniques__: VI techniques are compared based on their discrimination (C-statistic) between relevant and irrelevant predictor variables. The relevant predictor variables are those that have a relationship to the outcome, and the irrelevant variables are those with no relationship to the outcome. This is equivalent to assigning a binary outcome to each variable: 1 if it is relevant, 0 otherwise, and then computing a C-statistic for discrimination of the relevant versus irrelevant variables using VI as a 'prediction' for the variables.
 
-### Demo and validation of simulated data
+__Details on C-statistic computation:__ The C-statistic for VI is not the same thing as the C-statistic for prediction accuracy. Since relevance of a variable is binary, the C-statistic for VI is computed using `yardstick::roc_auc`, which wraps `pROC::roc`. 
 
-Some tests of the simulated data are presented below. If you have no skepticism regarding the simulated data, you can safely skip this sub-section. For simplicity, we set the number of predictors to 3 for each predictor group.
+## Data sets
+
+### Mayo Clinic Primary Biliary Cholangitis Data, N = 276
+
+Primary sclerosing cholangitis is an autoimmune disease leading to destruction of the small bile ducts in the liver. Progression is slow but inexhortable, eventually leading to cirrhosis and liver decompensation. The condition has been recognised since at least 1851 and was named "primary biliary cirrhosis" in 1949. Because cirrhosis is a feature only of advanced disease, a change of its name to "primary biliary cholangitis" was proposed by patient advocacy groups in 2014.
+
+This data is from the Mayo Clinic trial in PBC conducted between 1974 and 1984. A total of 424 PBC patients, referred to Mayo Clinic during that ten-year interval, met eligibility criteria for the randomized placebo controlled trial of the drug D-penicillamine. The first 312 cases in the data set participated in the randomized trial and contain largely complete data. The additional 112 cases did not participate in the clinical trial, but consented to have basic measurements recorded and to be followed for survival. Six of those cases were lost to follow-up shortly after diagnosis, so the data here are on an additional 106 cases as well as the 312 randomized participants. The `pbc_orsf` data includes 276 participants who had no missing data for the study covariates. The first 10 rows of the data are printed here:
+
+```{r}
+as_tibble(pbc_orsf)
+```
+
+### Rotterdam Breast Cancer Data, N = 2,982
+
+The `rotterdam` data set includes 2982 primary breast cancers patients whose records were included in the Rotterdam tumor bank. These data sets are used in a paper by Royston and Altman that is referenced below. The first 10 rows of the data are printed here:
+
+```{r}
+as_tibble(survival::rotterdam)
+```
+
+### Simulated data
+
+The simulated data contain right-censored time-to-event outcomes with five types of predictor variables:
+
+- $z$ (irrelevant) variables $z_1$, $\dots$, $z_{k}$ had no relationship with the outcome.
+
+- $x$ (linear effect) variables $x_1$, $\dots$, $x_{k}$ had a linear relationship with the outcome.
+
+- $w$ (non-linear effect) variables $w_1$, $\dots$, $w_{k}$ had a non-linear relationship with the outcome. The non-linear relationship followed a sinusoidal curve with varying period length.
+
+- $g$ (conditional linear) variables $g_1$, $\dots$, $g_{k}$ had a conditional linear relationship with the outcome. In other words, for each $i \in \{1, \ldots, k\}$,  $g_i$ had no relationship to the outcome, but $g_i * x_i$ was linearly related to the outcome.
+
+- $v$ (combination linear) variables $v_1$, $\dots$, $v_{k}$ had a combination linear relationship with the outcome. In other words, $v_1, v_2, v_3$ each had no effect on the outcome individually, but the latent variable $v_1*c_1* + v_2*c_2 + v_3 * c_3$ was linearly related to the outcome. Coefficients $c_i$ were generated at random uniformly from -1 to -0.5 and 0.5 to 1.
+
+__Mean and standard deviation__ The multivariate normal distribution that generated values for the predictor matrix had a mean of zero and standard deviation of 1 for each variable.
+
+__Correlation__: The correlation among $z$ variables was allowed to be non-zero as was the correlation among $x$ variables and the correlation between $x$ and $z$ variables. For all non-zero correlations, a value was selected at random uniformly between a lower and upper boundary. We set the lower boundary as -0.1 and upper boundary as +0.1. The correlations were adjusted if needed to create the nearest positive definite covariance matrix using `Matrix::nearPD()`.
+
+__Effect sizes__: A total effect of 6 was distributed evenly across each predictor group. For example, with a total of $k$ linear effect predictors (i.e., the $x$ variables), the increase in log-hazard associated with a 1 unit increased in each $x$ variable was $6 / 25 = 0.24$, i.e., about a 27% increase in relative risk.
+
+__Outcomes__: A censored outcome variable was generated with the `simsurv::simsurv()` function using a predictor matrix that included all relevant predictors. After the outcome was generated the interactions, non-linear transformations, and linear combinations of relevant predictors were dropped from the data.
+
+#### Demo and validation of simulated data
+
+Some tests of the simulated data are presented here. If you have no skepticism regarding the simulated data, you can safely skip this sub-section. For simplicity, we set the number of predictors ($k$) to 3 for each predictor group.
 
 __Data generation__: There are no tests for this step, just a glimpse of the simulated set of data.
 
@@ -81,14 +127,14 @@ set.seed(32987)
 
 ss_demo <-
   sim_surv(
-    n_obs = 5000,
+    n_obs = 10000,
     n_z = 3,
     n_x = 3,
     n_g = 3,
     n_w = 3,
     n_v = 3,
-    # omit categorical variables; these are tested separately
-    n_c = 0 
+    # omit categorical variables; these are under construction
+    n_c = 0
   )
 
 glimpse(ss_demo$data)
@@ -101,18 +147,18 @@ __Column means__: This test verifies that the mean of each predictor is close to
 
 data_sim <- ss_demo$data
 
-data_sim$true_v <- 
+data_sim$true_v <-
   with(
     data_sim,
-      v1 * ss_demo$coefs_lc[[1]][1] + 
-      v2 * ss_demo$coefs_lc[[1]][2] + 
-      v3 * ss_demo$coefs_lc[[1]][3] 
+      v1 * ss_demo$coefs_lc[[1]][1] +
+      v2 * ss_demo$coefs_lc[[1]][2] +
+      v3 * ss_demo$coefs_lc[[1]][3]
   )
 
-data_means <- data_sim |> 
-  select(where(is.numeric)) |> 
-  apply(2, mean) |> 
-  round(3) |> 
+data_means <- data_sim |>
+  select(where(is.numeric)) |>
+  apply(2, mean) |>
+  round(3) |>
   enframe()
 
 # we can see that the mean of each predictor is close to zero, and that roughly 40% of outcomes were censored.
@@ -128,19 +174,19 @@ dd <- datadist(data_sim)
 options(datadist = dd)
 
 mdl <- cph(
-  Surv(time, status) ~ 
+  Surv(time, status) ~
     # z variables; no effect should be detected
     z1 + z2 + z3 +
     # x variables; effect should be detected
     # g variables; no effect should be detected
     # interaction between x and g; effect should be detected
-    x1*g1 + x2*g2 + x3*g3 + 
+    x1*g1 + x2*g2 + x3*g3 +
     # w variables; effect should be detected and should be nonlinear
-    rcs(w1) + rcs(w2) + rcs(w3) + 
+    rcs(w1) + rcs(w2) + rcs(w3) +
     # v variables; no effect should be detected for individual
     # variables v1, v2, and v3, but the linear combination of
     # these variables should have a detectable effect.
-    # note: v1 is not included due to co-linearity 
+    # note: v1 is not included due to co-linearity
     v2 + v3 + true_v,
   data = data_sim
 )
@@ -154,23 +200,23 @@ __Effect size estimation for linear effects__: This test verifies that, when the
 
 ```{r}
 
-effects_expected <- c("x1" = 1, 
-                      "x2" = 1, 
-                      "x3" = 1,
+effects_expected <- c("x1" = 2,
+                      "x2" = 2,
+                      "x3" = 2,
                       "g1" = 0,
                       "g2" = 0,
                       "g3" = 0,
-                      "x1 * g1" = 1,       
-                      "x2 * g2" = 1,       
-                      "x3 * g3" = 1, 
+                      "x1 * g1" = 2,
+                      "x2 * g2" = 2,
+                      "x3 * g3" = 2,
                       "v2" = 0,
                       "v3" = 0,
-                      "true_v" = 1)
+                      "true_v" = 2)
 
 effects_observed <- coef(mdl)[names(effects_expected)]
 
 # the differences between observed and expected estimates is small
-abs(effects_expected - effects_observed) |> 
+abs(effects_expected - effects_observed) |>
   enframe(name = 'predictor',
           value = 'bias')
 
@@ -180,256 +226,167 @@ __Effect size estimation for non-linear effects__: This test verifies that, when
 
 ```{r}
 
-data_gg <- 
-  list(w1 = as.data.frame(Predict(mdl, w1)) |> select(x=w1, yhat),
-       w2 = as.data.frame(Predict(mdl, w2)) |> select(x=w2, yhat),
-       w3 = as.data.frame(Predict(mdl, w3)) |> select(x=w3, yhat)) |> 
-  bind_rows(.id = 'xvar') |> 
-  filter(x > -2.5, x < 2.5) |> 
+data_gg <-
+  list(w1 = as.data.frame(rms::Predict(mdl, w1)) |> select(x=w1, yhat),
+       w2 = as.data.frame(rms::Predict(mdl, w2)) |> select(x=w2, yhat),
+       w3 = as.data.frame(rms::Predict(mdl, w3)) |> select(x=w3, yhat)) |>
+  bind_rows(.id = 'xvar') |>
+  filter(x > -2.5, x < 2.5) |>
   mutate(xvar = recode(xvar,
                        w1 = "Non-linear variable: w1",
                        w2 = "Non-linear variable: w2",
-                       w3 = "Non-linear variable: w3")) |> 
+                       w3 = "Non-linear variable: w3")) |>
   as_tibble()
 
-# We expect increasing wiggle from left to right. 
+# We expect increasing wiggle from left to right.
 
-ggplot(data_gg) + 
-  aes(x = x, y = yhat) + 
-  geom_line() + 
-  facet_wrap(~ xvar) + 
-  theme_bw() + 
+ggplot(data_gg) +
+  aes(x = x, y = yhat) +
+  geom_line() +
+  facet_wrap(~ xvar) +
+  theme_bw() +
   labs(x = 'W value', y = 'Estimated log-hazard')
 
 ```
 
-These results verify that the simulated data set has the expected properties 
-# Simulation Study
+These results verify that the simulated data set has the expected properties
 
-I compare four different techniques to measure variable importance (VI).  
-
-1. `Negation importance`: the method I propose to develop further with this pilot application. This is computed using an oblique random survival forest model.
-
-1. `ANOVA importance`: A method introduced by Menze et al. This is computed using an oblique random survival forest model.
-
-1. `SHAP importance`: A method introduced by Lundberg et al. SHAP importance is widely regarded as a gold standard due to its excellent asymptotic properties. This is computed using a boosting model. 
-
-1. `Permutation importance`: A method introduced by Leo Breiman. This is computed using a standard random survival forest model.
-
-__Evaluation of variable importance techniques__: VI techniques are compared based on their discrimination (C-statistic) between relevant and irrelevant predictor variables. The relevant predictor variables are those that have a relationship to the outcome ($x$, $w$, $g$, and $v$ variables), and the irrelevant variables are those with no relationship to the outcome, i.e. the $z$ variables. This is equivalent to assigning a binary outcome to each variable: 1 if it is relevant, 0 otherwise, and then computing a C-statistic for discrimination of the relevant versus irrelevant variables using variable importance as a 'prediction' for the variables. 
-
-__Details on C-statistic computation:__ The C-statistic is computed using `yardstick::roc_auc`, which wraps `pROC::roc`. To illustrate, if a variable importance metric assigned higher importance for all of the $x$ variables compared to all the $z$ variables, it would have a C-statistic of 1 for the $x$ variables.
 
 ## Results
 
-Table 1: Discrimination between relevant and irrelevant predictor variables for each VI technique in 6 different simulated scenarios. Cells that are highlighted with a light blue color indicate which variable importance technique had the best discrimination for a given sample size, correlation setting, and variable type. For example, ANOVA importance had the best discrimination for linear effects with N = 2,500 and zero correlation between the linear effects and irrelevant variables. However, when the correlation between linear effects and irrelevant variables was non-zero, negation importance had the best discrimination across all scenarios and for each effect type. Given the low likelihood of ever having a real dataset with zero correlation between the predictor variables, these data suggest that negation importance can be very beneficial in applied settings. 
+### Prediction accuracy
+
+Overall, {`aorsf`} had the highest prognostic accuracy (__Table 1__), obtaining the highest C-statistic and scaled brier score in each of the three datasets. In addition, {`aorsf`} grew tree ensembles about 10 times as fast as {`ranger`} and generated predictions about 25 times as fast as {`party`}. Not bad! While {`aorsf`} was slower than {`randomForestSRC`}, its predictions were substantially more accurate.  
+
+__Table 1__ Prognostic accuracy and computational efficiency of machine learning algorithms applied to real and simulated data.
 
 ```{r}
 
-data_gt <-  
-  benchmark_vi_smry |>
-  ungroup() |> 
-  mutate(xcorr = recode(xcorr, 
-                        '0.0' = '|Corr(linear effect variables, irrelevant variables)| = 0',
-                        '0.1' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.10',
-                        '0.2' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.20',
-                        '0.3' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.30',
-                        '0.4' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.40'),
-         model = recode(model,
-                        'aorsf' = 'Negation importance',
-                        'aorsf_menze' = 'ANOVA importance',
-                        'xgboost' = 'SHAP importance',
-                        'randomForestSRC' = 'Permutation importance')) |> 
-  select(n_obs, model, xcorr, overall, x, w, g, v, c) |> 
-  pivot_wider(names_from = n_obs, 
-              values_from = c(overall, x, w, g, v, c)) |> 
-  select(xcorr,
-         model,
-         overall_2500,
-         x_2500,
-         w_2500,
-         g_2500,
-         v_2500,
-         c_2500,
-         overall_5000,
-         x_5000,
-         w_5000,
-         g_5000,
-         v_5000,
-         c_5000) |> 
-  arrange(xcorr, model)
-
-cols_to_highlight <- c("overall_2500",
-                       "x_2500",
-                       "w_2500",
-                       "g_2500",
-                       "v_2500",
-                       "c_2500",
-                       "overall_5000",
-                       "x_5000",
-                       "w_5000",
-                       "g_5000",
-                       "v_5000",
-                       "c_5000")
-
-max_row_positions <- data_gt |>
-  group_by(xcorr) |> 
-  summarize(across(all_of(cols_to_highlight), which.max)) |> 
-  mutate(xcorr = c(0, 4, 8, 12, 16)) |> 
-  pivot_longer(cols = -xcorr) |> 
-  mutate(value = value + xcorr) |> 
-  select(name, value)
-
-code_styles <- map2_chr(
-  .x = max_row_positions$value,
-  .y = max_row_positions$name,
-  .f = ~ paste0(
-    "|>",
-    "tab_style(style = cell_fill(color = 'lightblue')",
-    ", locations = cells_body(columns = ", .y, ",rows = ", .x, "))"
-  )
-)
-
-
-
-results_tbl_1 <- data_gt |> 
-  mutate(across(ends_with("0"), ~table_value(100*.x))) |> 
-  gt(rowname_col = 'model', groupname_col = 'xcorr') |> 
-  tab_stubhead(label = 'Variable importance technique') |> 
-  tab_spanner(label = 'N = 2,500', 
-              columns = c("overall_2500",
-                          "x_2500",
-                          "w_2500",
-                          "g_2500",
-                          "v_2500",
-                          "c_2500")) |> 
-  tab_spanner(label = 'N = 5,000', 
-              columns = c("overall_5000",
-                          "x_5000",
-                          "w_5000",
-                          "g_5000",
-                          "v_5000",
-                          "c_5000")) |> 
-  cols_label(
-    overall_2500 = "All effects",
-    x_2500 = "Linear effects",
-    w_2500 = "Non-linear effects",
-    g_2500 = "Interaction effects",
-    v_2500 = "Combo effects",
-    c_2500 = "Categorical effects",
-    overall_5000 = "All effects",
-    x_5000 = "Linear effects",
-    w_5000 = "Non-linear effects",
-    g_5000 = "Interaction effects",
-    v_5000 = "Combo effects",
-    c_5000 = "Categorical effects"
-  ) |> 
-  cols_align(align = 'center')
-
-code_to_run <- paste0('results_tbl_1', 
-                      paste0(code_styles, collapse = ''))
-
-eval(rlang::parse_expr(code_to_run))
-
-
-```
-
-### Overall summary
-
-Due to space constraints, the pilot application presents a summary of the results in Table 1. This summary aggregates the results from the 6 scenarios presented above, and it is shown here here to verify.
-
-```{r}
-
-data_fig <- benchmark_vi_smry |>
-  ungroup() |> 
-  mutate(
-    n_obs = recode(n_obs,
-                   '2500' = 'Training data sample size = 2,500',
-                   '5000' = 'Training data sample size = 5,000'),
-    model = factor(model,
-                   levels = c('aorsf',
-                              'aorsf_menze',
-                              'xgboost',
-                              'randomForestSRC'),
-                   labels = c('Negation importance',
-                              'ANOVA importance',
-                              'SHAP importance',
-                              'Permutation importance'))
-  )
-
-fig <- ggplot(data_fig) + 
-  aes(x = xcorr, y = overall, col = model) + 
-  geom_line() +
-  geom_point(size = 2) +
-  scale_color_manual(values = c("purple", "orange", "grey", "limegreen")) +
-  facet_wrap(~n_obs) + 
-  labs(x = "max( |Corr(linear effect variables, irrelevant variables)| )",
-       y = "Discrimination between relevant\nand irrelevant predictor variables",
-       color = 'Variable importance\nestimated using') + 
-  theme_bw() + 
-  theme(panel.grid = element_blank())
-
-ggsave(filename = 'plot_violet.png',
-       plot = fig,
-       device = 'png',
-       width = 9,
-       height = 4,
-       dpi = 600)
-
-fig
-
-```
-
-Table 2: Discrimination between relevant and irrelevant predictor variables for each VI technique. Negation importance obtains the highest C-statistic for each variable type except non-linear variables, where it closely trails SHAP importance.
-
-```{r}
-
-results_tbl_2 <- benchmark_vi_smry |>
-  ungroup() |> 
-  mutate(model = recode(model,
-                        'aorsf' = 'Negation importance',
-                        'aorsf_menze' = 'ANOVA importance',
-                        'xgboost' = 'SHAP importance',
-                        'randomForestSRC' = 'Permutation importance')) |> 
-  select(n_obs, model, xcorr, overall, x, w, g, v, c) |> 
-  group_by(model) |> 
+results_overall <- bm_pred_comb |> 
+  mutate(model = recode(model, 'cif' = 'party')) |> 
+  group_by(model) |>
   summarize(
     across(
-      c(overall, x, w, g, v, c),
-      ~table_value(mean(.x))
+      .cols = c(cstat, IPA, time_fit, time_prd),
+      .fns = list(mean = mean, sd = sd)
     )
   ) |> 
-  gt(rowname_col = 'model') |> 
+  mutate(data = 'Overall')
+
+data_tbl <- bm_pred_comb |> 
+  mutate(model = recode(model, 'cif' = 'party')) |> 
+  group_by(model, data) |>
+  summarize(
+    across(
+      .cols = c(cstat, IPA, time_fit, time_prd),
+      .fns = list(mean = mean, sd = sd)
+    )
+  ) |> 
+  bind_rows(results_overall) |> 
+  group_by(data) |> 
+  mutate(
+    across(.cols = starts_with("time"), .fns = as.numeric),
+    time_fit_ratio = time_fit_mean / time_fit_mean[model == 'aorsf'],
+    time_prd_ratio = time_prd_mean / time_prd_mean[model == 'aorsf']
+  ) |> 
+  transmute(
+    model, 
+    data = recode(
+      data,
+      'pbc_orsf' = 'Mayo Clinic Primary Biliary Cholangitis Data, N = 276',
+      'rotterdam' = 'Rotterdam Breast Cancer Data, N = 2,982',
+      'sim' = 'Simulated data'
+    ),
+    cstat = table_glue("{cstat_mean} ({cstat_sd})"),
+    ipa = table_glue("{IPA_mean} ({IPA_sd})"),
+    time_fit_mean = format(round(time_fit_mean, 4), nsmall = 4),
+    time_fit_ratio = table_value(time_fit_ratio),
+    time_prd_mean = format(round(time_prd_mean, 4), nsmall = 4),
+    time_prd_ratio = table_value(time_prd_ratio)
+  )
+
+gt(data_tbl, rowname_col = 'model', groupname_col = 'data') |> 
+  cols_label(cstat = 'C-Statistic (SD)',
+             ipa = 'Scaled Brier Score (SD)',
+             time_fit_mean = 'Mean, seconds',
+             time_fit_ratio = 'Ratio',
+             time_prd_mean = 'Mean, seconds',
+             time_prd_ratio = 'Ratio') |> 
+  cols_align(align = 'center') |> 
+  tab_spanner(label = 'Model prediction accuracy',
+              columns = c('cstat', 'ipa')) |> 
+  tab_spanner(label = 'Model fit time',
+              columns = c('time_fit_mean', 'time_fit_ratio')) |> 
+  tab_spanner(label = 'Risk prediction time',
+              columns = c('time_prd_mean', 'time_prd_ratio')) 
+
+
+```
+
+
+### Variable importance
+
+__Table 2__: Discrimination between relevant and irrelevant predictor variables for each VI technique in . Cells that are highlighted with a light blue color indicate which variable importance technique had the best discrimination for a given sample size, correlation setting, and variable type. 
+
+```{r}
+
+data_gt <- bm_vi_comb |>
+  group_by(n_obs, xcorr, model) |> 
+  summarize(
+    across(
+      .cols = c(overall, x, w, g, v),
+      .fns = function(x) table_glue("{mean(x)} ({sd(x)})")
+    )
+  ) |> 
+  ungroup() |> 
+  mutate(
+    xcorr = recode(
+      xcorr, 
+      '0.0' = '|Corr(linear effect variables, irrelevant variables)| = 0',
+      '0.1' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.10',
+      '0.2' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.20',
+      '0.3' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.30',
+      '0.4' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.40'),
+    model = factor(
+      model,
+      levels = c('aorsf',
+                 'aorsf_menze',
+                 'xgboost',
+                 'randomForestSRC',
+                 'ranger'),
+      labels = c('Negation importance',
+                 'ANOVA importance',
+                 'SHAP importance',
+                 'Permutation importance (SRC)',
+                 'Permutation importance (ranger)')
+    )
+  ) |> 
+  select(model, overall, x, w, g, v) |> 
+  arrange(model)
+
+
+tbl <- data_gt |> 
+  gt(rowname_col = 'model', groupname_col = 'xcorr') |> 
   tab_stubhead(label = 'Variable importance technique') |> 
   cols_label(
-    overall = "Overall",
+    overall = "All effects",
     x = "Linear effects",
     w = "Non-linear effects",
     g = "Interaction effects",
-    v = "Combo effects",
-    c = "Categorical effects"
-  ) |> 
+    v = "Combo effects") |> 
   cols_align(align = 'center')
 
-results_tbl_2
+tbl
 
 ```
 
 
-# Conclusion
+## Conclusion
 
-The strengths of negation importance are:
-
-1. It can be computed for any type of oblique random forest, as it only leverages the linear coefficients in the nodes. (ANOVA importance requires a p-value be computed for each variable in each node).
-
-1. It penalizes over-fitting by evaluating performance in out-of-bag data.
-
-1. In the current simulation, it had the most reliable estimate of variable importance when irrelevant variables were correlated to relevant ones.
-
+{`aorsf`} offers novel, computationally efficient techniques to fit and interpret oblique random survival forests. The benchmarks above are incomplete, and I will be developing them more over time as I slowly work towards a paper. 
 
 # REFERENCES
 
 1. Source for `pbc_orsf` data: T Therneau and P Grambsch (2000), Modeling Survival Data: Extending the Cox Model, Springer-Verlag, New York. ISBN: 0-387-98784-3.
 
 1. Source for `rotterdam` data: Patrick Royston and Douglas Altman, External validation of a Cox prognostic model: principles and methods. BMC Medical Research Methodology 2013, 13:33
-

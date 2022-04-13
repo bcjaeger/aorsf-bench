@@ -5,7 +5,14 @@
 #' @title
 #' @param data_source
 #' @param run_seed
-bench_pred <- function(data_source, run_seed, test_prop = 1/2) {
+bench_pred <- function(data_source,
+                       n_obs = NULL,
+                       n_z = NULL,
+                       correlated_x = NULL,
+                       run_seed,
+                       test_prop = 1/2) {
+
+  set.seed(run_seed)
 
   switch(
 
@@ -37,7 +44,9 @@ bench_pred <- function(data_source, run_seed, test_prop = 1/2) {
 
     'sim' = {
 
-      data_all <- sim_surv() |>
+      data_all <- sim_surv(n_obs = n_obs,
+                           n_z = n_z,
+                           correlated_x = correlated_x) |>
         getElement('data')
 
     }
@@ -46,18 +55,33 @@ bench_pred <- function(data_source, run_seed, test_prop = 1/2) {
 
   pred_horizon <- median(data_all$time)
 
-  set.seed(run_seed)
 
-  test_index <- sample(x = seq(nrow(data_all)),
-                       size = round(nrow(data_all) * test_prop),
-                       replace = FALSE)
+  if(data_source == 'sim'){
 
-  train <- data_all[-test_index, ]
-  test <- data_all[test_index, ]
+    train <- data_all
+
+    test <- sim_surv(n_obs = 5000,
+                     n_z = n_z,
+                     correlated_x = correlated_x) |>
+      getElement('data')
+
+  } else {
+
+    test_index <- sample(x = seq(nrow(data_all)),
+                         size = round(nrow(data_all) * test_prop),
+                         replace = FALSE)
+
+    train <- data_all[-test_index, ]
+    test <- data_all[test_index, ]
+
+
+  }
+
 
   models <- set_names(
     c(
       'aorsf',
+      'cif',
       # 'obliqueRSF',
       'xgboost',
       'randomForestSRC',
@@ -108,7 +132,10 @@ bench_pred <- function(data_source, run_seed, test_prop = 1/2) {
   score <- cstat |>
     left_join(brier, by = 'model') |>
     left_join(times, by = 'model') |>
-    as_tibble()
+    as_tibble() |>
+    mutate(n_obs = n_obs,
+           n_z = n_z,
+           correlated_x = correlated_x)
 
   print(score)
 

@@ -10,7 +10,7 @@ sim_surv <- function(n_obs = 2500,
                      n_g = 20,
                      n_w = 20,
                      n_v = 20,
-                     n_c = 10,
+                     n_c = 0,
                      correlated_x = 0,
                      pred_horiz = 2.5) {
 
@@ -168,11 +168,11 @@ sim_surv <- function(n_obs = 2500,
   betas <- vector(mode = 'numeric', length = ncol(covs))
   names(betas) <- names(covs)
 
-  if(n_x > 0)  x_effect   <- 3 / n_x else x_effect   <- 0
-  if(n_g > 0)  int_effect <- 3 / n_g else int_effect <- 0
-  if(n_w > 0)  nl_effect  <- 3 / n_w else nl_effect  <- 0
-  if(n_v > 0)  lc_effect  <- 3 / n_v else lc_effect  <- 0
-  if(n_c > 0)  c_effect   <- 3 / n_c else c_effect   <- 0
+  if(n_x > 0)  x_effect   <- 6 / n_x else x_effect   <- 0
+  if(n_g > 0)  int_effect <- 6 / n_g else int_effect <- 0
+  if(n_w > 0)  nl_effect  <- 6 / n_w else nl_effect  <- 0
+  if(n_v > 0)  lc_effect  <- 6 / n_v else lc_effect  <- 0
+  if(n_c > 0)  c_effect   <- 6 / n_c else c_effect   <- 0
 
   betas[str_detect(names(betas), '^x')] <- x_effect
 
