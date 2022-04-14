@@ -93,8 +93,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
   <!--  https://schema.org/Article -->
-  <meta property="article:published" itemprop="datePublished" content="2022-04-13" />
-  <meta property="article:created" itemprop="dateCreated" content="2022-04-13" />
+  <meta property="article:published" itemprop="datePublished" content="2022-04-14" />
+  <meta property="article:created" itemprop="dateCreated" content="2022-04-14" />
   <meta name="article:author" content="Byron C. Jaeger" />
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
@@ -112,7 +112,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","affiliation","date","output","toc_depth","code_folding"]}},"value":[{"type":"character","attributes":{},"value":["Benchmarking the accelerated oblique random survival forest"]},{"type":"character","attributes":{},"value":["Comparing prediction accuracy and identification of relevant predictor variables\n"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Byron C. Jaeger"]}]}]},{"type":"character","attributes":{},"value":["Wake Forest School of Medicine"]},{"type":"character","attributes":{},"value":["2022-04-13"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article","toc"]}},"value":[{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"integer","attributes":{},"value":[2]},{"type":"logical","attributes":{},"value":[true]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","affiliation","date","output","toc_depth","code_folding"]}},"value":[{"type":"character","attributes":{},"value":["Benchmarking the accelerated oblique random survival forest"]},{"type":"character","attributes":{},"value":["Comparing prediction accuracy and identification of relevant predictor variables\n"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name"]}},"value":[{"type":"character","attributes":{},"value":["Byron C. Jaeger"]}]}]},{"type":"character","attributes":{},"value":["Wake Forest School of Medicine"]},{"type":"character","attributes":{},"value":["2022-04-14"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article","toc"]}},"value":[{"type":"NULL"},{"type":"logical","attributes":{},"value":[true]}]},{"type":"integer","attributes":{},"value":[2]},{"type":"logical","attributes":{},"value":[true]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -1459,7 +1459,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Benchmarking the accelerated oblique random survival forest","description":"Comparing prediction accuracy and identification of relevant predictor variables","authors":[{"author":"Byron C. Jaeger","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2022-04-13T00:00:00.000-04:00","citationText":"Jaeger, 2022"}
+{"title":"Benchmarking the accelerated oblique random survival forest","description":"Comparing prediction accuracy and identification of relevant predictor variables","authors":[{"author":"Byron C. Jaeger","authorURL":"#","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2022-04-14T00:00:00.000-04:00","citationText":"Jaeger, 2022"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1478,7 +1478,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="d-byline">
   Byron C. Jaeger  
   
-<br />2022-04-13
+<br />2022-04-14
 </div>
 
 <div class="d-article">
@@ -1672,7 +1672,7 @@ $ v3     &lt;dbl&gt; -1.807185294, -1.186713270, -0.961187654, 0.644765119~</cod
 <p>These results verify that the simulated data set has the expected properties</p>
 <h2 id="results">Results</h2>
 <h3 id="prediction-accuracy-1">Prediction accuracy</h3>
-<p>Overall, {<code>aorsf</code>} had the highest prognostic accuracy (<strong>Table 1</strong>), obtaining the highest C-statistic and index of prediction accuracy in each of the three datasets. In addition, {<code>aorsf</code>} grew tree ensembles about 10 times as fast as {<code>ranger</code>} and generated predictions about 25 times as fast as {<code>party</code>}. Not bad! While {<code>aorsf</code>} was slower than {<code>randomForestSRC</code>}, its predictions were substantially more accurate.</p>
+<p>Overall, {<code>aorsf</code>} had the highest prognostic accuracy (<strong>Table 1</strong>), obtaining the highest C-statistic and scaled brier score in each of the three datasets. In addition, {<code>aorsf</code>} grew tree ensembles about 10 times as fast as {<code>ranger</code>} and generated predictions about 25 times as fast as {<code>party</code>}. Not bad! While {<code>aorsf</code>} was slower than {<code>randomForestSRC</code>}, its predictions were substantially more accurate.</p>
 <p><strong>Table 1</strong> Prognostic accuracy and computational efficiency of machine learning algorithms applied to real and simulated data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div id="srondjpfaq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
@@ -2042,154 +2042,154 @@ $ v3     &lt;dbl&gt; -1.807185294, -1.186713270, -0.961187654, 0.644765119~</cod
       <td colspan="7" class="gt_group_heading">Mayo Clinic Primary Biliary Cholangitis Data, N = 276</td>
     </tr>
     <tr><td class="gt_row gt_left gt_stub">aorsf</td>
-<td class="gt_row gt_center">0.896 (0.024)</td>
-<td class="gt_row gt_center">0.416 (0.062)</td>
-<td class="gt_row gt_center"> 0.1673</td>
+<td class="gt_row gt_center">0.908 (0.025)</td>
+<td class="gt_row gt_center">0.440 (0.055)</td>
+<td class="gt_row gt_center"> 0.1707</td>
 <td class="gt_row gt_center">1.00</td>
-<td class="gt_row gt_center">0.0313</td>
+<td class="gt_row gt_center">0.0316</td>
 <td class="gt_row gt_center">1.00</td></tr>
     <tr><td class="gt_row gt_left gt_stub">party</td>
-<td class="gt_row gt_center">0.888 (0.029)</td>
-<td class="gt_row gt_center">0.366 (0.048)</td>
-<td class="gt_row gt_center"> 0.1119</td>
-<td class="gt_row gt_center">0.669</td>
-<td class="gt_row gt_center">0.2762</td>
-<td class="gt_row gt_center">8.82</td></tr>
+<td class="gt_row gt_center">0.900 (0.028)</td>
+<td class="gt_row gt_center">0.380 (0.044)</td>
+<td class="gt_row gt_center"> 0.1136</td>
+<td class="gt_row gt_center">0.665</td>
+<td class="gt_row gt_center">0.2770</td>
+<td class="gt_row gt_center">8.77</td></tr>
     <tr><td class="gt_row gt_left gt_stub">randomForestSRC</td>
-<td class="gt_row gt_center">0.881 (0.027)</td>
-<td class="gt_row gt_center">0.369 (0.059)</td>
-<td class="gt_row gt_center"> 0.1588</td>
-<td class="gt_row gt_center">0.949</td>
-<td class="gt_row gt_center">0.0885</td>
-<td class="gt_row gt_center">2.83</td></tr>
+<td class="gt_row gt_center">0.894 (0.028)</td>
+<td class="gt_row gt_center">0.387 (0.055)</td>
+<td class="gt_row gt_center"> 0.1715</td>
+<td class="gt_row gt_center">1.00</td>
+<td class="gt_row gt_center">0.0934</td>
+<td class="gt_row gt_center">2.96</td></tr>
     <tr><td class="gt_row gt_left gt_stub">ranger</td>
-<td class="gt_row gt_center">0.883 (0.023)</td>
-<td class="gt_row gt_center">0.359 (0.059)</td>
-<td class="gt_row gt_center"> 0.3296</td>
-<td class="gt_row gt_center">1.97</td>
-<td class="gt_row gt_center">0.0279</td>
-<td class="gt_row gt_center">0.890</td></tr>
+<td class="gt_row gt_center">0.895 (0.026)</td>
+<td class="gt_row gt_center">0.379 (0.061)</td>
+<td class="gt_row gt_center"> 0.4436</td>
+<td class="gt_row gt_center">2.60</td>
+<td class="gt_row gt_center">0.0309</td>
+<td class="gt_row gt_center">0.978</td></tr>
     <tr><td class="gt_row gt_left gt_stub">xgboost</td>
-<td class="gt_row gt_center">0.839 (0.047)</td>
-<td class="gt_row gt_center">0.296 (0.117)</td>
-<td class="gt_row gt_center">12.9628</td>
-<td class="gt_row gt_center">77.5</td>
-<td class="gt_row gt_center">0.0062</td>
-<td class="gt_row gt_center">0.199</td></tr>
+<td class="gt_row gt_center">0.857 (0.041)</td>
+<td class="gt_row gt_center">0.324 (0.105)</td>
+<td class="gt_row gt_center">13.1716</td>
+<td class="gt_row gt_center">77.2</td>
+<td class="gt_row gt_center">0.0079</td>
+<td class="gt_row gt_center">0.251</td></tr>
     <tr class="gt_group_heading_row">
       <td colspan="7" class="gt_group_heading">Rotterdam Breast Cancer Data, N = 2,982</td>
     </tr>
     <tr><td class="gt_row gt_left gt_stub">aorsf</td>
-<td class="gt_row gt_center">0.726 (0.009)</td>
-<td class="gt_row gt_center">0.155 (0.009)</td>
-<td class="gt_row gt_center"> 1.9131</td>
+<td class="gt_row gt_center">0.729 (0.010)</td>
+<td class="gt_row gt_center">0.158 (0.010)</td>
+<td class="gt_row gt_center"> 1.8813</td>
 <td class="gt_row gt_center">1.00</td>
-<td class="gt_row gt_center"> 0.3167</td>
+<td class="gt_row gt_center"> 0.3163</td>
 <td class="gt_row gt_center">1.00</td></tr>
     <tr><td class="gt_row gt_left gt_stub">party</td>
-<td class="gt_row gt_center">0.717 (0.011)</td>
-<td class="gt_row gt_center">0.144 (0.014)</td>
-<td class="gt_row gt_center"> 2.8138</td>
+<td class="gt_row gt_center">0.718 (0.011)</td>
+<td class="gt_row gt_center">0.147 (0.014)</td>
+<td class="gt_row gt_center"> 2.7573</td>
 <td class="gt_row gt_center">1.47</td>
-<td class="gt_row gt_center">18.7984</td>
-<td class="gt_row gt_center">59.4</td></tr>
+<td class="gt_row gt_center">18.8494</td>
+<td class="gt_row gt_center">59.6</td></tr>
     <tr><td class="gt_row gt_left gt_stub">randomForestSRC</td>
-<td class="gt_row gt_center">0.716 (0.010)</td>
-<td class="gt_row gt_center">0.141 (0.014)</td>
-<td class="gt_row gt_center"> 0.5247</td>
-<td class="gt_row gt_center">0.274</td>
-<td class="gt_row gt_center"> 0.3173</td>
-<td class="gt_row gt_center">1.00</td></tr>
+<td class="gt_row gt_center">0.717 (0.011)</td>
+<td class="gt_row gt_center">0.143 (0.016)</td>
+<td class="gt_row gt_center"> 0.5003</td>
+<td class="gt_row gt_center">0.266</td>
+<td class="gt_row gt_center"> 0.3081</td>
+<td class="gt_row gt_center">0.974</td></tr>
     <tr><td class="gt_row gt_left gt_stub">ranger</td>
-<td class="gt_row gt_center">0.718 (0.010)</td>
-<td class="gt_row gt_center">0.143 (0.014)</td>
-<td class="gt_row gt_center">11.3203</td>
-<td class="gt_row gt_center">5.92</td>
-<td class="gt_row gt_center"> 2.3214</td>
-<td class="gt_row gt_center">7.33</td></tr>
+<td class="gt_row gt_center">0.719 (0.011)</td>
+<td class="gt_row gt_center">0.145 (0.015)</td>
+<td class="gt_row gt_center">13.2394</td>
+<td class="gt_row gt_center">7.04</td>
+<td class="gt_row gt_center"> 2.4247</td>
+<td class="gt_row gt_center">7.67</td></tr>
     <tr><td class="gt_row gt_left gt_stub">xgboost</td>
-<td class="gt_row gt_center">0.705 (0.011)</td>
-<td class="gt_row gt_center">0.122 (0.012)</td>
-<td class="gt_row gt_center">10.3028</td>
-<td class="gt_row gt_center">5.39</td>
-<td class="gt_row gt_center"> 0.0330</td>
-<td class="gt_row gt_center">0.104</td></tr>
+<td class="gt_row gt_center">0.706 (0.011)</td>
+<td class="gt_row gt_center">0.120 (0.013)</td>
+<td class="gt_row gt_center">11.1112</td>
+<td class="gt_row gt_center">5.91</td>
+<td class="gt_row gt_center"> 0.0316</td>
+<td class="gt_row gt_center">0.100</td></tr>
     <tr class="gt_group_heading_row">
       <td colspan="7" class="gt_group_heading">Simulated data</td>
     </tr>
     <tr><td class="gt_row gt_left gt_stub">aorsf</td>
-<td class="gt_row gt_center">0.698 (0.017)</td>
-<td class="gt_row gt_center">0.088 (0.013)</td>
-<td class="gt_row gt_center"> 4.0024</td>
+<td class="gt_row gt_center">0.701 (0.020)</td>
+<td class="gt_row gt_center">0.087 (0.015)</td>
+<td class="gt_row gt_center"> 3.9953</td>
 <td class="gt_row gt_center">1.00</td>
-<td class="gt_row gt_center"> 2.6827</td>
+<td class="gt_row gt_center"> 2.6451</td>
 <td class="gt_row gt_center">1.00</td></tr>
     <tr><td class="gt_row gt_left gt_stub">party</td>
-<td class="gt_row gt_center">0.681 (0.020)</td>
-<td class="gt_row gt_center">0.064 (0.010)</td>
-<td class="gt_row gt_center"> 2.5261</td>
-<td class="gt_row gt_center">0.631</td>
-<td class="gt_row gt_center">55.0714</td>
-<td class="gt_row gt_center">20.5</td></tr>
+<td class="gt_row gt_center">0.683 (0.020)</td>
+<td class="gt_row gt_center">0.064 (0.009)</td>
+<td class="gt_row gt_center"> 2.5267</td>
+<td class="gt_row gt_center">0.632</td>
+<td class="gt_row gt_center">54.7472</td>
+<td class="gt_row gt_center">20.7</td></tr>
     <tr><td class="gt_row gt_left gt_stub">randomForestSRC</td>
-<td class="gt_row gt_center">0.663 (0.016)</td>
-<td class="gt_row gt_center">0.055 (0.008)</td>
-<td class="gt_row gt_center"> 0.5193</td>
-<td class="gt_row gt_center">0.130</td>
-<td class="gt_row gt_center"> 0.8402</td>
-<td class="gt_row gt_center">0.313</td></tr>
+<td class="gt_row gt_center">0.666 (0.018)</td>
+<td class="gt_row gt_center">0.055 (0.009)</td>
+<td class="gt_row gt_center"> 0.5215</td>
+<td class="gt_row gt_center">0.131</td>
+<td class="gt_row gt_center"> 0.8141</td>
+<td class="gt_row gt_center">0.308</td></tr>
     <tr><td class="gt_row gt_left gt_stub">ranger</td>
-<td class="gt_row gt_center">0.662 (0.019)</td>
-<td class="gt_row gt_center">0.014 (0.011)</td>
-<td class="gt_row gt_center">48.8303</td>
-<td class="gt_row gt_center">12.2</td>
-<td class="gt_row gt_center"> 2.8324</td>
+<td class="gt_row gt_center">0.664 (0.019)</td>
+<td class="gt_row gt_center">0.012 (0.015)</td>
+<td class="gt_row gt_center">47.1975</td>
+<td class="gt_row gt_center">11.8</td>
+<td class="gt_row gt_center"> 2.8059</td>
 <td class="gt_row gt_center">1.06</td></tr>
     <tr><td class="gt_row gt_left gt_stub">xgboost</td>
-<td class="gt_row gt_center">0.636 (0.019)</td>
-<td class="gt_row gt_center">-0.044 (0.031)</td>
-<td class="gt_row gt_center">38.9152</td>
-<td class="gt_row gt_center">9.72</td>
-<td class="gt_row gt_center"> 0.0336</td>
+<td class="gt_row gt_center">0.640 (0.019)</td>
+<td class="gt_row gt_center">-0.046 (0.028)</td>
+<td class="gt_row gt_center">43.5018</td>
+<td class="gt_row gt_center">10.9</td>
+<td class="gt_row gt_center"> 0.0345</td>
 <td class="gt_row gt_center">0.013</td></tr>
     <tr class="gt_group_heading_row">
       <td colspan="7" class="gt_group_heading">Overall</td>
     </tr>
     <tr><td class="gt_row gt_left gt_stub">aorsf</td>
-<td class="gt_row gt_center">0.773 (0.090)</td>
-<td class="gt_row gt_center">0.220 (0.147)</td>
-<td class="gt_row gt_center"> 2.0276</td>
+<td class="gt_row gt_center">0.779 (0.094)</td>
+<td class="gt_row gt_center">0.228 (0.156)</td>
+<td class="gt_row gt_center"> 2.0158</td>
 <td class="gt_row gt_center">1.00</td>
-<td class="gt_row gt_center"> 1.0102</td>
+<td class="gt_row gt_center"> 0.9976</td>
 <td class="gt_row gt_center">1.00</td></tr>
     <tr><td class="gt_row gt_left gt_stub">party</td>
-<td class="gt_row gt_center">0.762 (0.093)</td>
-<td class="gt_row gt_center">0.192 (0.132)</td>
-<td class="gt_row gt_center"> 1.8173</td>
-<td class="gt_row gt_center">0.896</td>
-<td class="gt_row gt_center">24.7153</td>
-<td class="gt_row gt_center">24.5</td></tr>
+<td class="gt_row gt_center">0.767 (0.098)</td>
+<td class="gt_row gt_center">0.197 (0.137)</td>
+<td class="gt_row gt_center"> 1.7992</td>
+<td class="gt_row gt_center">0.893</td>
+<td class="gt_row gt_center">24.6245</td>
+<td class="gt_row gt_center">24.7</td></tr>
     <tr><td class="gt_row gt_left gt_stub">randomForestSRC</td>
-<td class="gt_row gt_center">0.753 (0.096)</td>
-<td class="gt_row gt_center">0.188 (0.139)</td>
-<td class="gt_row gt_center"> 0.4009</td>
-<td class="gt_row gt_center">0.198</td>
-<td class="gt_row gt_center"> 0.4153</td>
-<td class="gt_row gt_center">0.411</td></tr>
+<td class="gt_row gt_center">0.759 (0.100)</td>
+<td class="gt_row gt_center">0.195 (0.144)</td>
+<td class="gt_row gt_center"> 0.3977</td>
+<td class="gt_row gt_center">0.197</td>
+<td class="gt_row gt_center"> 0.4052</td>
+<td class="gt_row gt_center">0.406</td></tr>
     <tr><td class="gt_row gt_left gt_stub">ranger</td>
-<td class="gt_row gt_center">0.754 (0.097)</td>
-<td class="gt_row gt_center">0.172 (0.148)</td>
-<td class="gt_row gt_center">20.1601</td>
-<td class="gt_row gt_center">9.94</td>
-<td class="gt_row gt_center"> 1.7272</td>
-<td class="gt_row gt_center">1.71</td></tr>
+<td class="gt_row gt_center">0.759 (0.101)</td>
+<td class="gt_row gt_center">0.179 (0.157)</td>
+<td class="gt_row gt_center">20.2935</td>
+<td class="gt_row gt_center">10.1</td>
+<td class="gt_row gt_center"> 1.7539</td>
+<td class="gt_row gt_center">1.76</td></tr>
     <tr><td class="gt_row gt_left gt_stub">xgboost</td>
-<td class="gt_row gt_center">0.727 (0.090)</td>
-<td class="gt_row gt_center">0.125 (0.156)</td>
-<td class="gt_row gt_center">20.7270</td>
-<td class="gt_row gt_center">10.2</td>
-<td class="gt_row gt_center"> 0.0243</td>
-<td class="gt_row gt_center">0.024</td></tr>
+<td class="gt_row gt_center">0.734 (0.095)</td>
+<td class="gt_row gt_center">0.132 (0.164)</td>
+<td class="gt_row gt_center">22.5949</td>
+<td class="gt_row gt_center">11.2</td>
+<td class="gt_row gt_center"> 0.0247</td>
+<td class="gt_row gt_center">0.025</td></tr>
   </tbody>
   
   
@@ -2551,35 +2551,60 @@ $ v3     &lt;dbl&gt; -1.807185294, -1.186713270, -0.961187654, 0.644765119~</cod
   </thead>
   <tbody class="gt_table_body">
     <tr><td class="gt_row gt_left gt_stub">Negation importance</td>
-<td class="gt_row gt_center">0.812 (0.050)</td>
-<td class="gt_row gt_center">0.978 (0.017)</td>
-<td class="gt_row gt_center">0.827 (0.071)</td>
-<td class="gt_row gt_center">0.545 (0.109)</td>
-<td class="gt_row gt_center">0.899 (0.063)</td></tr>
+<td class="gt_row gt_center">0.804
+(0.047)</td>
+<td class="gt_row gt_center">0.976
+(0.021)</td>
+<td class="gt_row gt_center">0.807
+(0.084)</td>
+<td class="gt_row gt_center">0.529
+(0.095)</td>
+<td class="gt_row gt_center">0.903
+(0.048)</td></tr>
     <tr><td class="gt_row gt_left gt_stub">ANOVA importance</td>
-<td class="gt_row gt_center">0.790 (0.059)</td>
-<td class="gt_row gt_center">0.972 (0.019)</td>
-<td class="gt_row gt_center">0.811 (0.102)</td>
-<td class="gt_row gt_center">0.499 (0.097)</td>
-<td class="gt_row gt_center">0.878 (0.065)</td></tr>
+<td class="gt_row gt_center">0.773
+(0.055)</td>
+<td class="gt_row gt_center">0.967
+(0.023)</td>
+<td class="gt_row gt_center">0.766
+(0.097)</td>
+<td class="gt_row gt_center">0.491
+(0.095)</td>
+<td class="gt_row gt_center">0.870
+(0.060)</td></tr>
     <tr><td class="gt_row gt_left gt_stub">SHAP importance</td>
-<td class="gt_row gt_center">0.774 (0.046)</td>
-<td class="gt_row gt_center">0.940 (0.043)</td>
-<td class="gt_row gt_center">0.798 (0.083)</td>
-<td class="gt_row gt_center">0.530 (0.074)</td>
-<td class="gt_row gt_center">0.827 (0.096)</td></tr>
+<td class="gt_row gt_center">0.763
+(0.053)</td>
+<td class="gt_row gt_center">0.942
+(0.038)</td>
+<td class="gt_row gt_center">0.775
+(0.107)</td>
+<td class="gt_row gt_center">0.508
+(0.099)</td>
+<td class="gt_row gt_center">0.827
+(0.074)</td></tr>
     <tr><td class="gt_row gt_left gt_stub">Permutation importance (SRC)</td>
-<td class="gt_row gt_center">0.732 (0.042)</td>
-<td class="gt_row gt_center">0.902 (0.039)</td>
-<td class="gt_row gt_center">0.688 (0.088)</td>
-<td class="gt_row gt_center">0.579 (0.052)</td>
-<td class="gt_row gt_center">0.759 (0.092)</td></tr>
+<td class="gt_row gt_center">0.699
+(0.061)</td>
+<td class="gt_row gt_center">0.877
+(0.051)</td>
+<td class="gt_row gt_center">0.645
+(0.090)</td>
+<td class="gt_row gt_center">0.535
+(0.089)</td>
+<td class="gt_row gt_center">0.741
+(0.092)</td></tr>
     <tr><td class="gt_row gt_left gt_stub">Permutation importance (ranger)</td>
-<td class="gt_row gt_center">0.711 (0.076)</td>
-<td class="gt_row gt_center">0.863 (0.064)</td>
-<td class="gt_row gt_center">0.708 (0.082)</td>
-<td class="gt_row gt_center">0.526 (0.127)</td>
-<td class="gt_row gt_center">0.746 (0.110)</td></tr>
+<td class="gt_row gt_center">0.693
+(0.054)</td>
+<td class="gt_row gt_center">0.864
+(0.052)</td>
+<td class="gt_row gt_center">0.665
+(0.079)</td>
+<td class="gt_row gt_center">0.504
+(0.092)</td>
+<td class="gt_row gt_center">0.738
+(0.086)</td></tr>
   </tbody>
   
   

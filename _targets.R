@@ -13,13 +13,13 @@ lapply(list.files("./R", full.names = TRUE), base::source)
 
 analyses_real <- expand_grid(data_source = c("pbc_orsf",
                                              "rotterdam"),
-                             run_seed = 1:15)
+                             run_seed = 1:50)
 
 analyses_sim <- expand_grid(data_source = 'sim',
                             n_obs = c(1000),
                             n_z = c(20),
                             correlated_x = c(0.1),
-                            run_seed = 1:15)
+                            run_seed = 1:50)
 
 
 tar_plan(

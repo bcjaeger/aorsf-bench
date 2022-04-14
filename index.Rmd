@@ -55,7 +55,7 @@ __Note__ {`xgboost`} requires careful tuning to obtain ideal performance. While 
 
 ### Prediction accuracy 
 
-The machine learning algorithms above are compared based on their discrimination (C-statistic) and scaled Brier score, which are computed using the `riskRegression` package, and specifically `riskRegression::Score()`. Computational time required for model fitting and model predictions are also presented. Results are averaged over 15 runs of Monte-Carlo Cross-validation. In each run of Monte-Carlo Cross-validation, the current data are separated into a training and testing set, all modeling techniques are applied to the training set, and model predictions are evaluated in the testing set. 
+The machine learning algorithms above are compared based on their discrimination (C-statistic) and scaled Brier score, which are computed using the `riskRegression` package, and specifically `riskRegression::Score()`. Computational time required for model fitting and model predictions are also presented. Results are averaged over 50 runs of Monte-Carlo Cross-validation. In each run of Monte-Carlo Cross-validation, the current data are separated into a training and testing set, all modeling techniques are applied to the training set, and model predictions are evaluated in the testing set. 
 
 ### Variable importance 
 
@@ -335,7 +335,7 @@ data_gt <- bm_vi_comb |>
   summarize(
     across(
       .cols = c(overall, x, w, g, v),
-      .fns = function(x) table_glue("{mean(x)} ({sd(x)})")
+      .fns = function(x) table_glue("{mean(x)}")
     )
   ) |> 
   ungroup() |> 
