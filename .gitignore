@@ -43,3 +43,7 @@ renv/
 .Rproj.user
 .Rdata
 .DS_Store
+
+# never push data to github
+data
+
