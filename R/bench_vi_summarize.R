@@ -3,10 +3,27 @@
 #' .. content for \details{} ..
 #'
 #' @title
-#' @param benchmark_vi_comb
-bench_vi_summarize <- function(benchmark_vi_comb) {
+#' @param bm_vi_comb
+#' @param bm_pred_comb
+bench_vi_summarize <- function(bm_pred_comb, bm_vi_comb) {
 
-  benchmark_vi_comb |>
+
+  bm_pred_comb |>
+    mutate(
+      data = if_else(
+        data == 'sim',
+        paste(data, n_obs, n_z, correlated_x, sep = '_'),
+        data
+      )
+    ) |>
+    group_by(model, data) |>
+    summarize(across(.cols = c(cstat, IPA, time_fit, time_prd),
+                     .fns = median)) |>
+    arrange(data, desc(cstat))
+
+  group_by(model, data, )
+
+  bm_vi_comb |>
     group_by(model, xcorr, n_obs, n_z) |>
     summarize(across(everything(), ~mean(.x))) |>
     arrange(xcorr, n_obs, n_z, desc(overall)) |>

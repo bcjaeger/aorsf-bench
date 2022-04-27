@@ -42,6 +42,13 @@ bench_pred <- function(data_source,
 
     },
 
+    'guide_it' = {
+
+      data_all <- guide_it_build() |>
+        select(-deidnum)
+
+    },
+
     'sim' = {
 
       data_all <- sim_surv(n_obs = n_obs,
@@ -89,12 +96,22 @@ bench_pred <- function(data_source,
     )
   )
 
-  fits <- map(models, model_fit, train = as.data.frame(train))
+
+
+  imputer <- recipe(x = train, time + status ~ .) |>
+    step_impute_mean(all_numeric_predictors()) |>
+    step_impute_mode(all_nominal_predictors()) |>
+    prep()
+
+  .train <- juice(imputer)
+  .test <- bake(imputer, new_data = test)
+
+  fits <- map(models, model_fit, train = as.data.frame(.train))
 
   prds <- map2(.x = fits,
                .y = models,
                .f = model_pred,
-               test = as.data.frame(test),
+               test = as.data.frame(.test),
                pred_horizon = pred_horizon)
 
   times_fit <- fits |>

@@ -39,11 +39,23 @@ model_fit <- function(type, train) {
         as_tibble() |>
         as_sgb_data(status = status, time = time)
 
-      res <- sgb_fit(sgb_df = xmat,
-                     verbose = 0,
-                     params = list(eta = 0.01,
-                                   objective = 'survival:cox',
-                                   eval_metric = 'cox-nloglik'))
+      res <- try(
+        sgb_fit(sgb_df = xmat,
+                verbose = 0,
+                params = list(eta = 0.01,
+                              objective = 'survival:cox',
+                              eval_metric = 'cox-nloglik'))
+      )
+
+      # sometimes you don't have enough events to do CV
+      if(inherits(res, 'try-error'))
+        res <- sgb_fit(sgb_df = xmat,
+                       verbose = 0,
+                       nrounds = 250,
+                       params = list(eta = 0.01,
+                                     objective = 'survival:cox',
+                                     eval_metric = 'cox-nloglik'))
+
     },
 
     'obliqueRSF' = {
