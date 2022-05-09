@@ -10,7 +10,16 @@ bench_pred <- function(data_source,
                        n_z = NULL,
                        correlated_x = NULL,
                        run_seed,
-                       test_prop = 1/2) {
+                       test_prop = 1/4) {
+
+  conflict_prefer("filter", "dplyr")
+  conflict_prefer("summarize", "dplyr")
+  conflict_prefer("Predict", "modeltools")
+
+  # one core per worker
+  options(parallelly.availableCores.custom = function() { 1L })
+
+  print(paste("Number of cores available:", availableCores()))
 
   set.seed(run_seed)
 
@@ -49,12 +58,35 @@ bench_pred <- function(data_source,
 
     },
 
+    'breast' = {
+
+      data("Breast",package='biospear')
+
+      data_all <- Breast
+
+      names(data_all)[4:ncol(data_all)] <-
+        paste('var',4:ncol(data_all),sep='_')
+
+    },
+
     'sim' = {
 
       data_all <- sim_surv(n_obs = n_obs,
                            n_z = n_z,
                            correlated_x = correlated_x) |>
         getElement('data')
+
+    },
+
+    'sprint-cvd' = {
+
+      data_all <- load_sprint_ndi(outcome = 'cvd')
+
+    },
+
+    'sprint-acm' = {
+
+      data_all <- load_sprint_ndi(outcome = 'acm')
 
     }
 
@@ -87,8 +119,13 @@ bench_pred <- function(data_source,
 
   models <- set_names(
     c(
-      'aorsf',
+      'aorsf-1',
+      'aorsf-3',
+      'aorsf-5',
+      'aorsf-10',
+      'aorsf-net',
       'cif',
+      'coxtime',
       # 'obliqueRSF',
       'xgboost',
       'randomForestSRC',
@@ -97,14 +134,18 @@ bench_pred <- function(data_source,
   )
 
 
+  not_all_missing <- function(x){ !all(is.na(x)) & !all() }
 
   imputer <- recipe(x = train, time + status ~ .) |>
     step_impute_mean(all_numeric_predictors()) |>
     step_impute_mode(all_nominal_predictors()) |>
+    step_nzv() |>
+    step_range(all_numeric_predictors()) |>
     prep()
 
   .train <- juice(imputer)
   .test <- bake(imputer, new_data = test)
+
 
   fits <- map(models, model_fit, train = as.data.frame(.train))
 

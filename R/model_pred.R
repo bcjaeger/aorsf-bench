@@ -11,6 +11,8 @@ model_pred <- function(fit, type, test, pred_horizon) {
 
   message("predicting risk with ", type, " model")
 
+  if(str_detect(type, '^aorsf')) type <- 'aorsf'
+
   start_time <- Sys.time()
 
   res <- switch(
@@ -18,6 +20,20 @@ model_pred <- function(fit, type, test, pred_horizon) {
 
     'aorsf' = {
       predict(fit$model, new_data = test, pred_horizon = pred_horizon)
+    },
+
+    'coxtime' = {
+
+      pmat <- predict(fit$model,
+                      newdata = test,
+                      type = 'survival')
+
+      pmat_times <- as.numeric(colnames(pmat))
+
+      pmat_col <- max(which(pmat_times <= pred_horizon))
+
+      as.numeric(1-pmat[, pmat_col, drop = TRUE])
+
     },
 
     'cif' = {

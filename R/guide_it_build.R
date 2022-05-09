@@ -66,8 +66,8 @@ guide_it_build <- function(){
     .(
       TORSEND,
       TORSEDD,
-      BUMETA,
-      BUMETAND,
+      # BUMETA,
+      # BUMETAND,
       BBDOSE,
       FUROSND,
       FUROSE,
@@ -82,7 +82,7 @@ guide_it_build <- function(){
       aldpct,
       arbpct,
       bbpct,
-      ivause,
+      # ivause,
       valsart,
       diurdose,
       acearbpt,
@@ -104,13 +104,19 @@ guide_it_build <- function(){
     )
   ]
 
-  list(demog,
-       endpt,
-       clabs,
-       slabs,
-       meds) |>
+  out <- list(demog,
+              endpt,
+              clabs,
+              slabs,
+              meds) |>
     reduce(.f = merge,
            by = 'deidnum',
            all.x = TRUE)
+
+  out[ARB == 0, ARBDOSE := 0]
+  out[ALDOS == 0, ALDODOSE := 0]
+  out[TORSEND != 1 | is.na(TORSEND), TORSEDD := 0]
+
+  out[, `:=`(ARB = NULL, ALDOS = NULL, TORSEND = NULL)]
 
 }

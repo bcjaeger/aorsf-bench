@@ -6,6 +6,7 @@ library(tarchetypes)
 
 library(aorsf)
 library(survival)
+library(survivalmodels)
 library(obliqueRSF)
 library(xgboost)
 library(xgboost.surv)

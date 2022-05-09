@@ -275,7 +275,7 @@ results_overall <- bm_pred_comb |>
 
 data_tbl <- bm_pred_comb |> 
   mutate(model = recode(model, 'cif' = 'party')) |> 
-  group_by(model, data) |>
+  group_by(model, data, n_z, n_obs, correlated_x) |>
   summarize(
     across(
       .cols = c(cstat, IPA, time_fit, time_prd),
@@ -283,12 +283,22 @@ data_tbl <- bm_pred_comb |>
     )
   ) |> 
   bind_rows(results_overall) |> 
+  mutate(
+    data = if_else(
+      is.na(n_z),
+      true = data,
+      false = as.character(
+        glue::glue("Simulation, N junk = {n_z}, N obs = {n_obs}, X corr \u2264 {correlated_x}")
+      )
+    )
+  ) |> 
   group_by(data) |> 
   mutate(
     across(.cols = starts_with("time"), .fns = as.numeric),
-    time_fit_ratio = time_fit_mean / time_fit_mean[model == 'aorsf'],
-    time_prd_ratio = time_prd_mean / time_prd_mean[model == 'aorsf']
+    time_fit_ratio = time_fit_mean / time_fit_mean[model == 'aorsf-1'],
+    time_prd_ratio = time_prd_mean / time_prd_mean[model == 'aorsf-1']
   ) |> 
+  arrange(data, desc(cstat_mean)) |> 
   transmute(
     model, 
     data = recode(
@@ -303,7 +313,7 @@ data_tbl <- bm_pred_comb |>
     time_fit_ratio = table_value(time_fit_ratio),
     time_prd_mean = format(round(time_prd_mean, 4), nsmall = 4),
     time_prd_ratio = table_value(time_prd_ratio)
-  )
+  ) 
 
 gt(data_tbl, rowname_col = 'model', groupname_col = 'data') |> 
   cols_label(cstat = 'C-Statistic (SD)',
@@ -346,7 +356,8 @@ data_gt <- bm_vi_comb |>
       '0.1' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.10',
       '0.2' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.20',
       '0.3' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.30',
-      '0.4' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.40'),
+      '0.4' = '|Corr(linear effect variables, irrelevant variables)| \u2264 0.40'
+    ),
     model = factor(
       model,
       levels = c('aorsf',
@@ -361,7 +372,7 @@ data_gt <- bm_vi_comb |>
                  'Permutation importance (ranger)')
     )
   ) |> 
-  select(model, overall, x, w, g, v) |> 
+  select(model, xcorr, overall, x, w, g, v) |> 
   arrange(model)
 
 
