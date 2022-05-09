@@ -20,11 +20,20 @@ sim_surv <- function(n_obs = 2500,
 
   stopifnot(n_x >= n_g)
 
+  # z = junk variables
   z_names <- paste0('z', seq(n_z))
+  # x = main effect
   x_names <- paste0('x', seq(n_x))
+  # no main but have interaction with x
+  # x1 interacts with g1, x2 with g2, etc.
   g_names <- paste0('g', seq(n_g))
+  # non-linear effect
   w_names <- paste0('w', seq(n_w))
+  # linear combination effect
+  # v1, v2, v3 have no effect
+  # c1*v1 + c2*v2 + c3*v3 has a big effect
   v_names <- paste0('v', seq(n_v))
+  # categorical (not used at the moment)
   c_names <- paste0('c', seq(n_c))
 
   .names <- c(z_names, x_names)
@@ -164,6 +173,8 @@ sim_surv <- function(n_obs = 2500,
     }
 
   }
+
+  # making effect sizes -----
 
   betas <- vector(mode = 'numeric', length = ncol(covs))
   names(betas) <- names(covs)
