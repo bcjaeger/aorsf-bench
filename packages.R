@@ -25,5 +25,7 @@ library(mltools)
 library(party)
 
 conflict_prefer("filter", "dplyr")
+conflict_prefer("slice", "dplyr")
 conflict_prefer("summarize", "dplyr")
 conflict_prefer("Predict", "modeltools")
+

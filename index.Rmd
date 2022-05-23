@@ -35,7 +35,7 @@ tar_load(names = c(bm_pred_comb, bm_vi_comb))
 
 # Benchmarking aorsf
 
-Welcome! This benchmark experiment is under construction and will eventually be the basis of a paper that formally introduces the novel mechanisms at play in the {`aorsf`} package.  
+Welcome! This benchmark experiment is under construction and will eventually be the basis of a paper that formally introduces the novel mechanisms at play in the {`aorsf`} package.
 
 ## Methods
 
@@ -43,35 +43,35 @@ Welcome! This benchmark experiment is under construction and will eventually be 
 
 The benchmark experiment uses real and simulated data to compare the following machine learning algorithms {`R package`}:
 
-1. accelerated oblique random survival forests {`aorsf`}
-1. original oblique random survival forests {`obliqueRSF`}
-1. axis-based random survival forests {`randomForestSRC` & `ranger`}
-1. axis-based conditional inference forests {`party`}
-1. gradient boosted decision trees {`xgboost`}
+1.  accelerated oblique random survival forests {`aorsf`}
+2.  original oblique random survival forests {`obliqueRSF`}
+3.  axis-based random survival forests {`randomForestSRC` & `ranger`}
+4.  axis-based conditional inference forests {`party`}
+5.  gradient boosted decision trees {`xgboost`}
 
-__Note__ Presently, the original oblique random survival forest is not included in the benchmark results. This is because the original oblique random survival forest runs very slowly, turning a 10-minute benchmark into a 6 hour benchmark. I will include it once the project is more stable. 
+**Note** Presently, the original oblique random survival forest is not included in the benchmark results. This is because the original oblique random survival forest runs very slowly, turning a 10-minute benchmark into a 6 hour benchmark. I will include it once the project is more stable.
 
-__Note__ {`xgboost`} requires careful tuning to obtain ideal performance. While we do tune the number of boosting steps in this benchmark, we do not go beyond that and instead use default setting for hyper-parameters.
+**Note** {`xgboost`} requires careful tuning to obtain ideal performance. While we do tune the number of boosting steps in this benchmark, we do not go beyond that and instead use default setting for hyper-parameters.
 
-### Prediction accuracy 
+### Prediction accuracy
 
-The machine learning algorithms above are compared based on their discrimination (C-statistic) and scaled Brier score, which are computed using the `riskRegression` package, and specifically `riskRegression::Score()`. Computational time required for model fitting and model predictions are also presented. Results are averaged over 50 runs of Monte-Carlo Cross-validation. In each run of Monte-Carlo Cross-validation, the current data are separated into a training and testing set, all modeling techniques are applied to the training set, and model predictions are evaluated in the testing set. 
+The machine learning algorithms above are compared based on their discrimination (C-statistic) and scaled Brier score, which are computed using the `riskRegression` package, and specifically `riskRegression::Score()`. Computational time required for model fitting and model predictions are also presented. Results are averaged over 50 runs of Monte-Carlo Cross-validation. In each run of Monte-Carlo Cross-validation, the current data are separated into a training and testing set, all modeling techniques are applied to the training set, and model predictions are evaluated in the testing set.
 
-### Variable importance 
+### Variable importance
 
 I compare four different techniques to measure variable importance (VI).
 
-1. `Negation importance`: the method I propose to develop further with this pilot application. This is computed using an accelerated oblique random survival forest model.
+1.  `Negation importance`: the method I propose to develop further with this pilot application. This is computed using an accelerated oblique random survival forest model.
 
-1. `ANOVA importance`: A method introduced by Menze et al. This is computed using an accelerated oblique random survival forest model.
+2.  `ANOVA importance`: A method introduced by Menze et al. This is computed using an accelerated oblique random survival forest model.
 
-1. `SHAP importance`: A method introduced by Lundberg et al. SHAP importance is widely regarded as a gold standard due to its excellent asymptotic properties. This is computed using a boosting model.
+3.  `SHAP importance`: A method introduced by Lundberg et al. SHAP importance is widely regarded as a gold standard due to its excellent asymptotic properties. This is computed using a boosting model.
 
-1. `Permutation importance`: A method introduced by Leo Breiman. This is computed using a standard random survival forest model.
+4.  `Permutation importance`: A method introduced by Leo Breiman. This is computed using a standard random survival forest model.
 
-__Evaluation of variable importance techniques__: VI techniques are compared based on their discrimination (C-statistic) between relevant and irrelevant predictor variables. The relevant predictor variables are those that have a relationship to the outcome, and the irrelevant variables are those with no relationship to the outcome. This is equivalent to assigning a binary outcome to each variable: 1 if it is relevant, 0 otherwise, and then computing a C-statistic for discrimination of the relevant versus irrelevant variables using VI as a 'prediction' for the variables.
+**Evaluation of variable importance techniques**: VI techniques are compared based on their discrimination (C-statistic) between relevant and irrelevant predictor variables. The relevant predictor variables are those that have a relationship to the outcome, and the irrelevant variables are those with no relationship to the outcome. This is equivalent to assigning a binary outcome to each variable: 1 if it is relevant, 0 otherwise, and then computing a C-statistic for discrimination of the relevant versus irrelevant variables using VI as a 'prediction' for the variables.
 
-__Details on C-statistic computation:__ The C-statistic for VI is not the same thing as the C-statistic for prediction accuracy. Since relevance of a variable is binary, the C-statistic for VI is computed using `yardstick::roc_auc`, which wraps `pROC::roc`. 
+**Details on C-statistic computation:** The C-statistic for VI is not the same thing as the C-statistic for prediction accuracy. Since relevance of a variable is binary, the C-statistic for VI is computed using `yardstick::roc_auc`, which wraps `pROC::roc`.
 
 ## Data sets
 
@@ -97,29 +97,29 @@ as_tibble(survival::rotterdam)
 
 The simulated data contain right-censored time-to-event outcomes with five types of predictor variables:
 
-- $z$ (irrelevant) variables $z_1$, $\dots$, $z_{k}$ had no relationship with the outcome.
+-   $z$ (irrelevant) variables $z_1$, $\dots$, $z_{k}$ had no relationship with the outcome.
 
-- $x$ (linear effect) variables $x_1$, $\dots$, $x_{k}$ had a linear relationship with the outcome.
+-   $x$ (linear effect) variables $x_1$, $\dots$, $x_{k}$ had a linear relationship with the outcome.
 
-- $w$ (non-linear effect) variables $w_1$, $\dots$, $w_{k}$ had a non-linear relationship with the outcome. The non-linear relationship followed a sinusoidal curve with varying period length.
+-   $w$ (non-linear effect) variables $w_1$, $\dots$, $w_{k}$ had a non-linear relationship with the outcome. The non-linear relationship followed a sinusoidal curve with varying period length.
 
-- $g$ (conditional linear) variables $g_1$, $\dots$, $g_{k}$ had a conditional linear relationship with the outcome. In other words, for each $i \in \{1, \ldots, k\}$,  $g_i$ had no relationship to the outcome, but $g_i * x_i$ was linearly related to the outcome.
+-   $g$ (conditional linear) variables $g_1$, $\dots$, $g_{k}$ had a conditional linear relationship with the outcome. In other words, for each $i \in \{1, \ldots, k\}$, $g_i$ had no relationship to the outcome, but $g_i * x_i$ was linearly related to the outcome.
 
-- $v$ (combination linear) variables $v_1$, $\dots$, $v_{k}$ had a combination linear relationship with the outcome. In other words, $v_1, v_2, v_3$ each had no effect on the outcome individually, but the latent variable $v_1*c_1* + v_2*c_2 + v_3 * c_3$ was linearly related to the outcome. Coefficients $c_i$ were generated at random uniformly from -1 to -0.5 and 0.5 to 1.
+-   $v$ (combination linear) variables $v_1$, $\dots$, $v_{k}$ had a combination linear relationship with the outcome. In other words, $v_1, v_2, v_3$ each had no effect on the outcome individually, but the latent variable $v_1*c_1* + v_2*c_2 + v_3 * c_3$ was linearly related to the outcome. Coefficients $c_i$ were generated at random uniformly from -1 to -0.5 and 0.5 to 1.
 
-__Mean and standard deviation__ The multivariate normal distribution that generated values for the predictor matrix had a mean of zero and standard deviation of 1 for each variable.
+**Mean and standard deviation** The multivariate normal distribution that generated values for the predictor matrix had a mean of zero and standard deviation of 1 for each variable.
 
-__Correlation__: The correlation among $z$ variables was allowed to be non-zero as was the correlation among $x$ variables and the correlation between $x$ and $z$ variables. For all non-zero correlations, a value was selected at random uniformly between a lower and upper boundary. We set the lower boundary as -0.1 and upper boundary as +0.1. The correlations were adjusted if needed to create the nearest positive definite covariance matrix using `Matrix::nearPD()`.
+**Correlation**: The correlation among $z$ variables was allowed to be non-zero as was the correlation among $x$ variables and the correlation between $x$ and $z$ variables. For all non-zero correlations, a value was selected at random uniformly between a lower and upper boundary. We set the lower boundary as -0.1 and upper boundary as +0.1. The correlations were adjusted if needed to create the nearest positive definite covariance matrix using `Matrix::nearPD()`.
 
-__Effect sizes__: A total effect of 6 was distributed evenly across each predictor group. For example, with a total of $k$ linear effect predictors (i.e., the $x$ variables), the increase in log-hazard associated with a 1 unit increased in each $x$ variable was $6 / 25 = 0.24$, i.e., about a 27% increase in relative risk.
+**Effect sizes**: A total effect of 6 was distributed evenly across each predictor group. For example, with a total of $k$ linear effect predictors (i.e., the $x$ variables), the increase in log-hazard associated with a 1 unit increased in each $x$ variable was $6 / 25 = 0.24$, i.e., about a 27% increase in relative risk.
 
-__Outcomes__: A censored outcome variable was generated with the `simsurv::simsurv()` function using a predictor matrix that included all relevant predictors. After the outcome was generated the interactions, non-linear transformations, and linear combinations of relevant predictors were dropped from the data.
+**Outcomes**: A censored outcome variable was generated with the `simsurv::simsurv()` function using a predictor matrix that included all relevant predictors. After the outcome was generated the interactions, non-linear transformations, and linear combinations of relevant predictors were dropped from the data.
 
 #### Demo and validation of simulated data
 
 Some tests of the simulated data are presented here. If you have no skepticism regarding the simulated data, you can safely skip this sub-section. For simplicity, we set the number of predictors ($k$) to 3 for each predictor group.
 
-__Data generation__: There are no tests for this step, just a glimpse of the simulated set of data.
+**Data generation**: There are no tests for this step, just a glimpse of the simulated set of data.
 
 ```{r}
 
@@ -141,7 +141,7 @@ glimpse(ss_demo$data)
 
 ```
 
-__Column means__: This test verifies that the mean of each predictor is close to zero, and that roughly 45% of outcomes were censored.
+**Column means**: This test verifies that the mean of each predictor is close to zero, and that roughly 45% of outcomes were censored.
 
 ```{r}
 
@@ -166,7 +166,7 @@ data_means
 
 ```
 
-__Effects detected__: This test verifies that, when the oracle model is used, an effect is only detected for variables that have a relationship to the outcome.
+**Effects detected**: This test verifies that, when the oracle model is used, an effect is only detected for variables that have a relationship to the outcome.
 
 ```{r}
 
@@ -196,7 +196,7 @@ anova(mdl)
 
 ```
 
-__Effect size estimation for linear effects__: This test verifies that, when the oracle model is used, the estimated effect sizes for variables with linear effects are consistent with the effect sizes used to simulate the data.
+**Effect size estimation for linear effects**: This test verifies that, when the oracle model is used, the estimated effect sizes for variables with linear effects are consistent with the effect sizes used to simulate the data.
 
 ```{r}
 
@@ -222,7 +222,7 @@ abs(effects_expected - effects_observed) |>
 
 ```
 
-__Effect size estimation for non-linear effects__: This test verifies that, when the oracle model is used, the estimated effect sizes for variables with non-linear effects are consistent with the effect sizes used to simulate the data.
+**Effect size estimation for non-linear effects**: This test verifies that, when the oracle model is used, the estimated effect sizes for variables with non-linear effects are consistent with the effect sizes used to simulate the data.
 
 ```{r}
 
@@ -251,14 +251,13 @@ ggplot(data_gg) +
 
 These results verify that the simulated data set has the expected properties
 
-
 ## Results
 
 ### Prediction accuracy
 
-Overall, {`aorsf`} had the highest prognostic accuracy (__Table 1__), obtaining the highest C-statistic and scaled brier score in each of the three datasets. In addition, {`aorsf`} grew tree ensembles about 10 times as fast as {`ranger`} and generated predictions about 25 times as fast as {`party`}. Not bad! While {`aorsf`} was slower than {`randomForestSRC`}, its predictions were substantially more accurate.  
+Overall, {`aorsf`} had the highest prognostic accuracy (**Table 1**), obtaining the highest C-statistic and scaled brier score in each of the three datasets. In addition, {`aorsf`} grew tree ensembles about 10 times as fast as {`ranger`} and generated predictions about 25 times as fast as {`party`}. Not bad! While {`aorsf`} was slower than {`randomForestSRC`}, its predictions were substantially more accurate.
 
-__Table 1__ Prognostic accuracy and computational efficiency of machine learning algorithms applied to real and simulated data.
+**Table 1** Prognostic accuracy and computational efficiency of machine learning algorithms applied to real and simulated data.
 
 ```{r}
 
@@ -333,10 +332,9 @@ gt(data_tbl, rowname_col = 'model', groupname_col = 'data') |>
 
 ```
 
-
 ### Variable importance
 
-__Table 2__: Discrimination between relevant and irrelevant predictor variables for each VI technique in . Cells that are highlighted with a light blue color indicate which variable importance technique had the best discrimination for a given sample size, correlation setting, and variable type. 
+**Table 2**: Discrimination between relevant and irrelevant predictor variables for each VI technique in . Cells that are highlighted with a light blue color indicate which variable importance technique had the best discrimination for a given sample size, correlation setting, and variable type.
 
 ```{r}
 
@@ -391,13 +389,12 @@ tbl
 
 ```
 
-
 ## Conclusion
 
-{`aorsf`} offers novel, computationally efficient techniques to fit and interpret oblique random survival forests. The benchmarks above are incomplete, and I will be developing them more over time as I slowly work towards a paper. 
+{`aorsf`} offers novel, computationally efficient techniques to fit and interpret oblique random survival forests. The benchmarks above are incomplete, and I will be developing them more over time as I slowly work towards a paper.
 
 # REFERENCES
 
-1. Source for `pbc_orsf` data: T Therneau and P Grambsch (2000), Modeling Survival Data: Extending the Cox Model, Springer-Verlag, New York. ISBN: 0-387-98784-3.
+1.  Source for `pbc_orsf` data: T Therneau and P Grambsch (2000), Modeling Survival Data: Extending the Cox Model, Springer-Verlag, New York. ISBN: 0-387-98784-3.
 
-1. Source for `rotterdam` data: Patrick Royston and Douglas Altman, External validation of a Cox prognostic model: principles and methods. BMC Medical Research Methodology 2013, 13:33
+2.  Source for `rotterdam` data: Patrick Royston and Douglas Altman, External validation of a Cox prognostic model: principles and methods. BMC Medical Research Methodology 2013, 13:33

@@ -13,15 +13,23 @@ lapply(list.files("./R", full.names = TRUE), base::source)
 
 analyses_real <- expand_grid(
   data_source = c(
+    "vdv",
+    "veteran",
+    "colon",
     "pbc_orsf",
+    'time-to-million',
+    'gbsg2',
+    'peakV02',
+    'flchain',
+    'nafld',
     "rotterdam",
-    "actg"
-    # "guide_it"
-    # "breast",
-    # "sprint-cvd",
-    # "sprint-acm"
+    "actg",
+    "guide_it",
+    "breast",
+    "sprint-cvd",
+    "sprint-acm"
   ),
-  run_seed = 1:10
+  run_seed = 1:19
 ) |>
   mutate(
     n_obs = NA_real_,
@@ -39,7 +47,7 @@ analyses_sim <- expand_grid(data_source = 'sim',
 tar_plan(
 
   bm_pred <- tar_map(
-    values = analyses_real, #bind_rows(analyses_sim, analyses_real),
+    values = analyses_real, #bind_rows(analyses_real, analyses_sim),
     tar_target(
       res_pred,
       bench_pred(data_source = data_source,
@@ -49,26 +57,31 @@ tar_plan(
                  run_seed = run_seed),
       resources = tar_resources(
         future = tar_resources_future(
-          resources = list(n_cores=1)
+          resources = list(n_cores=3)
         )
       )
     )
   ),
 
-  # bm_vi <- tar_map(
-  #   values = analyses_sim,
-  #   tar_target(res_vi, bench_vi(data_source = data_source,
-  #                               n_obs = n_obs,
-  #                               n_z = n_z,
-  #                               run_seed = run_seed,
-  #                               correlated_x = correlated_x))
-  #
-  # ),
+  bm_vi <- tar_map(
+    values = analyses_sim,
+    tar_target(res_vi, bench_vi(data_source = data_source,
+                                n_obs = n_obs,
+                                n_z = n_z,
+                                run_seed = run_seed,
+                                correlated_x = correlated_x))
+
+  ),
+
+  tar_target(
+    data_key,
+    summarize_data_source(x = unique(analyses_real$data_source))
+  ),
 
 
   tar_combine(bm_pred_comb, bm_pred[[1]]),
 
-  # tar_combine(bm_vi_comb, bm_vi[[1]])
+  tar_combine(bm_vi_comb, bm_vi[[1]])
 
   #
   # tar_target(

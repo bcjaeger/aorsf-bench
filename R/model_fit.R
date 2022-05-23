@@ -10,8 +10,10 @@ model_fit <- function(type, train) {
 
   message("fitting ", type, " model")
 
+  # params shared by all tree models
   mtry <- round(sqrt(ncol(train)-2))
   node_size <- 10
+
   aorsf_cph_iter <- 1
 
   type_simplified <- type
@@ -30,25 +32,23 @@ model_fit <- function(type, train) {
 
   }
 
-
-  orsf_prefit <- orsf(
-    Surv(time, status) ~ .,
-    mtry = mtry,
-    split_min_obs = node_size,
-    control = control,
-    data = train,
-    no_fit = TRUE
-  )
-
   start_time <- Sys.time()
 
-  print(type_simplified)
-
   switch(
+
     type_simplified,
 
     'aorsf' = {
-      res <- orsf_train(orsf_prefit)
+      res <- orsf(
+        data_train = train,
+        formula = Surv(time, status) ~ .,
+        mtry = mtry,
+        n_retry = 3,
+        split_min_obs = node_size,
+        control = control,
+        oobag_pred = FALSE
+      )
+
     },
 
     'cif' = {
@@ -59,18 +59,53 @@ model_fit <- function(type, train) {
 
     'coxtime' = {
 
+
+      nn <- list(
+        c(mtry),
+        c(mtry, mtry/2),
+        c(mtry, mtry/2 , mtry/2),
+        c(mtry, mtry/2, mtry/2 , mtry/2),
+        c(mtry, mtry, mtry/2, mtry/2 , mtry/2),
+        c(mtry, mtry, mtry, mtry/2, mtry/2 , mtry/2),
+        c(mtry, mtry, mtry, mtry, mtry/2, mtry/2 , mtry/2),
+        c(mtry, mtry, mtry, mtry, mtry, mtry/2, mtry/2 , mtry/2)
+      )
+
+      tuners <- map(
+        .x = nn,
+        .f = ~ coxtime(
+          Surv(time, status) ~ .,
+          data = train,
+          frac = 0.25,
+          activation = "relu",
+          num_nodes = .x,
+          dropout = 0.1,
+          early_stopping = TRUE,
+          epochs = 500,
+          batch_size = 32L
+        )
+      )
+
+      scores <- tuners |>
+        map_dbl(~min(.x$model$val_metrics$scores$loss$score))
+
+      winner_loss_vals <-
+        tuners[[which.min(scores)]]$model$val_metrics$scores$loss$score
+
+      epochs <-
+        tuners[[which.min(scores)]]$model$val_metrics$scores$loss$epoch[
+          which.min(winner_loss_vals)
+        ]
+
       res <- coxtime(
         Surv(time, status) ~ .,
         data = train,
-        frac = 0.3,
         activation = "relu",
-        num_nodes = c(as.integer(mtry), 8L, 4L, 2L),
+        num_nodes = nn[[which.min(scores)]],
         dropout = 0.1,
-        early_stopping = TRUE,
-        epochs = 100,
+        epochs = epochs,
         batch_size = 32L
       )
-
 
     },
 
@@ -79,22 +114,37 @@ model_fit <- function(type, train) {
         as_tibble() |>
         as_sgb_data(status = status, time = time)
 
-      res <- try(
-        sgb_fit(sgb_df = xmat,
-                verbose = 0,
-                params = list(eta = 0.01,
-                              objective = 'survival:cox',
-                              eval_metric = 'cox-nloglik'))
-      )
+      params <- list(eta = 0.01,
+           objective = 'survival:cox',
+           eval_metric = 'cox-nloglik',
+           # min_child_weight = node_size,
+           colsample_bynode = mtry / ncol(xmat$data))
+
+      cv_fit <- xgboost::xgb.cv(params = params,
+                                data = xmat$data,
+                                label = xmat$label,
+                                nfold = 3,
+                                nround = 5000,
+                                early_stopping_rounds = 25,
+                                verbose = FALSE)
+
+      # res <- try(
+      #   sgb_fit(sgb_df = xmat,
+      #           verbose = 0,
+      #           params = params)
+      # )
 
       # sometimes you don't have enough events to do CV
-      if(inherits(res, 'try-error'))
+      if(inherits(cv_fit, 'try-error'))
         res <- sgb_fit(sgb_df = xmat,
                        verbose = 0,
-                       nrounds = 250,
-                       params = list(eta = 0.01,
-                                     objective = 'survival:cox',
-                                     eval_metric = 'cox-nloglik'))
+                       nrounds = 100,
+                       params = params)
+      else
+        res <- sgb_fit(sgb_df = xmat,
+                       verbose = 0,
+                       nrounds = cv_fit$best_iteration,
+                       params = params)
 
     },
 
@@ -109,6 +159,9 @@ model_fit <- function(type, train) {
 
     'randomForestSRC' = {
       res <- rfsrc(Surv(time, status) ~ .,
+                   ntree = 500,
+                   samptype = 'swr',
+                   perf.type = 'none',
                    data = train,
                    mtry = mtry,
                    nodesize = node_size)
@@ -117,8 +170,11 @@ model_fit <- function(type, train) {
     'ranger' = {
       res <- ranger(
         Surv(time, status) ~ .,
+        num.trees = 500,
+        splitrule = 'extratrees',
         data = train,
         mtry = mtry,
+        oob.error = FALSE,
         min.node.size = node_size
       )
     }

@@ -48,7 +48,17 @@ model_pred <- function(fit, type, test, pred_horizon) {
         select(-time, -status) |>
         as.matrix()
 
-      1-predict(fit$model, new_data = .test, eval_times = pred_horizon)
+      out <- 1-predict(fit$model, new_data = .test, eval_times = pred_horizon)
+
+      if(all(is.na(out))){
+        out <- xgboost:::predict.xgb.Booster(
+          object = fit$model$fit,
+          newdata = .test
+        ) |>
+          scales::rescale(to = c(0,1))
+      }
+
+      out
 
     },
 

@@ -13,84 +13,20 @@ bench_pred <- function(data_source,
                        test_prop = 1/4) {
 
   conflict_prefer("filter", "dplyr")
+  conflict_prefer("slice", "dplyr")
   conflict_prefer("summarize", "dplyr")
   conflict_prefer("Predict", "modeltools")
+
 
   # one core per worker
   options(parallelly.availableCores.custom = function() { 1L })
 
-  print(paste("Number of cores available:", availableCores()))
-
   set.seed(run_seed)
 
-  switch(
-
-    data_source,
-
-    'pbc_orsf' = {
-      data_all <- aorsf::pbc_orsf |>
-        select(-id) |>
-        as_tibble()
-    },
-
-    'rotterdam' = {
-      data_all <- survival::rotterdam |>
-        mutate(time = pmin(rtime, dtime),
-               status = if_else(rtime < dtime, recur, death)) |>
-        select(age, meno, size, grade, nodes, pgr, er, hormon,
-               time, status) |>
-        as_tibble()
-    },
-
-    'actg' = {
-
-      data_all <- mlr3proba::actg |>
-        as_tibble() |>
-        select(-id, -time_d, -censor_d) |>
-        rename(status = censor)
-
-    },
-
-    'guide_it' = {
-
-      data_all <- guide_it_build() |>
-        select(-deidnum)
-
-    },
-
-    'breast' = {
-
-      data("Breast",package='biospear')
-
-      data_all <- Breast
-
-      names(data_all)[4:ncol(data_all)] <-
-        paste('var',4:ncol(data_all),sep='_')
-
-    },
-
-    'sim' = {
-
-      data_all <- sim_surv(n_obs = n_obs,
-                           n_z = n_z,
-                           correlated_x = correlated_x) |>
-        getElement('data')
-
-    },
-
-    'sprint-cvd' = {
-
-      data_all <- load_sprint_ndi(outcome = 'cvd')
-
-    },
-
-    'sprint-acm' = {
-
-      data_all <- load_sprint_ndi(outcome = 'acm')
-
-    }
-
-  )
+  data_all <- load_data(data_source,
+                        n_obs = n_obs,
+                        n_z = n_z,
+                        correlated_x = correlated_x)
 
   pred_horizon <- median(data_all$time)
 
@@ -120,13 +56,11 @@ bench_pred <- function(data_source,
   models <- set_names(
     c(
       'aorsf-1',
-      'aorsf-3',
-      'aorsf-5',
-      'aorsf-10',
+      'aorsf-15',
       'aorsf-net',
       'cif',
       'coxtime',
-      # 'obliqueRSF',
+      'obliqueRSF',
       'xgboost',
       'randomForestSRC',
       'ranger'
@@ -134,12 +68,10 @@ bench_pred <- function(data_source,
   )
 
 
-  not_all_missing <- function(x){ !all(is.na(x)) & !all() }
-
   imputer <- recipe(x = train, time + status ~ .) |>
     step_impute_mean(all_numeric_predictors()) |>
     step_impute_mode(all_nominal_predictors()) |>
-    step_nzv() |>
+    step_nzv(all_predictors()) |>
     step_range(all_numeric_predictors()) |>
     prep()
 
@@ -173,13 +105,15 @@ bench_pred <- function(data_source,
                 values_from = time,
                 names_prefix = 'time_')
 
-  sc <- Score(
+  sc <- try(Score(
     object = map(prds, 'prediction'),
     formula = Surv(time, status) ~ 1,
     data = test,
     summary = 'IPA',
     times = pred_horizon
-  )
+  ), silent = TRUE)
+
+  if(inherits(sc, 'try-error')) return(NULL)
 
   cstat <- sc$AUC$score |>
     select(model, cstat = AUC)
@@ -195,7 +129,10 @@ bench_pred <- function(data_source,
            n_z = n_z,
            correlated_x = correlated_x)
 
-  print(score)
+  score |>
+    arrange(desc(cstat)) |>
+    select(-Brier, -run, -time_prd, -n_z, -n_obs) |>
+    print(n=100)
 
   score
 
