@@ -26,6 +26,8 @@
 \usepackage{amsmath}
 \usepackage{booktabs}
 \usepackage{caption}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
 
 
 \definecolor{lightgray}{rgb}{0.83, 0.83, 0.83}
@@ -100,7 +102,7 @@ abstract here
 
 \section{Related work}
 
-Several machine learning algorithms can engage with right-censored time-to-event outcomes. In the current study, we consider four classes of learners: random forests, boosting ensembles, regression models, and neural networks.
+Table \ref{table:1} is an example of a referenced \LaTeX{}. Several machine learning algorithms can engage with right-censored time-to-event outcomes. In the current study, we consider four classes of learners: random forests, boosting ensembles, regression models, and neural networks.
 
 accelerated oblique random survival forests \texttt{aorsf}
 
@@ -112,6 +114,38 @@ axis-based conditional inference forests \texttt{party}
 
 gradient boosted decision trees \texttt{xgboost}
 
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{p{2cm} | p{3cm} p{7cm}}
+ \hline
+ Learner & Software & Description \\ [0.5ex]
+ \hline\hline
+ \multicolumn{3}{l}{\textit{Random Survival Forests}}\\
+ \hline\hline
+ Standard & \href{https://www.randomforestsrc.org/index.html}{\texttt{RandomForestSRC}} & Axis based survival trees following Leo Breiman's original random forest algorithm, with cut-points selected to maximize a log-rank statistic.  \\ \hline
+ Oblique & \href{https://CRAN.R-project.org/package=obliqueRSF}{\texttt{obliqueRSF}} \newline \href{https://bcjaeger.github.io/aorsf/}{\texttt{aorsf}} & Oblique survival trees following Leo Breiman's random forest algorithm but not using random coefficients for linear combinations. \texttt{obliqueRSF} uses penalized models, and \texttt{aorsf} additionally uses partially trained models. Cut-points are selected to maximize a log-rank statistic. \\ \hline
+ Extremely \,Randomized & \href{https://CRAN.R-project.org/package=ranger}{\texttt{ranger}} & Axis-based survival trees grown with randomly selected features and cut-points\\ \hline
+ Conditional \,Inference & \href{http://party.r-forge.r-project.org/}{\texttt{party}} & Axis based survival trees grown using unbiased recursive partitioning.  \\
+ \hline\hline
+ \multicolumn{3}{l}{\textit{Boosting ensembles}}\\
+ \hline\hline
+ Trees & \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} & The Cox likelihood function is maximized additively with decision trees. Nested cross validation (5 folds) is applied to tune the number of trees grown.  \\
+ Models & \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} & The accelerated failure time likelihood function is maximized additively with decision trees. Nested cross validation (5 folds) is applied to tune the number of trees grown.  \\
+ \hline\hline
+ \multicolumn{3}{l}{\textit{Regression models}}\\
+ \hline\hline
+ Cox Net & \texttt{glmnet} & The Cox model is fit using an elastic net penalty. Nested cross validation (5 folds) is applied to tune penalty terms.\\
+ \hline\hline
+ \multicolumn{3}{l}{\textit{Neural networks}}\\
+ \hline\hline
+ Cox Time & 6 & 87837  \\
+ \hline
+\end{tabular}
+\caption{Table to test captions and labels.}
+\label{table:1}
+\end{table}
+
 \section{Results}
 
 <<>>=
@@ -120,7 +154,7 @@ results_overall <- bm_pred_comb |>
   group_by(model) |>
   summarize(
     across(
-      .cols = c(cstat, IPA, time_fit, time_prd),
+      .cols = c(cstat, IPA, time_fit, time_pred),
       .fns = list(mean = mean, sd = sd)
     )
   ) |>
@@ -130,7 +164,7 @@ data_tbl <- bm_pred_comb |>
   group_by(model, data, n_z, n_obs, correlated_x) |>
   summarize(
     across(
-      .cols = c(cstat, IPA, time_fit, time_prd),
+      .cols = c(cstat, IPA, time_fit, time_pred),
       .fns = list(mean = mean, sd = sd)
     )
   ) |>
@@ -147,15 +181,15 @@ data_tbl <- bm_pred_comb |>
   group_by(data) |>
   mutate(
     across(.cols = starts_with("time"), .fns = as.numeric),
-    time_fit_ratio = time_fit_mean / time_fit_mean[model == 'aorsf-1'],
-    time_prd_ratio = time_prd_mean / time_prd_mean[model == 'aorsf-1']
+    time_fit_ratio = time_fit_mean / time_fit_mean[model == 'aorsf_1'],
+    time_pred_ratio = time_pred_mean / time_pred_mean[model == 'aorsf_1']
   ) |>
   arrange(data, desc(cstat_mean)) |>
   transmute(
     model = recode(
       model,
-      "aorsf-15" = 'aORSF(i=15)',
-      "aorsf-1" = 'aORSF(i=1)',
+      "aorsf_15" = 'aORSF(i=15)',
+      "aorsf_1" = 'aORSF(i=1)',
       "ranger" = 'Ranger',
       "xgboost" = 'Xgboost',
       "cif" = "Party",
@@ -172,8 +206,8 @@ data_tbl <- bm_pred_comb |>
     ipa = table_glue("{IPA_mean} ({IPA_sd})"),
     time_fit_mean = format(round(time_fit_mean, 3), nsmall = 3),
     time_fit_ratio = table_value(time_fit_ratio),
-    time_prd_mean = format(round(time_prd_mean, 3), nsmall = 3),
-    time_prd_ratio = table_value(time_prd_ratio)
+    time_pred_mean = format(round(time_pred_mean, 3), nsmall = 3),
+    time_pred_ratio = table_value(time_pred_ratio)
   )
 
 indents <- table(data_tbl$data)

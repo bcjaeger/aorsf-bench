@@ -11,26 +11,23 @@ summarize_data_source <- function(x) {
   conflict_prefer("summarize", "dplyr")
   conflict_prefer("Predict", "modeltools")
 
-  x = c(
-    "vdv",
-    "veteran",
-    "colon",
-    "pbc_orsf",
-    'time-to-million',
-    'gbsg2',
-    'peakV02',
-    'flchain',
-    'nafld',
-    "rotterdam",
-    "actg",
-    "guide_it",
-    "breast",
-    "sprint-cvd",
-    "sprint-acm"
-  ) |>
-    set_names()
-
-  all_data <- map(.x = x, .f = load_data)
+  all_data = list(
+    "vdv" = load_vdv(),
+    "veteran" = load_veteran(),
+    "colon" = load_colon(),
+    "pbc_orsf" = load_pbc_orsf(),
+    'time_to_million' = load_time_to_million(),
+    'gbsg2' = load_gbsg2(),
+    'peakV02' = load_peakV02(),
+    'flchain' = load_flchain(),
+    'nafld' = load_nafld(),
+    "rotterdam" = load_rotterdam(),
+    "actg" = load_actg(),
+    "guide_it" = load_guide_it(),
+    "breast" = load_breast(),
+    "sprint_cvd" = load_sprint_cvd(),
+    "sprint_acm" = load_sprint_acm()
+  )
 
   data_info <- map_dfr(
     .x = all_data,

@@ -6,81 +6,138 @@
 #' @param fit
 #' @param type
 #' @param test
-model_pred <- function(fit, type, test, pred_horizon) {
 
-
-  message("predicting risk with ", type, " model")
-
-  if(str_detect(type, '^aorsf')) type <- 'aorsf'
+aorsf_pred <- function(object, test, pred_horizon){
 
   start_time <- Sys.time()
 
-  res <- switch(
-    type,
-
-    'aorsf' = {
-      predict(fit$model, new_data = test, pred_horizon = pred_horizon)
-    },
-
-    'coxtime' = {
-
-      pmat <- predict(fit$model,
-                      newdata = test,
-                      type = 'survival')
-
-      pmat_times <- as.numeric(colnames(pmat))
-
-      pmat_col <- max(which(pmat_times <= pred_horizon))
-
-      as.numeric(1-pmat[, pmat_col, drop = TRUE])
-
-    },
-
-    'cif' = {
-      leaves <- predict(fit$model, newdata = test, type = 'prob')
-      map_dbl(leaves, ~ 1-.x$surv[max(which(.x$time <= pred_horizon))])
-    },
-
-    'xgboost' = {
-
-      .test <- model.matrix(~. -1L, data = test) |>
-        as_tibble() |>
-        select(-time, -status) |>
-        as.matrix()
-
-      out <- 1-predict(fit$model, new_data = .test, eval_times = pred_horizon)
-
-      if(all(is.na(out))){
-        out <- xgboost:::predict.xgb.Booster(
-          object = fit$model$fit,
-          newdata = .test
-        ) |>
-          scales::rescale(to = c(0,1))
-      }
-
-      out
-
-    },
-
-    'obliqueRSF' = {
-      1-predict(fit$model, newdata = test, times = pred_horizon)
-    },
-
-    'randomForestSRC' = {
-      predictRisk(fit$model, newdata = test, times = pred_horizon)
-    },
-
-    'ranger' = {
-      predictRisk(fit$model, newdata = test, times = pred_horizon)
-    }
-
-  )
+  res <- predict(object$fit,
+                 new_data = test,
+                 pred_horizon = pred_horizon)
 
   end_time <- Sys.time()
 
-  list(prediction = as.numeric(res), time = end_time - start_time)
+  object$pred <- as.numeric(res)
+  object$time_pred <- end_time - start_time
+  object
 
 }
 
 
+aorsf_cph_15_pred <- function(object, test, pred_horizon){
+  aorsf_pred(object, test, pred_horizon)
+}
+
+aorsf_cph_1_pred <- function(object, test, pred_horizon){
+  aorsf_pred(object, test, pred_horizon)
+}
+
+aorsf_net_pred <- function(object, test, pred_horizon){
+  aorsf_pred(object, test, pred_horizon)
+}
+
+cif_pred <- function(object, test, pred_horizon){
+
+  start_time <- Sys.time()
+
+  leaves <- predict(object$fit, newdata = test, type = 'prob')
+  res <- map_dbl(leaves, ~ 1-.x$surv[max(which(.x$time <= pred_horizon))])
+
+  end_time <- Sys.time()
+
+  object$pred <- as.numeric(res)
+  object$time_pred <- end_time - start_time
+  object
+
+}
+
+coxtime_pred <- function(object, test, pred_horizon){
+
+  start_time <- Sys.time()
+
+  pmat <- predict(object$fit,
+                  newdata = test,
+                  type = 'survival')
+
+  pmat_times <- as.numeric(colnames(pmat))
+
+  pmat_col <- max(which(pmat_times <= pred_horizon))
+
+  res <- 1-pmat[, pmat_col, drop = TRUE]
+
+  end_time <- Sys.time()
+
+  object$pred <- as.numeric(res)
+  object$time_pred <- end_time - start_time
+  object
+
+}
+
+obliqueRSF_pred <- function(object, test, pred_horizon){
+
+  start_time <- Sys.time()
+
+  res <- 1-predict(object$fit,
+                   newdata = test,
+                   times = pred_horizon)
+
+  end_time <- Sys.time()
+
+  object$pred <- as.numeric(res)
+  object$time_pred <- end_time - start_time
+  object
+
+}
+
+xgboost_pred <- function(object, test, pred_horizon){
+
+  .test <- model.matrix(~. -1L, data = test) |>
+    as_tibble() |>
+    select(-time, -status) |>
+    as.matrix()
+
+  start_time <- Sys.time()
+
+  res <- 1 - predict(object$fit,
+                     new_data = .test,
+                     eval_times = pred_horizon)
+
+  # sometimes the base hazard can't be estimated
+  if(all(is.na(res))){
+    res <- xgboost:::predict.xgb.Booster(
+      object = object$fit$fit,
+      newdata = .test
+    ) |>
+      scales::rescale(to = c(0,1))
+  }
+
+  end_time <- Sys.time()
+
+  object$pred <- as.numeric(res)
+  object$time_pred <- end_time - start_time
+  object
+
+}
+
+randomForestSRC_pred <- function(object, test, pred_horizon){
+
+  ranger_pred(object, test, pred_horizon)
+
+}
+
+ranger_pred <- function(object, test, pred_horizon){
+
+  start_time <- Sys.time()
+
+  res <- predictRisk(object$fit,
+                     newdata = test,
+                     times = pred_horizon)
+
+  end_time <- Sys.time()
+
+  object$pred <- as.numeric(res)
+  object$time_pred <- end_time - start_time
+  object
+
+}
 

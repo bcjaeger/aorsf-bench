@@ -6,6 +6,10 @@
 #' @param data_source
 #' @param run_seed
 bench_pred <- function(data_source,
+                       model_type,
+                       data_load_fun,
+                       model_fit_fun,
+                       model_prd_fun,
                        n_obs = NULL,
                        n_z = NULL,
                        correlated_x = NULL,
@@ -17,19 +21,11 @@ bench_pred <- function(data_source,
   conflict_prefer("summarize", "dplyr")
   conflict_prefer("Predict", "modeltools")
 
-
-  # one core per worker
-  options(parallelly.availableCores.custom = function() { 1L })
-
   set.seed(run_seed)
 
-  data_all <- load_data(data_source,
-                        n_obs = n_obs,
-                        n_z = n_z,
-                        correlated_x = correlated_x)
-
-  pred_horizon <- median(data_all$time)
-
+  data_all <- data_load_fun(n_obs = n_obs,
+                            n_z = n_z,
+                            correlated_x = correlated_x)
 
   if(data_source == 'sim'){
 
@@ -52,22 +48,6 @@ bench_pred <- function(data_source,
 
   }
 
-
-  models <- set_names(
-    c(
-      'aorsf-1',
-      'aorsf-15',
-      'aorsf-net',
-      'cif',
-      'coxtime',
-      'obliqueRSF',
-      'xgboost',
-      'randomForestSRC',
-      'ranger'
-    )
-  )
-
-
   imputer <- recipe(x = train, time + status ~ .) |>
     step_impute_mean(all_numeric_predictors()) |>
     step_impute_mode(all_nominal_predictors()) |>
@@ -75,66 +55,56 @@ bench_pred <- function(data_source,
     step_range(all_numeric_predictors()) |>
     prep()
 
-  .train <- juice(imputer)
-  .test <- bake(imputer, new_data = test)
+  .train <- as.data.frame(juice(imputer))
+  .test <- as.data.frame(bake(imputer, new_data = test))
 
+  pred_horizon <- median(.train$time)
 
-  fits <- map(models, model_fit, train = as.data.frame(.train))
+  model <- model_fit_fun(train = .train) |>
+    model_prd_fun(test = .test, pred_horizon = pred_horizon)
 
-  prds <- map2(.x = fits,
-               .y = models,
-               .f = model_pred,
-               test = as.data.frame(.test),
-               pred_horizon = pred_horizon)
+  sc <- try(
+    Score(
+      object = set_names(list(model$pred), model_type),
+      formula = Surv(time, status) ~ 1,
+      data = test,
+      summary = 'IPA',
+      times = pred_horizon
+    ),
+    silent = TRUE)
 
-  times_fit <- fits |>
-    map_dfr('time') |>
-    mutate(action = 'fit')
+  score <- tibble(model = model_type,
+                  cstat = NA_real_,
+                  Brier = NA_real_,
+                  IPA = NA_real_)
 
-  times_prd <- prds |>
-    map_dfr('time') |>
-    mutate(action = 'prd')
+  if( !inherits(sc, 'try-error') ) {
 
-  times <-
-    bind_rows(times_fit, times_prd) |>
-    mutate(data = data_source, run = run_seed) |>
-    pivot_longer(cols = any_of(models),
-                 names_to = 'model',
-                 values_to = 'time') |>
-    pivot_wider(names_from = action,
-                values_from = time,
-                names_prefix = 'time_')
+    cstat <- sc$AUC$score |>
+      select(model, cstat = AUC)
 
-  sc <- try(Score(
-    object = map(prds, 'prediction'),
-    formula = Surv(time, status) ~ 1,
-    data = test,
-    summary = 'IPA',
-    times = pred_horizon
-  ), silent = TRUE)
+    brier <- sc$Brier$score |>
+      select(model, Brier, IPA)
 
-  if(inherits(sc, 'try-error')) return(NULL)
+    score <- cstat |>
+      left_join(brier, by = 'model') |>
+      as_tibble()
 
-  cstat <- sc$AUC$score |>
-    select(model, cstat = AUC)
+  }
 
-  brier <- sc$Brier$score |>
-    select(model, Brier, IPA)
+  out <- score |>
+    mutate(data = data_source,
+           run = run_seed,
+           .before = 1)
 
-  score <- cstat |>
-    left_join(brier, by = 'model') |>
-    left_join(times, by = 'model') |>
-    as_tibble() |>
-    mutate(n_obs = n_obs,
-           n_z = n_z,
-           correlated_x = correlated_x)
-
-  score |>
-    arrange(desc(cstat)) |>
-    select(-Brier, -run, -time_prd, -n_z, -n_obs) |>
-    print(n=100)
-
-  score
+  out$pred_horizon <- pred_horizon
+  out$time_fit     <- model$time_fit
+  out$time_pred    <- model$time_pred
+  out$n_obs        <- n_obs %||% NA_integer_
+  out$n_z          <- n_z %||% NA_integer_
+  out$correlated_x <- correlated_x %||% NA_real_
+  print(out)
+  out
 
 }
 
