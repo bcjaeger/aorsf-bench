@@ -22,9 +22,11 @@
 #
 # }
 
-aorsf_cph_1_fit <- function(train, node_size = 10){
+aorsf_cph_1_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
+
+  split_min_events <- min( round(sum(train$status) / 5), 5)
 
   start_time <- Sys.time()
 
@@ -34,7 +36,9 @@ aorsf_cph_1_fit <- function(train, node_size = 10){
     mtry = mtry,
     n_retry = 3,
     split_min_obs = node_size,
-    control = orsf_control_cph(iter_max = 1),
+    split_min_events = split_min_events,
+    control = orsf_control_cph(iter_max = 1,
+                               do_scale = FALSE),
     oobag_pred = FALSE
   )
 
@@ -44,9 +48,15 @@ aorsf_cph_1_fit <- function(train, node_size = 10){
 
 }
 
-aorsf_cph_15_fit <- function(train, node_size = 10){
+aorsf_random_fit <- function(train, node_size = 10, ...){
+
+  beta_fun <- function(x_node, y_node, w_node) {
+    matrix(runif(ncol(x_node)), ncol=1)
+  }
 
   mtry <- round(sqrt(ncol(train)-2))
+
+  split_min_events <- min( round(sum(train$status) / 5), 5)
 
   start_time <- Sys.time()
 
@@ -56,7 +66,8 @@ aorsf_cph_15_fit <- function(train, node_size = 10){
     mtry = mtry,
     n_retry = 3,
     split_min_obs = node_size,
-    control = orsf_control_cph(iter_max = 15),
+    split_min_events = split_min_events,
+    control = orsf_control_custom(beta_fun = beta_fun),
     oobag_pred = FALSE
   )
 
@@ -66,13 +77,11 @@ aorsf_cph_15_fit <- function(train, node_size = 10){
 
 }
 
-aorsf_net_fit <- function(train, node_size = 10){
+aorsf_cph_15_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
-  df_target <- max(mtry - 2,
-                   round(mtry/2),
-                   2)
+  split_min_events <- min( round(sum(train$status) / 5), 5)
 
   start_time <- Sys.time()
 
@@ -82,6 +91,35 @@ aorsf_net_fit <- function(train, node_size = 10){
     mtry = mtry,
     n_retry = 3,
     split_min_obs = node_size,
+    split_min_events = split_min_events,
+    control = orsf_control_cph(iter_max = 15,
+                               do_scale = TRUE),
+    oobag_pred = FALSE
+  )
+
+  end_time <- Sys.time()
+
+  list(fit = fit, time_fit = end_time - start_time)
+
+}
+
+aorsf_net_fit <- function(train, node_size = 10, ...){
+
+  mtry <- round(sqrt(ncol(train)-2))
+
+  df_target <- max(mtry - 2, round(mtry/2), 2)
+
+  split_min_events <- min( round(sum(train$status) / 5), 5)
+
+  start_time <- Sys.time()
+
+  fit <- orsf(
+    data_train = train,
+    formula = Surv(time, status) ~ .,
+    mtry = mtry,
+    n_retry = 3,
+    split_min_obs = node_size,
+    split_min_events = split_min_events,
     control = orsf_control_net(df_target = df_target),
     oobag_pred = FALSE
   )
@@ -92,7 +130,7 @@ aorsf_net_fit <- function(train, node_size = 10){
 
 }
 
-randomForestSRC_fit <- function(train, node_size = 10){
+randomForestSRC_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
@@ -112,7 +150,7 @@ randomForestSRC_fit <- function(train, node_size = 10){
 
 }
 
-ranger_fit <- function(train, node_size = 10){
+ranger_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
@@ -134,7 +172,7 @@ ranger_fit <- function(train, node_size = 10){
 
 }
 
-cif_fit <- function(train, node_size = 10){
+cif_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
@@ -150,7 +188,7 @@ cif_fit <- function(train, node_size = 10){
 
 }
 
-coxtime_fit <- function(train, node_size = 10){
+coxtime_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
@@ -165,7 +203,8 @@ coxtime_fit <- function(train, node_size = 10){
     c(mtry, mtry, mtry, mtry/2, mtry/2 , mtry/2),
     c(mtry, mtry, mtry, mtry, mtry/2, mtry/2 , mtry/2),
     c(mtry, mtry, mtry, mtry, mtry, mtry/2, mtry/2 , mtry/2)
-  )
+  ) |>
+    lapply(round, digits = 0)
 
   tuners <- map(
     .x = nn,
@@ -209,7 +248,7 @@ coxtime_fit <- function(train, node_size = 10){
 
 }
 
-obliqueRSF_fit <- function(train, node_size = 10){
+obliqueRSF_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
@@ -228,45 +267,151 @@ obliqueRSF_fit <- function(train, node_size = 10){
 
 }
 
-xgboost_fit <- function(train, node_size = 10){
+xgb_cox_fit <- function(train,
+                    node_size = 10,
+                    pred_horizon,
+                    ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
-  xmat <- model.matrix(~. -1, data = train) |>
-    as_tibble() |>
-    as_sgb_data(status = status, time = time)
+  xmat <- model.matrix(~. -1L, data = select(train, -time, -status))
+
+  ymat <- fifelse(
+    test = train$status == 1,
+    yes = train$time,
+    no = train$time * (-1)
+  )
+
+  dtrain <- xgb.DMatrix(data = xmat, label = ymat)
 
   params <- list(eta = 0.01,
                  objective = 'survival:cox',
                  eval_metric = 'cox-nloglik',
-                 # min_child_weight = node_size,
-                 colsample_bynode = mtry / ncol(xmat$data))
+                 min_child_weight = node_size,
+                 colsample_bynode = mtry / ncol(xmat))
 
   start_time <- Sys.time()
 
   cv_fit <- xgb.cv(params = params,
-                   data = xmat$data,
-                   label = xmat$label,
+                   data = dtrain,
+                   nfold = if(nrow(xmat < 100)) 2 else 5,
+                   nround = 5000,
+                   early_stopping_rounds = 25,
+                   verbose = FALSE)
+
+  fit <- xgb.train(params = params,
+                   data = dtrain,
+                   nrounds = cv_fit$best_iteration)
+
+  # baseline hazard estimate at pred horizon
+  lin_preds <- predict(fit, newdata = xmat)
+
+  base_haz <-
+    gbm::basehaz.gbm(t = train[, 'time'],
+                     delta = train[, 'status'],
+                     f.x = lin_preds,
+                     t.eval = pred_horizon,
+                     smooth = TRUE,
+                     cumulative = TRUE)
+
+  end_time <- Sys.time()
+
+  list(fit = fit,
+       time_fit = end_time - start_time,
+       base_haz = base_haz)
+
+}
+
+xgb_aft_fit <- function(train,
+                        node_size = 10,
+                        pred_horizon,
+                        ...){
+
+  mtry <- round(sqrt(ncol(train)-2))
+
+  xmat <- model.matrix(~. -1L, data = select(train, -time, -status))
+
+  y_lower <- train$time
+  y_upper <- fifelse(
+    test = train$status == 1,
+    yes = train$time,
+    no = Inf
+  )
+
+  dtrain <- xgb.DMatrix(data = xmat)
+
+  setinfo(dtrain, 'label', y_lower)
+  setinfo(dtrain, 'label_lower_bound', y_lower)
+  setinfo(dtrain, 'label_upper_bound', y_upper)
+
+  params <- list(eta = 0.01,
+                 objective = 'survival:aft',
+                 eval_metric = 'aft-nloglik',
+                 aft_loss_distribution = 'normal',
+                 aft_loss_distribution_scale = 1.20,
+                 min_child_weight = node_size,
+                 colsample_bynode = mtry / ncol(xmat))
+
+  start_time <- Sys.time()
+
+  cv_fit <- xgb.cv(params = params,
+                   data = dtrain,
                    nfold = 5,
                    nround = 5000,
                    early_stopping_rounds = 25,
                    verbose = FALSE)
 
-  # sometimes you don't have enough events to do CV
-  if(inherits(cv_fit, 'try-error'))
-    fit <- sgb_fit(sgb_df = xmat,
-                   verbose = 0,
-                   nrounds = 100,
-                   params = params)
-  else
-    fit <- sgb_fit(sgb_df = xmat,
-                   verbose = 0,
-                   nrounds = cv_fit$best_iteration,
-                   params = params)
+  fit <- xgb.train(params = params,
+                   data = dtrain,
+                   nrounds = cv_fit$best_iteration)
 
   end_time <- Sys.time()
 
-  list(fit = fit, time_fit = end_time - start_time)
+  list(fit = fit,
+       time_fit = end_time - start_time)
 
 }
+
+
+
+
+cox_net_fit <- function(train, node_size = 10, pred_horizon, ...){
+
+  xmat <- model.matrix(~. -1,
+                       data = select(train, -time, -status))
+
+  ymat <- as.matrix(select(train, time, status))
+
+  start_time <- Sys.time()
+
+  fit <- cv.glmnet(x = xmat,
+                   y = ymat,
+                   alpha = 1/2,
+                   nfolds = 5,
+                   family = 'cox')
+
+  # baseline hazard estimate at pred horizon
+  lin_preds <- predict(fit$glmnet.fit,
+                       newx = xmat,
+                       s = fit$lambda.min,
+                       type = 'link')
+
+  base_haz <-
+    gbm::basehaz.gbm(t = train[, 'time'],
+                     delta = train[, 'status'],
+                     f.x = lin_preds,
+                     t.eval = pred_horizon,
+                     smooth = TRUE,
+                     cumulative = TRUE)
+
+  end_time <- Sys.time()
+
+  list(fit = fit,
+       time_fit = end_time - start_time,
+       base_haz = base_haz)
+
+}
+
+
+
 

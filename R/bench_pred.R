@@ -9,17 +9,12 @@ bench_pred <- function(data_source,
                        model_type,
                        data_load_fun,
                        model_fit_fun,
-                       model_prd_fun,
+                       model_pred_fun,
                        n_obs = NULL,
                        n_z = NULL,
                        correlated_x = NULL,
                        run_seed,
-                       test_prop = 1/4) {
-
-  conflict_prefer("filter", "dplyr")
-  conflict_prefer("slice", "dplyr")
-  conflict_prefer("summarize", "dplyr")
-  conflict_prefer("Predict", "modeltools")
+                       test_prop = 1/2) {
 
   set.seed(run_seed)
 
@@ -58,52 +53,79 @@ bench_pred <- function(data_source,
   .train <- as.data.frame(juice(imputer))
   .test <- as.data.frame(bake(imputer, new_data = test))
 
-  pred_horizon <- median(.train$time)
+  event_time_bounds <- quantile(
+    x = data_all$time[data_all$status==1],
+    probs = c(.25, .75)
+  )
 
-  model <- model_fit_fun(train = .train) |>
-    model_prd_fun(test = .test, pred_horizon = pred_horizon)
+  pred_horizon <- sort(unique(.test$time[.test$status == 1]))
+
+  pred_horizon <- pred_horizon[pred_horizon <= event_time_bounds['75%']]
+  pred_horizon <- pred_horizon[pred_horizon >= event_time_bounds['25%']]
+
+  if(is_empty(pred_horizon)) return(NULL)
+
+  # Don't pipe here - it can mess up the measurement
+  # of time during model fitting and model predictions.
+
+  model <- model_fit_fun(train = .train,
+                         pred_horizon = pred_horizon)
+
+  predictions <- model_pred_fun(object = model,
+                                test = .test,
+                                pred_horizon = pred_horizon)
 
   sc <- try(
     Score(
-      object = set_names(list(model$pred), model_type),
+      object = set_names(list(predictions$pred), model_type),
       formula = Surv(time, status) ~ 1,
       data = test,
-      summary = 'IPA',
+      summary = c('IPA', 'ibs'),
       times = pred_horizon
     ),
     silent = TRUE)
 
   score <- tibble(model = model_type,
                   cstat = NA_real_,
-                  Brier = NA_real_,
-                  IPA = NA_real_)
+                  ibs_scaled = NA_real_)
 
   if( !inherits(sc, 'try-error') ) {
 
     cstat <- sc$AUC$score |>
-      select(model, cstat = AUC)
+      group_by(model) |>
+      summarize(cstat = mean(AUC))
 
     brier <- sc$Brier$score |>
-      select(model, Brier, IPA)
+      group_by(model) |>
+      slice(n()) |>
+      ungroup() |>
+      summarize(
+        ibs_scaled = (IBS[model=='Null model'] - IBS[model==model_type]) /
+          IBS[model=='Null model']
+      )
 
-    score <- cstat |>
-      left_join(brier, by = 'model') |>
-      as_tibble()
+    score <- bind_cols(cstat, brier)
 
   }
 
   out <- score |>
-    mutate(data = data_source,
+    mutate(model = as.character(model),
+           data = data_source,
            run = run_seed,
-           .before = 1)
+           .before = cstat)
 
-  out$pred_horizon <- pred_horizon
-  out$time_fit     <- model$time_fit
-  out$time_pred    <- model$time_pred
-  out$n_obs        <- n_obs %||% NA_integer_
-  out$n_z          <- n_z %||% NA_integer_
-  out$correlated_x <- correlated_x %||% NA_real_
-  print(out)
+  out$train_mean_time   <- mean(.train$time)
+  out$train_mean_status <- mean(.train$status)
+  out$time_fit          <- model$time_fit
+  out$time_pred         <- predictions$time
+
+  if(data_source == 'sim'){
+    out$n_obs <- n_obs
+    out$n_z <- n_z
+    out$correlated_x <- correlated_x
+  }
+
+  # print(out)
   out
 
 }

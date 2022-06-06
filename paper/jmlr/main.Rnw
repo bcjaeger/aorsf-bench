@@ -20,7 +20,7 @@
 % \usepackage[abbrvbib, preprint]{jmlr2e}
 
 \usepackage{jmlr2e}
-% extra packages for tables
+% extra packages
 \usepackage{longtable}
 \usepackage{colortbl}
 \usepackage{amsmath}
@@ -28,7 +28,9 @@
 \usepackage{caption}
 \usepackage{hyperref}
 \hypersetup{hidelinks}
-
+\usepackage{geometry}
+\usepackage{pdflscape}
+\usepackage{bm}
 
 \definecolor{lightgray}{rgb}{0.83, 0.83, 0.83}
 
@@ -36,6 +38,16 @@
 
 \newcommand{\dataset}{{\cal D}}
 \newcommand{\fracpartial}[2]{\frac{\partial #1}{\partial  #2}}
+\newcommand{\ie}{that is}
+\newcommand{\eg}{for example}
+\newcommand{\cstat}{\widehat{\text{C}}(t)}
+\newcommand{\bstat}{\widehat{\text{BS}}(t)}
+\newcommand{\bsbar}{\mathcal{\widehat{BS}}(t_1, t_2)}
+\newcommand{\bskap}{\mathcal{\widehat{BS}}_0(t_1, t_2)}
+
+\newcommand{\ntrain}{N_{\text{train}}}
+\newcommand{\ntest}{N_{\text{test}}}
+
 
 % Heading arguments are {volume}{year}{pages}{date submitted}{date published}{paper id}{author-full-names}
 
@@ -43,24 +55,43 @@
 
 % Short headings should be running head and authors last names
 
-\ShortHeadings{Learning with Mixtures of Trees}{Meil\u{a} and Jordan}
+\ShortHeadings{Accelerated oblique random survival forests}{Jaeger et al}
 \firstpageno{1}
 
 \begin{document}
 
 \title{Accelerated oblique random survival forests}
 
-\author{\name Marina Meil\u{a} \email mmp@stat.washington.edu \\
-       \addr Department of Statistics\\
-       University of Washington\\
-       Seattle, WA 98195-4322, USA
+\author{\name Byron C. Jaeger \email bjaeger@wakehealth.edu \\
+       \addr Department of Biostatistics and Data Science\\
+       Wake Forest University School of Medicine\\
+       Winston-Salem, NC 27157, USA
        \AND
-       \name Michael I.\ Jordan \email jordan@cs.berkeley.edu \\
-       \addr Division of Computer Science and Department of Statistics\\
-       University of California\\
-       Berkeley, CA 94720-1776, USA}
+       \name Sawyer Welden \email swelden@wakehealth.edu \\
+       \addr Department of Biostatistics and Data Science\\
+       Wake Forest University School of Medicine\\
+       Winston-Salem, NC 27157, USA
+       \AND
+       \name Kristin Lenoir \email klenoir@wakehealth.edu \\
+       \addr Department of Biostatistics and Data Science\\
+       Wake Forest University School of Medicine\\
+       Winston-Salem, NC 27157, USA
+       \AND
+       \name Jaime L Speiser \email jspeiser@wakehealth.edu \\
+       \addr Department of Biostatistics and Data Science\\
+       Wake Forest University School of Medicine\\
+       Winston-Salem, NC 27157, USA
+       \AND
+       \name Matthew Segar \email Matthew.Segar@UTSouthwestern.edu \\
+       \addr Division of Cardiology, Department of Internal Medicine, \\
+       University of Texas Southwestern Medical Center, Dallas
+       \AND
+       \name Nicholas M. Pajewski \email npajewsk@wakehealth.edu \\
+       \addr Department of Biostatistics and Data Science\\
+       Wake Forest University School of Medicine\\
+       Winston-Salem, NC 27157, USA}
 
-\editor{Kevin Murphy and Bernhard Sch{\"o}lkopf}
+\editor{TBD}
 
 \maketitle
 
@@ -83,146 +114,259 @@ names(rspec) <- paste('table.glue', names(rspec), sep = '.')
 
 options(rspec)
 
-tar_load(names = c(bm_pred_comb, bm_vi_comb))
+tar_load(names = c(bm_pred_comb,
+                   bm_vi_comb,
+                   bm_pred_viz,
+                   bm_pred_model_viz,
+                   data_key,
+                   model_key))
+
+to_omit <- bm_pred_comb |>
+  filter(is.na(cstat) | is.na(ibs_scaled)) |>
+  distinct(data, run) |>
+  as.list() |>
+  map(unique)
+
+bm_pred_comb <- bm_pred_comb |>
+  filter( ! (data %in% to_omit$data & run %in% to_omit$run) )
 
 @
 
+\newpage
 
 \begin{abstract}%   <- trailing '%' for backward compatibility of .sty file
-abstract here
+
+The oblique random survival forest (ORSF) is an ensemble method for supervised learning that extends the random survival forest (RSF). Trees in the ORSF are grown using linear combinations of variables to create branches in the tree, whereas in the RSF a single variable is used. ORSF ensembles often have higher prediction accuracy than RSF ensembles, but the additional computational overhead of fitting ORSF ensembles limits their scope of application. In addition, few methods have been developed for interpretation of ORSF ensembles. In this article, we introduce and evaluate methods to accelerate the ORSF (\ie, reduce computational overhead) and compute the importance of individual variables in the ORSF We show that our strategy to accelerate the ORSF is up to 500 times faster than existing software for ORSFs (the \texttt{obliqueRSF} R package), and that prediction accuracy of the accelerated ORSF is equivalent or superior to that of existing ORSF methods. We estimate importance of variables for the ORSF by negating each coefficient used for the given variable in linear combinations, and then computing the reduction in out-of-bag accuracy. We show with simulation that  `negation importance' can discriminate between signal and noise variables, and it outperforms several state-of-the-art variable importance techniques in this task when there is correlation among predictors.
+
 \end{abstract}
 
 \begin{keywords}
-  Bayesian networks, mixture models, Chow-Liu trees
+  Random Forests, Survival, Efficient, Variable Importance
 \end{keywords}
 
 \section{Introduction}
 
+Risk prediction can reduce the burden of disease by educating patients and providers and guiding strategies to prevent and treat disease in a wide range of medical domains \citep{moons2012riskI, moons2012riskII}. The random survival forest (RSF), a supervised learning algorithm that can engage with censored outcomes, is frequently used for risk prediction. Notable characteristics of the RSF include uniform convergence of its ensemble survival function to the true population survival function when the predictor space is discrete. In addition, software implementing the RSF is freely available, extremely efficient, and full of tools to interpret and explain the RSF. However, there remains considerable potential to improve the RSF in risk prediction tasks where training samples are not large enough to guarantee asymptotic properties or predictor spaces are non-discrete (\ie, predictors are continuous).
+
+RSFs may be axis based or oblique. The axis based RSF uses a single predictor whereas the oblique RSF uses a linear combination of predictors to create branches in trees. While axis based decision boundaries are always perpendicular to the axis of the relevant predictor, linear combinations of predictors create oblique decision boundaries that are neither parallel nor perpendicular to axes of their contributing predictors. Prior work has found the oblique RSF has higher prediction accuracy than the axis based RSF in general benchmarks \citep{jaeger2019oblique} and that oblique splitting is particularly effective when predictor spaces are non-discrete. However, existing methods to implement oblique RSFs use fully trained models in each non-leaf node to identify linear combinations of predictors, exponentially increasing the number of operations required for the oblique RSF versus its axis based counterpart. In addition, standard methods to estimate the importance of individual variables in the RSF are less effective in the oblique RSF.
+
+In this article, we introduce methods to increase computational efficiency and estimate variable importance (VI) for oblique RSFs. We evaluate computational efficiency, prediction accuracy, and the ability to discriminate between signal and noise variables using the proposed methods compared to standard and state-of-the-art methods. To accomplish these goals, we analyze 23 distinct risk prediction tasks from real data and conduct a simulation study. All methods introduced in this article for oblique RSFs are available in the \texttt{aorsf} R Package.
 
 
 \section{Related work}
 
-Table \ref{table:1} is an example of a referenced \LaTeX{}. Several machine learning algorithms can engage with right-censored time-to-event outcomes. In the current study, we consider four classes of learners: random forests, boosting ensembles, regression models, and neural networks.
 
-accelerated oblique random survival forests \texttt{aorsf}
+\citet{breiman2001random} introduced the axis-based random forest (RF) and the oblique RF (oRF). Axis based RFs recursively split data using a single predictor at each non-leaf node in decision trees, whereas oRFs use multiple predictors in linear combination. The splits are called `oblique' because linear combinations of predictors create decision boundaries that are neither parallel nor perpendicular to their axes have higher prediction accuracy in external data compared to their axis based counterparts. Several studies investigating RFs for classification and regression have noted that oblique RFs have lower generalization than their axis-based counterparts.
 
-original oblique random survival forests \texttt{obliqueRSF}
 
-axis-based random survival forests \texttt{randomForestSRC \& ranger}
 
-axis-based conditional inference forests \texttt{party}
+The axis-based RF proposed in \citet{breiman2001random} was extended to survival outcomes by \citet{ishwaran2008random} and the oblique RF  la soon after RFs for classification and regression were developed by \citet{breiman2001random}, and oblique RFs for survival were Several studies have shown that oblique recursive partitioning improves the generalization error of RFs for classification and regression, b
 
-gradient boosted decision trees \texttt{xgboost}
+% More recently, \citet{jaeger2019oblique} showed that the generalization error of RFs for survival outcomes improves when multiple predictors are used in linear combination instead of a single predictor to split non-leaf nodes in trees, similar to RFs for classification and regression \citet{breiman2001random}. Splitting data with a single predictor creates a decision boundary that is perpendicular to its axis, whereas the decision boundary formed by a linear combination of predictors is neither perpendicular nor parallel to their respective axes.
 
+% \citet{breiman2001random} introduced the axis-based random forest (RF) and oblique RF. Axis based RFs recursively split data using a single predictor at each non-leaf node in decision trees, whereas oRFs use multiple predictors in linear combination. The splits are called `oblique' because linear combinations of predictors create decision boundaries that are neither parallel nor perpendicular to their axes have higher prediction accuracy in external data compared to their axis based counterparts. However, many oRFs require a fully trained model to be embedded in each non-leaf node to identify linear combinations of predictors, exponentially increasing the number of operations required for fitting an oRF versus an axis based RF. In addition, standard methods to interpret RFs (\eg, permutation importance) are less effective when used to interpret the oRF because they are not designed to engage with oblique trees.
+
+
+Several supervised learning algorithms can develop prediction functions for right-censored time-to-event outcomes, henceforth referred to as survival outcomes. \cite{ishwaran2008random} developed the RF for survival, an extension of the RF for regression and classification developed by \citet{breiman2001random}. Fast algorithms to fit the RF for survival are available in the \texttt{randomForestSRC} R package \citep{randomForestSRC}. A similar implementation of the RF for survival can be found in the \texttt{ranger} R package \citep{ranger}, which is particularly suited for high dimensional data. The RF for survival can also be fit using unbiased recursive partitioning \citep{cif} via the \texttt{party} R package \citep{hothorn2010party}.
+
+
+\citet{zhu2015reinforcement}
+
+\citet{zhu2013tree}
+
+\citet{menze2011oblique} introduced an oblique RF (oRF) for classification that utilizes fully trained models at non-leaf nodes to identify linear combinations of predictors. \citet{tomita2020sparse} introduced sparse projections for oRFs for classification. \citet{katuwal2020heterogeneous} developed a heterogeneous oRF for classification that applies several linear classifiers at each non-leaf node. Compared to classification, fewer studies have developed oRFs for survival. \citet{jaeger2019oblique} introduced an oRF for survival that applies penalized regression at each non-leaf node and disseminated algorithms to fit the oRF for survival in the \texttt{obliqueRSF} R package \citep{obliqueRSF}.
+
+Variable importance (VI) for oRFs VI has been estimated for oRFs using analysis of variance (ANOVA),6 but this only applies in the rare case where p-values are calculable for coefficients in linear combinations. Permutation importance is used to estimate VI in RFs,14 but is not ideal for oRFs because it does not account for the coefficients used in linear combinations. Shapley VI, a method based in game theory,15 has excellent asymptotic properties for interpretation,16,17 but is computationally infeasible and can only be approximated efficiently for standard decision trees.18
+
+\section{Novel techniques for oblique random survival forests}
+
+\subsection{Partial training at non-leaf nodes}
+
+\subsection{Negation variable importance}
+
+We propose a new VI method, ``negation importance",  that can be used for any oRF and accounts for the coefficients in linear combinations.
+
+\section{Numeric experiments}
+
+\subsection{Benchmark of prediction accuracy}
+
+\subsubsection{Learners}
+
+In the current study, we consider four classes of learners: random forests, boosting ensembles, regression models, and neural networks (Table \ref{table:learners}). For random forest learners, the number of observations required in terminal nodes was fixed at 10, the number of randomly selected predictors was the nearest integer to the square root of the total number of predictors, and the number of trees in the ensemble was 500.
+
+\newgeometry{margin=1cm} % modify this if you need even more space
+\begin{landscape}
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{p{2cm} | p{3cm} p{7cm}}
+\begin{tabular}{p{2cm} | p{3cm} p{4cm} p{12cm}}
  \hline
- Learner & Software & Description \\ [0.5ex]
+ Learner Class & Software & Learners & Description \\ [0.5ex]
  \hline\hline
  \multicolumn{3}{l}{\textit{Random Survival Forests}}\\
  \hline\hline
- Standard & \href{https://www.randomforestsrc.org/index.html}{\texttt{RandomForestSRC}} & Axis based survival trees following Leo Breiman's original random forest algorithm, with cut-points selected to maximize a log-rank statistic.  \\ \hline
- Oblique & \href{https://CRAN.R-project.org/package=obliqueRSF}{\texttt{obliqueRSF}} \newline \href{https://bcjaeger.github.io/aorsf/}{\texttt{aorsf}} & Oblique survival trees following Leo Breiman's random forest algorithm but not using random coefficients for linear combinations. \texttt{obliqueRSF} uses penalized models, and \texttt{aorsf} additionally uses partially trained models. Cut-points are selected to maximize a log-rank statistic. \\ \hline
- Extremely \,Randomized & \href{https://CRAN.R-project.org/package=ranger}{\texttt{ranger}} & Axis-based survival trees grown with randomly selected features and cut-points\\ \hline
- Conditional \,Inference & \href{http://party.r-forge.r-project.org/}{\texttt{party}} & Axis based survival trees grown using unbiased recursive partitioning.  \\
+ Standard & \href{https://www.randomforestsrc.org/index.html}{\texttt{RandomForestSRC}} & \texttt{rfsrc-standard} & Axis based survival trees following Leo Breiman's original random forest algorithm, with cut-points selected to maximize a log-rank statistic.  \\ \hline
+ Oblique & \href{https://CRAN.R-project.org/package=obliqueRSF}{\texttt{obliqueRSF}} \newline \href{https://bcjaeger.github.io/aorsf/}{\texttt{aorsf}} &
+ \texttt{obliqueRSF-net} \newline
+ \texttt{aorsf-net} \newline
+ \texttt{aorsf-cph($i=1$)} \newline
+ \texttt{aorsf-cph($i \leq 15$)} \newline
+ \texttt{aorsf-extratrees} &
+ Oblique survival trees following Leo Breiman's random forest algorithm. Linear combinations of inputs are derived using \texttt{glmnet} in \texttt{obliqueRSF-net} and \texttt{aorsf-net}, using Newton Raphson scoring for the Cox partial likelihood function in \texttt{aorsf-cph($i=1$)} and \texttt{aorsf-cph($i \leq 15$)}, and chosen randomly from a uniform distribution in \texttt{aorsf-extratrees}. Cut-points are selected to maximize a log-rank statistic. \\ \hline
+ Extremely \,Randomized & \href{https://CRAN.R-project.org/package=ranger}{\texttt{ranger}} & \texttt{ranger-extratrees} & Axis-based survival trees grown with randomly selected features and cut-points\\ \hline
+ Conditional \,Inference & \href{http://party.r-forge.r-project.org/}{\texttt{party}} & \texttt{party-cif} & Axis based survival trees grown using unbiased recursive partitioning.  \\
  \hline\hline
  \multicolumn{3}{l}{\textit{Boosting ensembles}}\\
  \hline\hline
- Trees & \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} & The Cox likelihood function is maximized additively with decision trees. Nested cross validation (5 folds) is applied to tune the number of trees grown.  \\
- Models & \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} & The accelerated failure time likelihood function is maximized additively with decision trees. Nested cross validation (5 folds) is applied to tune the number of trees grown.  \\
+ Trees & \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} & \texttt{xgboost-cox} &  The Cox partial likelihood function is maximized additively with decision trees. Nested cross validation (5 folds) is applied to tune the number of trees grown.  \\
+ Models & \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} & \texttt{xgboost-aft} & The accelerated failure time likelihood function is maximized additively with decision trees. Nested cross validation (5 folds) is applied to tune the number of trees grown.  \\
  \hline\hline
  \multicolumn{3}{l}{\textit{Regression models}}\\
  \hline\hline
- Cox Net & \texttt{glmnet} & The Cox model is fit using an elastic net penalty. Nested cross validation (5 folds) is applied to tune penalty terms.\\
+ Cox Net & \texttt{glmnet} & \texttt{glmnet-cox} & The Cox model is fit using an elastic net penalty. Nested cross validation (5 folds) is applied to tune penalty terms.\\
  \hline\hline
  \multicolumn{3}{l}{\textit{Neural networks}}\\
  \hline\hline
- Cox Time & 6 & 87837  \\
+ Cox Time & \href{https://raphaels1.github.io/survivalmodels/}{\texttt{survivalmodels}} & \texttt{nn-cox} & A neural network based on the proportional hazards model with time-varying effects  \\
  \hline
 \end{tabular}
-\caption{Table to test captions and labels.}
-\label{table:1}
+\caption{Learning algorithms assessed in numeric studies}
+\label{table:learners}
 \end{table}
 
-\section{Results}
+\end{landscape}
+\restoregeometry
+
+
+\subsubsection{Evaluation of prediction accuracy} \label{sec:prediction_accuracy}
+
+Our primary metric for evaluating the accuracy of predicted risk is the integrated and scaled Brier score \citep{graf1999assessment}. For observation $i$ in the testing data, let $\widehat{S}(t \mid \bm{x}_i)$ be the predicted probability of survival up to a given prediction horizon of $t > 0$ and let $\bm{x}_i$ be the vector of predictor values. Define \begin{align*}
+\bstat = \frac{1}{\ntest} \sum_{i=1}^{\ntest} &\{ \widehat{S}(t \mid \bm{x}_i)^2 \cdot I(T_i \leq t, \delta_i = 1) \cdot \widehat{G}(T_i)^{-1} \\ &+ [1-\widehat{S}(t \mid \bm{x}_i)]^2 \cdot I(T_i > t) \cdot \widehat{G}(t)^{-1}\}
+\end{align*} where $\widehat{G}(t)$ is the Kaplan-Meier estimate of the censoring distribution. As $\bstat$ is time dependent, integration over time provides a summary measure of performance over a range of plausible prediction horizons. The integrated $\bstat$ is defined as \begin{equation}
+\bsbar = \frac{1}{t_2 - t_1}\int_{t_1}^{t_2} \widehat{\text{BS}}(t) dt.
+\end{equation} In our results, $t_1$ and $t_2$ are the 25th and 75th percentile of event times, respectively. $\bsbar$, a sum of squared prediction errors, can be scaled to produce a measure of explained residual variation (\ie, an $R^2$ statistic) by computing \begin{equation}
+R^2 = 1 - \frac{\bsbar}{\bskap}
+\end{equation} where $\bskap$ is the integrated Brier score when a Kaplan-Meier estimate for survival based on the training data is used as the survival prediction function $\widehat{S}(t)$. We refer to this $R^2$ statistic as the index of prediction accuracy and we scale its values by 100 to avoid unnecessary leading zero's. For example, we present 25 if $R^2$ is 0.25 and present 10.2 if the difference between two $R^2$ is 0.102.
+
+\subsubsection{Statistical analysis}
+
+\subsubsection{Results}
+
+<<fig.height=10, fig.width=9, dpi=400>>=
+bm_pred_viz$ibs_scaled
+@
+
+
+<<fig.height=10, fig.width=9, dpi=400>>=
+bm_pred_model_viz$ibs_scaled
+@
+
+\subsection{Benchmark of variable selection}
+
+
+
+
+% Acknowledgements should go at the end, before appendices and references
+
+\acks{Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine}
+
+% Manual newpage inserted to improve layout of sample file - not
+% needed in general before appendices/bibliography.
+
+\newpage
+
+\appendix
+\section*{Appendix A.}
+
+<<fig.height=10, fig.width=9, dpi=400>>=
+bm_pred_viz$cstat
+@
+
+\newpage
 
 <<>>=
+
+data_recoder <- data_key |>
+  transmute(data,
+            label = paste0(label, "; ",
+                           outcome, ", n = ", .data$nrow,
+                           ", p = ", .data$ncol)) |>
+  deframe()
+
+model_recoder <- model_key |>
+  deframe()
 
 results_overall <- bm_pred_comb |>
   group_by(model) |>
   summarize(
     across(
-      .cols = c(cstat, IPA, time_fit, time_pred),
-      .fns = list(mean = mean, sd = sd)
+      .cols = c(cstat, ibs_scaled, time_fit, time_pred),
+      .fns = list(mean = mean,
+                  median = median,
+                  sd = sd)
     )
   ) |>
   mutate(data = 'Overall')
 
 data_tbl <- bm_pred_comb |>
-  group_by(model, data, n_z, n_obs, correlated_x) |>
+  group_by(model, data) |>
   summarize(
     across(
-      .cols = c(cstat, IPA, time_fit, time_pred),
-      .fns = list(mean = mean, sd = sd)
+      .cols = c(cstat, ibs_scaled, time_fit, time_pred),
+      .fns = list(mean = mean,
+                  median = median,
+                  sd = sd)
     )
   ) |>
   bind_rows(results_overall) |>
-  mutate(
-    data = if_else(
-      is.na(n_z),
-      true = data,
-      false = as.character(
-        glue::glue("Simulation, N junk = {n_z}, N obs = {n_obs}, X corr less then or equal to {correlated_x}")
-      )
-    )
-  ) |>
+  # mutate(
+  #   data = if_else(
+  #     is.na(n_z),
+  #     true = data,
+  #     false = as.character(
+  #       glue::glue("Simulation, N junk = {n_z}, N obs = {n_obs}, X corr less than or equal to {correlated_x}")
+  #     )
+  #   )
+  # ) |>
   group_by(data) |>
   mutate(
     across(.cols = starts_with("time"), .fns = as.numeric),
-    time_fit_ratio = time_fit_mean / time_fit_mean[model == 'aorsf_1'],
-    time_pred_ratio = time_pred_mean / time_pred_mean[model == 'aorsf_1']
+    time_fit_ratio = time_fit_median /
+      time_fit_median[model == 'aorsf_cph_1'],
+    time_pred_ratio = time_pred_median /
+      time_pred_median[model == 'aorsf_cph_1']
   ) |>
-  arrange(data, desc(cstat_mean)) |>
+  ungroup() |>
+  arrange(data, desc(ibs_scaled_mean)) |>
   transmute(
-    model = recode(
-      model,
-      "aorsf_15" = 'aORSF(i=15)',
-      "aorsf_1" = 'aORSF(i=1)',
-      "ranger" = 'Ranger',
-      "xgboost" = 'Xgboost',
-      "cif" = "Party",
-      "randomForestSRC" = "Rfsrc",
-      "coxtime" = "Coxtime"
+    data = recode(data, !!!data_recoder),
+    data = fct_relevel(factor(data), 'Overall'),
+    model = recode(model, !!!model_recoder),
+    ibs_scaled = table_glue(
+      "{ibs_scaled_mean} ({ibs_scaled_sd})"
     ),
-    data = recode(
-      data,
-      'pbc_orsf' = 'Mayo Clinic Primary Biliary Cholangitis Data, N = 276',
-      'rotterdam' = 'Rotterdam Breast Cancer Data, N = 2,982',
-      'sim' = 'Simulated data'
+    cstat = table_glue(
+      "{cstat_mean} ({cstat_sd})"
     ),
-    cstat = table_glue("{cstat_mean} ({cstat_sd})"),
-    ipa = table_glue("{IPA_mean} ({IPA_sd})"),
-    time_fit_mean = format(round(time_fit_mean, 3), nsmall = 3),
+    time_fit_median = format(round(time_fit_median, 3), nsmall = 3),
     time_fit_ratio = table_value(time_fit_ratio),
-    time_pred_mean = format(round(time_pred_mean, 3), nsmall = 3),
+    time_pred_median = format(round(time_pred_median, 3), nsmall = 3),
     time_pred_ratio = table_value(time_pred_ratio)
-  )
+  ) |>
+  arrange(data)
 
 indents <- table(data_tbl$data)
 
 data_tbl |>
-  ungroup() |>
   select(-data) |>
   kable(booktabs=TRUE,
         longtable=TRUE,
         col.names = c(' ',
-                      'C-Statistic',
                       'Scaled Brier',
-                      'Mean',
+                      'C-Statistic',
+                      'Median',
                       'Ratio',
-                      'Mean',
+                      'Median',
                       'Ratio'),
         align = 'lcc') |>
   pack_rows(index = indents,
@@ -237,58 +381,7 @@ data_tbl |>
   add_header_above(header = c(" " = 3,
                               "Computing time, seconds" = 4))
 
-
 @
-
-
-% Acknowledgements should go at the end, before appendices and references
-
-\acks{We would like to acknowledge support for this project
-from the National Science Foundation (NSF grant IIS-9988642)
-and the Multidisciplinary Research Program of the Department
-of Defense (MURI N00014-00-1-0637). }
-
-% Manual newpage inserted to improve layout of sample file - not
-% needed in general before appendices/bibliography.
-
-\newpage
-
-\appendix
-\section*{Appendix A.}
-\label{app:theorem}
-
-% Note: in this sample, the section number is hard-coded in. Following
-% proper LaTeX conventions, it should properly be coded as a reference:
-
-%In this appendix we prove the following theorem from
-%Section~\ref{sec:textree-generalization}:
-
-In this appendix we prove the following theorem from
-Section~6.2:
-
-\noindent
-{\bf Theorem} {\it Let $u,v,w$ be discrete variables such that $v, w$ do
-not co-occur with $u$ (i.e., $u\neq0\;\Rightarrow \;v=w=0$ in a given
-dataset $\dataset$). Let $N_{v0},N_{w0}$ be the number of data points for
-which $v=0, w=0$ respectively, and let $I_{uv},I_{uw}$ be the
-respective empirical mutual information values based on the sample
-$\dataset$. Then
-\[
-	N_{v0} \;>\; N_{w0}\;\;\Rightarrow\;\;I_{uv} \;\leq\;I_{uw}
-\]
-with equality only if $u$ is identically 0.} \hfill\BlackBox
-
-\noindent
-{\bf Proof}. We use the notation:
-\[
-P_v(i) \;=\;\frac{N_v^i}{N},\;\;\;i \neq 0;\;\;\;
-P_{v0}\;\equiv\;P_v(0)\; = \;1 - \sum_{i\neq 0}P_v(i).
-\]
-These values represent the (empirical) probabilities of $v$
-taking value $i\neq 0$ and 0 respectively.  Entropies will be denoted
-by $H$. We aim to show that $\fracpartial{I_{uv}}{P_{v0}} < 0$....\\
-
-{\noindent \em Remainder omitted in this sample. See http://www.jmlr.org/papers/ for full paper.}
 
 
 \vskip 0.2in
