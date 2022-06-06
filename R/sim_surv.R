@@ -16,8 +16,8 @@ sim_surv <- function(n_obs = 2500,
                      pred_horiz = 2.5) {
 
   stopifnot(n_x > 0)
-  stopifnot(n_z > 0)
-  stopifnot(n_v >= 3)
+  # stopifnot(n_z > 0)
+  # stopifnot(n_v >= 3)
 
   stopifnot(n_x >= n_g)
 
@@ -37,7 +37,9 @@ sim_surv <- function(n_obs = 2500,
   # categorical (not used at the moment)
   c_names <- paste0('c', seq(n_c))
 
-  .names <- c(z_names, x_names)
+  .names <- c(x_names)
+
+  if(n_z > 0) .names <- c(.names, z_names)
 
   if(n_g > 0) .names <- c(.names, g_names)
 
