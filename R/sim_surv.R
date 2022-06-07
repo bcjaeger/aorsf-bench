@@ -15,10 +15,6 @@ sim_surv <- function(n_obs = 2500,
                      correlated_x = 0,
                      pred_horiz = 2.5) {
 
-  stopifnot(n_x > 0)
-  # stopifnot(n_z > 0)
-  # stopifnot(n_v >= 3)
-
   stopifnot(n_x >= n_g)
 
   # z = junk variables
@@ -37,7 +33,9 @@ sim_surv <- function(n_obs = 2500,
   # categorical (not used at the moment)
   c_names <- paste0('c', seq(n_c))
 
-  .names <- c(x_names)
+  .names <- c()
+
+  if(n_x > 0) .names <- c(.names, x_names)
 
   if(n_z > 0) .names <- c(.names, z_names)
 
@@ -126,6 +124,27 @@ sim_surv <- function(n_obs = 2500,
     }
 
   }
+
+  # if(n_w > 0){
+  #
+  #   degrees <- round(seq(3, 6, length.out = n_w))
+  #
+  #   for( i in seq(n_w) ){
+  #
+  #     w_name <- paste0("w", i)
+  #     nl_names <- paste('nl', i, seq(degrees[i]), sep = '_')
+  #
+  #     poly_cols <- seq(degrees[i]) |>
+  #       map(~ covs[[w_name]]^.x) |>
+  #       reduce(.f = cbind)
+  #
+  #     colnames(poly_cols) <- nl_names
+  #
+  #     covs <- cbind(covs, poly_cols)
+  #
+  #   }
+  #
+  # }
 
   # linear combination variables ----
 
@@ -237,7 +256,12 @@ sim_surv <- function(n_obs = 2500,
     vars_junk = setdiff(names(covs)[keep], vars_signal),
     vars_interaction = vars_interaction,
     vars_lc = vars_lc,
-    coefs_lc = coefs_lc
+    coefs_lc = coefs_lc,
+    effect_x = x_effect,
+    effect_int = int_effect,
+    effect_nl = nl_effect,
+    effect_lc = lc_effect,
+    effect_c = c_effect
   )
 
 
