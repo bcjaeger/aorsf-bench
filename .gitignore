@@ -47,5 +47,3 @@ renv/
 # never push data to github
 data
 
-*.rds
-
