@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Accelerated oblique random survival forests</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Byron C. Jaeger" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Accelerated oblique random survival forests
+### Byron C. Jaeger
+### Last updated 2022-06-10
+
+---
+
+class: center, middle
+background-image: url("img/meme_slow_R.jpg")
+background-size: contain
+
+
+
+&lt;style type="text/css"&gt;
+
+.medium { font-size: 25px; }
+.mediumer { font-size: 40px; }
+.large { font-size: 80px; }
+.larger { font-size: 160px; }
+.huge { font-size: 240px; }
+
+.rainbow-text {
+  background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);   -webkit-background-clip: text;
+  color: transparent;
+}
+
+&lt;/style&gt;
+
+
+---
+
+## Overview
+
+- Random forests (axis based and oblique)
+
+    + Decision trees
+    
+    + Random survival forests (RSF)
+
+- Accelerating the oblique RSF
+
+    + Newton Raphson scoring
+
+- Benchmark
+
+    + Datasets &amp; learners
+    
+    + Evaluation
+    
+    + Results
+    
+- Software
+    
+    + R package &amp; website
+
+---
+class: center, middle, inverse
+
+# .larger[Random forests] 
+## (axis based and oblique)
+
+---
+background-image: url(img/penguins.png)
+background-size: 45%
+background-position: 85% 72.5%
+
+## Decision trees
+
+- Frequently used in supervised learning.
+
+- Partitions the space of predictor variables.
+
+- Can be used for classification, regression, and survival analysis. 
+
+## 
+
+.pull-left[
+.medium[_Demo_:] &lt;br&gt;&lt;br&gt; Axis-based and oblique decision trees for classification of penguin species (chinstrap, gentoo, or adelie) based on bill and flipper length.&lt;sup&gt;1&lt;/sup&gt;
+]
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt;Data were collected and made available by [Dr. Kristen Gorman](https://www.uaf.edu/cfos/people/faculty/detail/kristen-gorman.php) and the [Palmer Station](https://pal.lternet.edu/), a member of the [Long Term Ecological Research Network](https://lternet.edu/).
+]
+
+---
+
+Dimensions for Adelie, Chinstrap and Gentoo Penguins at Palmer Station
+
+&lt;img src="index_files/figure-html/fig_penguins_nopart-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+Partition all the penguins into flipper length &lt; 207 or ≥ 207 mm
+
+&lt;img src="index_files/figure-html/fig_penguins_part1-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+Partition penguins on the left side into into bill length &lt; 43 or ≥ 43 mm
+
+&lt;img src="index_files/figure-html/fig_penguins_part2-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+With oblique splits, partitions do not need to be rectangles
+
+&lt;img src="index_files/figure-html/fig_penguins_part2_oblique-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Random survival forests (RSFs)
+
+1. Breiman developed the random forest, a large set of decision trees injected with randomness.&lt;sup&gt;1, 2&lt;/sup&gt;
+
+.footnote[&lt;sup&gt;1&lt;/sup&gt;Breiman, Leo. "Bagging predictors." Machine learning 24.2 (1996): 123-140.&lt;br/&gt;&lt;sup&gt;2&lt;/sup&gt;Breiman, Leo. "Random forests." Machine learning 45.1 (2001): 5-32.]
+
+---
+
+## Random survival forests (RSFs)
+
+1. Breiman developed the random forest, a large set of decision trees injected with randomness.&lt;sup&gt;1, 2&lt;/sup&gt;
+
+1. Hothorn and, separately, Ishwaran developed extensions of the random forest for survival outcomes.&lt;sup&gt;3, 4&lt;/sup&gt;
+
+Specifically, 
+
+- Hothorn developed the conditional inference forest (CIF) 
+
+- Ishwaran developed the random survival forest (RSF)
+
+.footnote[&lt;sup&gt;3&lt;/sup&gt;Hothorn, Torsten, et al. "Unbiased recursive partitioning: A conditional inference framework." Journal of Computational and Graphical statistics 15.3 (2006): 651-674.&lt;br/&gt;&lt;sup&gt;4&lt;/sup&gt; Ishwaran, Hemant, et al. "Random survival forests." Annals of Applied Statistics 2.3 (2008): 841-860.]
+
+---
+
+Each leaf in the RSF contains a Kaplan-Meier estimate of survival. In the CIF, weights are applied based on sample size.
+
+&lt;img src="index_files/figure-html/unnamed-chunk-1-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Random survival forests (RSFs)
+
+1. Breiman developed the random forest, a large set of decision trees injected with randomness.&lt;sup&gt;1, 2&lt;/sup&gt;
+
+1. Hothorn and, separately, Ishwaran developed extensions of the random forest to engage with survival outcomes (CIF and RSF).&lt;sup&gt;3, 4&lt;/sup&gt;
+
+1. Zhou developed a rotation survival forest and Wang developed a survival forest with an extended predictor space.&lt;sup&gt;5, 6&lt;/sup&gt;
+
+Both Zhou and Wang's extensions were based on the CIF
+
+
+.footnote[&lt;sup&gt;5&lt;/sup&gt;Zhou L, et al. "Rotation survival forest for right censored data." PeerJ. 2015 Jun 11;3:e1009.&lt;br/&gt;&lt;sup&gt;6&lt;/sup&gt; Wang H, et al. "Random survival forest with space extensions for censored data." Artif Intell Med. 2017 Jun;79:52-61.]
+
+---
+
+## Random survival forests (RSFs)
+
+1. Breiman developed the random forest, a large set of decision trees injected with randomness.&lt;sup&gt;1, 2&lt;/sup&gt;
+
+1. Hothorn and, separately, Ishwaran developed extensions of the random forest to engage with survival outcomes (CIF and RSF).&lt;sup&gt;3, 4&lt;/sup&gt;
+
+1. Zhou developed a rotation survival forest and Wang developed a survival forest with an extended predictor based on the CIF.&lt;sup&gt;5, 6&lt;/sup&gt;
+
+1. Jaeger developed the oblique RSF, which used penalized regression to find oblique splits.&lt;sup&gt;7&lt;/sup&gt;
+
+.footnote[&lt;sup&gt;7&lt;/sup&gt;Jaeger BC, et al. "Oblique random survival forests." The Annals of Applied Statistics 13.3 (2019): 1847-1883.]
+
+---
+class: center, middle, inverse
+
+# .larger[Accelerating the oblique RSF]
+
+---
+
+## Accelerating the oblique RSF
+
+Consider the usual framework for survival analysis:
+`$$\mathcal{D}_{\text{train}} = \left\{ (T_i, \delta_i, x_{i}) \right\}_{i=1}^{N_{\text{train}}}.$$`
+- `\(T_i\)` is the event time if `\(\delta_i=1\)` and last point of contact if `\(\delta_i=0\)`, 
+
+- `\(x_i\)` is a vector of predictors values.
+
+Let `\(t_1 &lt; \, \ldots \, &lt; t_m\)` denote the `\(m\)` unique event times in `\(\mathcal{D}_{\text{train}}\)`
+
+---
+
+## Accelerating the oblique RSF
+
+We identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model: `$$L(\beta) = \prod_{i=1}^m \frac{e^{x_{j(i)}^T \beta}}{\sum_{j \in R_i} e^{x_j^T \beta}}$$`
+
+- `\(R_i\)` is the set of indices, `\(j\)`, with `\(T_j \geq t_i\)` (i.e., those still at risk at time `\(t_i\)`)
+
+- `\(j(i)\)` is the index of the observation for which an event occurred at time `\(t_i\)`.
+
+---
+
+## Newton Raphson scoring
+
+Estimated regression coefficients `\(\hat{\beta}\)` are updated in each step based on their first derivative, `\(U(\hat{\beta})\)`, and second derivative, `\(H(\hat{\beta})\)`:
+`$$\hat{\beta}^{k+1} =  \hat{\beta}^{k} + U(\hat{\beta} = \hat{\beta}^{k})\, H^{-1}(\hat{\beta} = \hat{\beta}^{k})$$`
+
+For statistical inference, iterate until a convergence threshold is met. 
+
+For identifying linear combination of predictors in the oblique RSF, .mediumer[🤷]
+
+- `aorsf-fast` completes one iteration.
+
+- `aorsf-cph` iterates until convergence or 15 iterations.
+
+---
+class: center, middle, inverse
+
+# .larger[Benchmark]
+
+---
+
+## Learners
+
+__Oblique RSFs__:
+
+- _aorsf-fast_: the fast version of aorsf
+
+- _aorsf-cph_: the less fast but still pretty fast version of aorsf
+
+- _aorsf-random_: randomized coefficients (Breiman's idea)
+
+- _aorsf-net_: aorsf's copy of obliqueRSF
+
+- _obliqueRSF-net_: oblique RSF using penalized cox regression (the original)
+
+---
+
+## Learners
+
+__Oblique RSFs__:
+
+- .rainbow-text[_aorsf-fast_]: the fast version of aorsf
+
+- _aorsf-cph_: the less fast but still pretty fast version of aorsf
+
+- _aorsf-random_: randomized coefficients (Breiman's idea)
+
+- _aorsf-net_: aorsf's copy of obliqueRSF
+
+- _obliqueRSF-net_: oblique RSF using penalized cox regression (the original)
+
+---
+
+## Learners
+
+__Axis based RSFs__:
+
+- _cif-standard_: standard CIF
+
+- _cif-extension_: CIF with space extension
+
+- _cif-rotate_: CIF with rotation
+
+- _rsf-standard_: standard RSF
+
+- _ranger-extratrees_: RSF with extremely randomized trees
+
+---
+
+## Learners
+
+__Other__:
+
+- _glmnet-cox_: Penalized Cox regression model
+
+- _nn-cox_: Cox neural network with time-varying effects
+
+- _xgboost-cox_: Boosted trees fitted to Cox log likelihood
+
+- _xgboost-aft_: Boosted trees fitted to accelerated failure time.
+
+---
+
+## Data sets
+
+A total of 23 risk prediction tasks in 16 data sets were analyzed.
+
+This table is continued on the next 2 slides.
+
+<div id="oqyzfolzan" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#oqyzfolzan .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#oqyzfolzan .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#oqyzfolzan .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#oqyzfolzan .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#oqyzfolzan .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#oqyzfolzan .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#oqyzfolzan .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#oqyzfolzan .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#oqyzfolzan .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#oqyzfolzan .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#oqyzfolzan .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#oqyzfolzan .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#oqyzfolzan .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oqyzfolzan .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#oqyzfolzan .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#oqyzfolzan .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oqyzfolzan .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#oqyzfolzan .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oqyzfolzan .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#oqyzfolzan .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oqyzfolzan .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#oqyzfolzan .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#oqyzfolzan .gt_left {
+  text-align: left;
+}
+
+#oqyzfolzan .gt_center {
+  text-align: center;
+}
+
+#oqyzfolzan .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#oqyzfolzan .gt_font_normal {
+  font-weight: normal;
+}
+
+#oqyzfolzan .gt_font_bold {
+  font-weight: bold;
+}
+
+#oqyzfolzan .gt_font_italic {
+  font-style: italic;
+}
+
+#oqyzfolzan .gt_super {
+  font-size: 65%;
+}
+
+#oqyzfolzan .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+#oqyzfolzan .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#oqyzfolzan .gt_slash_mark {
+  font-size: 0.7em;
+  line-height: 0.7em;
+  vertical-align: 0.15em;
+}
+
+#oqyzfolzan .gt_fraction_numerator {
+  font-size: 0.6em;
+  line-height: 0.6em;
+  vertical-align: 0.45em;
+}
+
+#oqyzfolzan .gt_fraction_denominator {
+  font-size: 0.6em;
+  line-height: 0.6em;
+  vertical-align: -0.05em;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Outcome</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Obs</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Predictors</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Events</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Censored</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Missing</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Continuous</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_right gt_stub">ACTG 320</td>
+<td class="gt_row gt_left">AIDS diagnosis</td>
+<td class="gt_row gt_center">1,151</td>
+<td class="gt_row gt_center">12</td>
+<td class="gt_row gt_center">96</td>
+<td class="gt_row gt_center">92</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">30</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">ACTG 320</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">1,151</td>
+<td class="gt_row gt_center">12</td>
+<td class="gt_row gt_center">26</td>
+<td class="gt_row gt_center">98</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">30</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Colon cancer</td>
+<td class="gt_row gt_left">Recurrence</td>
+<td class="gt_row gt_center">929</td>
+<td class="gt_row gt_center">12</td>
+<td class="gt_row gt_center">468</td>
+<td class="gt_row gt_center">50</td>
+<td class="gt_row gt_center">0.37</td>
+<td class="gt_row gt_center">20</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Colon cancer</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">929</td>
+<td class="gt_row gt_center">12</td>
+<td class="gt_row gt_center">452</td>
+<td class="gt_row gt_center">51</td>
+<td class="gt_row gt_center">0.37</td>
+<td class="gt_row gt_center">20</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Early breast cancer</td>
+<td class="gt_row gt_left">Recurrence or death</td>
+<td class="gt_row gt_center">614</td>
+<td class="gt_row gt_center">1,692</td>
+<td class="gt_row gt_center">134</td>
+<td class="gt_row gt_center">78</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">100</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">FCL</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">541</td>
+<td class="gt_row gt_center">7</td>
+<td class="gt_row gt_center">76</td>
+<td class="gt_row gt_center">86</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">40</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">FCL</td>
+<td class="gt_row gt_left">Relapse</td>
+<td class="gt_row gt_center">541</td>
+<td class="gt_row gt_center">7</td>
+<td class="gt_row gt_center">272</td>
+<td class="gt_row gt_center">50</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">40</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+
+---
+## Data sets contd.
+
+<div id="bvgfjztcub" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#bvgfjztcub .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#bvgfjztcub .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#bvgfjztcub .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#bvgfjztcub .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#bvgfjztcub .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#bvgfjztcub .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#bvgfjztcub .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#bvgfjztcub .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bvgfjztcub .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bvgfjztcub .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#bvgfjztcub .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#bvgfjztcub .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#bvgfjztcub .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bvgfjztcub .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#bvgfjztcub .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#bvgfjztcub .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bvgfjztcub .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#bvgfjztcub .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bvgfjztcub .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#bvgfjztcub .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bvgfjztcub .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bvgfjztcub .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bvgfjztcub .gt_left {
+  text-align: left;
+}
+
+#bvgfjztcub .gt_center {
+  text-align: center;
+}
+
+#bvgfjztcub .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#bvgfjztcub .gt_font_normal {
+  font-weight: normal;
+}
+
+#bvgfjztcub .gt_font_bold {
+  font-weight: bold;
+}
+
+#bvgfjztcub .gt_font_italic {
+  font-style: italic;
+}
+
+#bvgfjztcub .gt_super {
+  font-size: 65%;
+}
+
+#bvgfjztcub .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+#bvgfjztcub .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#bvgfjztcub .gt_slash_mark {
+  font-size: 0.7em;
+  line-height: 0.7em;
+  vertical-align: 0.15em;
+}
+
+#bvgfjztcub .gt_fraction_numerator {
+  font-size: 0.6em;
+  line-height: 0.6em;
+  vertical-align: 0.45em;
+}
+
+#bvgfjztcub .gt_fraction_denominator {
+  font-size: 0.6em;
+  line-height: 0.6em;
+  vertical-align: -0.05em;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Outcome</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Obs</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Predictors</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Events</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Censored</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Missing</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Continuous</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_right gt_stub">GBSG II</td>
+<td class="gt_row gt_left">Recurrence or death</td>
+<td class="gt_row gt_center">686</td>
+<td class="gt_row gt_center">10</td>
+<td class="gt_row gt_center">299</td>
+<td class="gt_row gt_center">56</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">62</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">GUIDE-IT</td>
+<td class="gt_row gt_left">CVD death</td>
+<td class="gt_row gt_center">894</td>
+<td class="gt_row gt_center">59</td>
+<td class="gt_row gt_center">110</td>
+<td class="gt_row gt_center">88</td>
+<td class="gt_row gt_center">12</td>
+<td class="gt_row gt_center">47</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">GUIDE-IT</td>
+<td class="gt_row gt_left">HF hospitalization</td>
+<td class="gt_row gt_center">894</td>
+<td class="gt_row gt_center">59</td>
+<td class="gt_row gt_center">288</td>
+<td class="gt_row gt_center">68</td>
+<td class="gt_row gt_center">12</td>
+<td class="gt_row gt_center">47</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Heart Transplant</td>
+<td class="gt_row gt_left">Graft-loss or death</td>
+<td class="gt_row gt_center">3,787</td>
+<td class="gt_row gt_center">52</td>
+<td class="gt_row gt_center">500</td>
+<td class="gt_row gt_center">87</td>
+<td class="gt_row gt_center">6.1</td>
+<td class="gt_row gt_center">26</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Monoclonal gammopathy</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">1,384</td>
+<td class="gt_row gt_center">8</td>
+<td class="gt_row gt_center">963</td>
+<td class="gt_row gt_center">30</td>
+<td class="gt_row gt_center">0.49</td>
+<td class="gt_row gt_center">83</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Monoclonal gammopathy</td>
+<td class="gt_row gt_left">Malignancy</td>
+<td class="gt_row gt_center">1,384</td>
+<td class="gt_row gt_center">8</td>
+<td class="gt_row gt_center">115</td>
+<td class="gt_row gt_center">92</td>
+<td class="gt_row gt_center">0.49</td>
+<td class="gt_row gt_center">83</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Movies released in 2015-2018</td>
+<td class="gt_row gt_left">Gross 1M USD</td>
+<td class="gt_row gt_center">551</td>
+<td class="gt_row gt_center">46</td>
+<td class="gt_row gt_center">522</td>
+<td class="gt_row gt_center">5.3</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">4.5</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Non-alcohol fatty liver disease</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">17,549</td>
+<td class="gt_row gt_center">24</td>
+<td class="gt_row gt_center">1,364</td>
+<td class="gt_row gt_center">92</td>
+<td class="gt_row gt_center">33</td>
+<td class="gt_row gt_center">45</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+
+---
+
+## Data sets contd.
+
+<div id="bbgwdtjqcj" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#bbgwdtjqcj .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#bbgwdtjqcj .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#bbgwdtjqcj .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#bbgwdtjqcj .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#bbgwdtjqcj .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#bbgwdtjqcj .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#bbgwdtjqcj .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#bbgwdtjqcj .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bbgwdtjqcj .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bbgwdtjqcj .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#bbgwdtjqcj .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#bbgwdtjqcj .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#bbgwdtjqcj .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbgwdtjqcj .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#bbgwdtjqcj .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#bbgwdtjqcj .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbgwdtjqcj .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#bbgwdtjqcj .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbgwdtjqcj .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#bbgwdtjqcj .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbgwdtjqcj .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bbgwdtjqcj .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bbgwdtjqcj .gt_left {
+  text-align: left;
+}
+
+#bbgwdtjqcj .gt_center {
+  text-align: center;
+}
+
+#bbgwdtjqcj .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#bbgwdtjqcj .gt_font_normal {
+  font-weight: normal;
+}
+
+#bbgwdtjqcj .gt_font_bold {
+  font-weight: bold;
+}
+
+#bbgwdtjqcj .gt_font_italic {
+  font-style: italic;
+}
+
+#bbgwdtjqcj .gt_super {
+  font-size: 65%;
+}
+
+#bbgwdtjqcj .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+#bbgwdtjqcj .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#bbgwdtjqcj .gt_slash_mark {
+  font-size: 0.7em;
+  line-height: 0.7em;
+  vertical-align: 0.15em;
+}
+
+#bbgwdtjqcj .gt_fraction_numerator {
+  font-size: 0.6em;
+  line-height: 0.6em;
+  vertical-align: 0.45em;
+}
+
+#bbgwdtjqcj .gt_fraction_denominator {
+  font-size: 0.6em;
+  line-height: 0.6em;
+  vertical-align: -0.05em;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Outcome</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Obs</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Predictors</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">N Events</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Censored</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Missing</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">% Continuous</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_right gt_stub">Primary biliary cholangitis</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">276</td>
+<td class="gt_row gt_center">19</td>
+<td class="gt_row gt_center">111</td>
+<td class="gt_row gt_center">60</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">59</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Rotterdam tumor bank</td>
+<td class="gt_row gt_left">Recurrence</td>
+<td class="gt_row gt_center">2,982</td>
+<td class="gt_row gt_center">11</td>
+<td class="gt_row gt_center">1,518</td>
+<td class="gt_row gt_center">49</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">56</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Rotterdam tumor bank</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">2,982</td>
+<td class="gt_row gt_center">11</td>
+<td class="gt_row gt_center">1,272</td>
+<td class="gt_row gt_center">57</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">56</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Serum free light chain</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">7,874</td>
+<td class="gt_row gt_center">10</td>
+<td class="gt_row gt_center">2,169</td>
+<td class="gt_row gt_center">72</td>
+<td class="gt_row gt_center">1.7</td>
+<td class="gt_row gt_center">50</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">SPRINT</td>
+<td class="gt_row gt_left">CVD death</td>
+<td class="gt_row gt_center">9,361</td>
+<td class="gt_row gt_center">174</td>
+<td class="gt_row gt_center">521</td>
+<td class="gt_row gt_center">94</td>
+<td class="gt_row gt_center">0.65</td>
+<td class="gt_row gt_center">24</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">SPRINT</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">9,361</td>
+<td class="gt_row gt_center">174</td>
+<td class="gt_row gt_center">1,644</td>
+<td class="gt_row gt_center">82</td>
+<td class="gt_row gt_center">0.65</td>
+<td class="gt_row gt_center">24</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Systolic Heart Failure</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">2,231</td>
+<td class="gt_row gt_center">41</td>
+<td class="gt_row gt_center">726</td>
+<td class="gt_row gt_center">67</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">33</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">VA lung cancer trial</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">137</td>
+<td class="gt_row gt_center">8</td>
+<td class="gt_row gt_center">128</td>
+<td class="gt_row gt_center">6.6</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">33</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+
+---
+
+
+## Evaluation
+
+Consider a testing data set:
+`$$\mathcal{D}_{\text{test}} = \left\{ (T_i, \delta_i, x_{i}) \right\}_{i=1}^{N_{\text{test}}}.$$`
+Let `\(\widehat{S}(t \mid x_i)\)` be the predicted probability of survival up to a given prediction horizon of `\(t &gt; 0\)`. 
+The Brier score at time `\(t\)` is `$$\widehat{\text{BS}}(t) = \frac{1}{N_{\text{test}}} \sum_{i=1}^{N_{\text{test}}} \left\{ \widehat{S}(t \mid x_i)^2 \cdot I(T_i \leq t, \delta_i = 1) \cdot \widehat{G}(T_i)^{-1} + \\ [1-\widehat{S}(t \mid x_i)]^2 \cdot I(T_i &gt; t) \cdot \widehat{G}(t)^{-1}\right\}$$` 
+
+where `\(\widehat{G}(\cdot)\)` is the Kaplan-Meier estimate of the censoring distribution. 
+
+---
+
+## Evaluation
+
+As the Brier score is time dependent, integration over time provides a summary measure of performance over a range of plausible prediction horizons. The integrated Brier score is defined as 
+
+`$$\mathcal{\widehat{BS}}(t_a, t_b) = \frac{1}{t_b - t_a}\int_{t_a}^{t_b} \widehat{\text{BS}}(t) dt.$$` 
+In our results 
+
+- `\(t_a\)` is the 25th percentile of event times
+
+- `\(t_b\)` is the 75th percentile of event times
+
+---
+
+## Evaluation
+
+`\(\mathcal{\widehat{BS}}(t_a, t_b)\)`, a sum of squared prediction errors, can be scaled to produce a measure of explained residual variation (i.e., an `\(R^2\)` statistic) by computing `$$R^2 = 1 - \frac{\mathcal{\widehat{BS}}(t_a, t_b)}{\mathcal{\widehat{BS}}_0(t_a, t_b)}$$` where `\(\mathcal{\widehat{BS}}_0(t_a, t_b)\)` is the integrated Brier score when a Kaplan-Meier estimate for survival based on the training data is used as the survival prediction function `\(\widehat{S}(t)\)`. 
+
+_Jargon_: `\(R^2\)` = __index of prediction accuracy__ (IPA) 
+
+_Presentation_: We scale the IPA by 100 to avoid unnecessary leading zero's. 
+
+---
+
+## Evaluation
+
+Step 1: Collect IPA values from ten 50/50 train/test splits on each data set for each learner.
+
+Step 2: Fit a hierarchical Bayesian model to analyze posterior expected IPA values for each learner:
+
+`$$\text{IPA} = \widehat{\gamma} \cdot \text{model} + (1\,|\, \text{data/run})$$`
+
+where `run` refers to the specific train/test split of `data`.
+
+
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_viz_ibs-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_viz_cstat-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_model_viz_ibs-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_model_viz_cstat-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_time_viz-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Using the accelerated oblique RSF
+
+&lt;iframe src="https://bcjaeger.github.io/aorsf/" width="100%" height="400px" data-external="1"&gt;&lt;/iframe&gt;
+
+---
+
+# Thank you!
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

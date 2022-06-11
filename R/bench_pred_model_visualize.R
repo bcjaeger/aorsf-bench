@@ -5,9 +5,8 @@
 #' @title
 #' @param bm_pred_model
 bench_pred_model_visualize <- function(bm_pred_model,
-                                       model_key) {
-
-  equiv_bound <- 0.01
+                                       model_key,
+                                       equiv_bound = 0.01) {
 
   data_infer <- bm_pred_model$posterior
 
@@ -18,6 +17,7 @@ bench_pred_model_visualize <- function(bm_pred_model,
     summarize(
       prob_equiv = mean(value <= equiv_bound & value >= -equiv_bound),
       prob_super = mean(value < 0),
+      prob_super_duper = mean(value < -equiv_bound),
       median = median(value),
       q25 = quantile(value, probs = 1/4),
       q75 = quantile(value, probs = 3/4),
@@ -38,7 +38,7 @@ bench_pred_model_visualize <- function(bm_pred_model,
       ),
       across(
         starts_with("prob"),
-        ~ if_else(model == 'aorsf-cph(maxit = 1)', '---', .x)
+        ~ if_else(model == 'aorsf-fast', '---', .x)
       ),
       metric = factor(metric,
                       levels = c("ibs_scaled", "cstat"),
@@ -51,6 +51,8 @@ bench_pred_model_visualize <- function(bm_pred_model,
   y_col_0 = -equiv_bound * 10
   y_col_1 = equiv_bound * 4
   y_col_2 = equiv_bound * 7
+  y_col_3 = equiv_bound * 10
+
 
   y_breaks <- seq(-5, 1) * 1/100
 
@@ -58,18 +60,25 @@ bench_pred_model_visualize <- function(bm_pred_model,
     .x = levels(gg_data$metric),
     .f = ~ {
       tibble(
-        x = c(xmax + 1, xmax + 1, xmax + 2, xmax + 1, xmax + 1),
+        x = c(xmax + 1,
+              xmax + 1,
+              xmax + 2,
+              xmax + 1,
+              xmax + 1,
+              xmax + 1),
         median = c(y_col_0,
                    (min(y_breaks) + max(y_breaks)) / 2,
-                   (y_col_1 + y_col_2) / 2,
+                   (y_col_1 + y_col_3) / 2,
                    y_col_1,
-                   y_col_2),
+                   y_col_2,
+                   y_col_3),
         label = c("Learner",
                   .x,
                   "Posterior probability",
                   "Equivalence",
-                  "Inferiority"),
-        hjust = c(0, 1/2, 1/2, 1/2, 1/2)
+                  "Difference < 0",
+                  "Difference < -1"),
+        hjust = c(0, 1/2, 1/2, 1/2, 1/2, 1/2)
       )
     }
   )
@@ -127,8 +136,9 @@ bench_pred_model_visualize <- function(bm_pred_model,
         geom_text(aes(y = y_col_0), hjust = 0) +
         geom_text(aes(x = x, y = y_col_1, label = prob_equiv)) +
         geom_text(aes(x = x, y = y_col_2, label = prob_super)) +
+        geom_text(aes(x = x, y = y_col_3, label = prob_super_duper)) +
         geom_text(data = .y, aes(label = label, hjust = hjust)) +
-        scale_y_continuous(limits = c(y_col_0, y_col_0*(-1)*1.10),
+        scale_y_continuous(limits = c(y_col_0, y_col_0*(-1)*1.25),
                            breaks = y_breaks,
                            labels = 100 * y_breaks,
                            expand = c(0, 0)) +
@@ -136,7 +146,7 @@ bench_pred_model_visualize <- function(bm_pred_model,
                            expand = c(0, 0)) +
         coord_flip() +
         theme_bw() +
-        labs(x = '', y = 'Difference versus aorsf-cph(maxit = 1)') +
+        labs(x = '', y = 'Difference versus aorsf-fast') +
         theme(panel.grid = element_blank(),
               panel.border = element_blank(),
               axis.ticks.y = element_blank(),

@@ -7,6 +7,50 @@
 #' @param type
 #' @param test
 
+
+rotsf_pred <- function(object, test, pred_horizon){
+
+  test_onehot <- model.matrix(~. -1L, data = test) |>
+    as.data.frame()
+
+  start_time <- Sys.time()
+
+  res <- rotsfpca.surv_predict(object$fit,
+                               newdata = select(test_onehot, -time, -status),
+                               uniquetimes = pred_horizon)
+
+  end_time <- Sys.time()
+
+  list(
+    pred = 1 - res,
+    time = end_time - start_time
+  )
+
+}
+
+rsfse_pred <- function(object, test, pred_horizon){
+
+  test_onehot <- model.matrix(~. -1L, data = test) |>
+    as.data.frame()
+
+  start_time <- Sys.time()
+
+  res <- rsfes.surv_predict(object$fit,
+                            newdata = select(test_onehot, -time, -status),
+                            uniquetimes = pred_horizon)
+
+  end_time <- Sys.time()
+
+  list(
+    pred = 1 - res,
+    time = end_time - start_time
+  )
+
+}
+
+
+
+
 aorsf_pred <- function(object, test, pred_horizon){
 
   start_time <- Sys.time()
@@ -25,6 +69,10 @@ aorsf_pred <- function(object, test, pred_horizon){
 }
 
 aorsf_random_pred <- function(object, test, pred_horizon){
+  aorsf_pred(object, test, pred_horizon)
+}
+
+aorsf_cph_1_filter_pred <- function(object, test, pred_horizon){
   aorsf_pred(object, test, pred_horizon)
 }
 

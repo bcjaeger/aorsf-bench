@@ -11,26 +11,13 @@ bench_vi <- function(data_source,
                      n_obs,
                      n_z) {
 
-  conflicted::conflict_prefer("filter", "dplyr")
-  conflicted::conflict_prefer("summarize", "dplyr")
-
   set.seed(run_seed)
 
-  switch(
+  sim <- sim_surv(n_obs = n_obs, n_z = n_z, correlated_x = correlated_x)
 
-    data_source,
-
-    'sim' = {
-
-      sim <- sim_surv(n_obs = n_obs, n_z = n_z, correlated_x = correlated_x)
-
-      train <- sim$data
-      vars_signal <- sim$vars_signal
-      vars_junk <- sim$vars_junk
-
-    }
-
-  )
+  train <- sim$data
+  vars_signal <- sim$vars_signal
+  vars_junk <- sim$vars_junk
 
   pred_horizon <- median(train$time)
 
@@ -39,8 +26,8 @@ bench_vi <- function(data_source,
       'aorsf',
       'aorsf_menze',
       'xgboost',
-      'randomForestSRC',
-      'ranger'
+      'randomForestSRC'
+      # 'ranger'
     )
   )
 

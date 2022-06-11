@@ -22,6 +22,107 @@
 #
 # }
 
+rotsf_fit <- function(train, node_size = 10, ...){
+
+  mtry <- round(sqrt(ncol(train)-2))
+
+  train_onehot <- model.matrix(~. -1L, data = train) |>
+    as.data.frame()
+
+  start_time <- Sys.time()
+
+  fit <- rotsfpca(
+    formula = Surv(time, status) ~ .,
+    data = train_onehot
+  )
+
+  end_time <- Sys.time()
+
+  list(fit = fit, time_fit = end_time - start_time)
+
+}
+
+rsfse_fit <- function(train, node_size = 10, ...){
+
+  mtry <- round(sqrt(ncol(train)-2))
+
+  train_onehot <- model.matrix(~. -1L, data = train) |>
+    as.data.frame()
+
+  start_time <- Sys.time()
+
+  xnames <- setdiff(names(train_onehot), c('time', 'status'))
+
+  fit <- rsfes(
+    x = train_onehot[, xnames],
+    y = Surv(time = train_onehot$time,
+             event = train_onehot$status)
+  )
+
+  end_time <- Sys.time()
+
+  list(fit = fit, time_fit = end_time - start_time)
+
+}
+
+aorsf_cph_1_filter_fit <- function(train, node_size = 10, ...){
+
+  mtry <- round(sqrt(ncol(train)-2))
+
+  split_min_events <- min( round(sum(train$status) / 5), 5)
+
+  start_time <- Sys.time()
+
+  # fit_filter <- orsf(
+  #   data_train = train,
+  #   formula = Surv(time, status) ~ .,
+  #   n_tree = 100,
+  #   mtry = mtry,
+  #   n_retry = 3,
+  #   split_min_obs = node_size,
+  #   split_min_events = split_min_events,
+  #   control = orsf_control_cph(iter_max = 1,
+  #                              do_scale = FALSE),
+  #   oobag_pred = FALSE
+  # )
+  #
+  # vi <- orsf_vi_anova(fit_filter)
+  #
+  # n_keep <- round( length(vi) * 0.75 )
+  #
+  # keep <- c('time', 'status', names(vi)[seq(n_keep)])
+  #
+  # fit <- orsf(
+  #   data_train = train[, keep],
+  #   formula = Surv(time, status) ~ .,
+  #   mtry = mtry,
+  #   n_retry = 3,
+  #   split_min_obs = node_size,
+  #   split_min_events = split_min_events,
+  #   control = orsf_control_cph(iter_max = 1,
+  #                              do_scale = FALSE),
+  #   oobag_pred = FALSE
+  # )
+
+  fit <- orsf(
+    data_train = train,
+    formula = Surv(time, status) ~ .,
+    mtry = mtry,
+    n_retry = 3,
+    split_min_obs = node_size,
+    split_min_events = split_min_events,
+    control = orsf_control_cph(iter_max = 1,
+                               do_scale = FALSE,
+                               pval_max = .25),
+    oobag_pred = FALSE
+  )
+
+  end_time <- Sys.time()
+
+  list(fit = fit, time_fit = end_time - start_time)
+
+}
+
 aorsf_cph_1_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))

@@ -1,4 +1,4 @@
-\documentclass[twoside,11pt]{article}\usepackage[]{graphicx}\usepackage[]{color}
+\documentclass[twoside,11pt]{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
 % maxwidth is the original width if it is less than linewidth
 % otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
@@ -12,9 +12,6 @@
 \makeatother
 
 \definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
-\makeatletter
-\@ifundefined{AddToHook}{}{\AddToHook{package/xcolor/after}{\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}}}
-\makeatother
 \newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
 \newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
 \newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
@@ -49,14 +46,6 @@
 \definecolor{messagecolor}{rgb}{0, 0, 0}
 \definecolor{warningcolor}{rgb}{1, 0, 1}
 \definecolor{errorcolor}{rgb}{1, 0, 0}
-\makeatletter
-\@ifundefined{AddToHook}{}{\AddToHook{package/xcolor/after}{
-\definecolor{shadecolor}{rgb}{.97, .97, .97}
-\definecolor{messagecolor}{rgb}{0, 0, 0}
-\definecolor{warningcolor}{rgb}{1, 0, 1}
-\definecolor{errorcolor}{rgb}{1, 0, 0}
-}}
-\makeatother
 \newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
 
 \usepackage{alltt}
@@ -172,45 +161,41 @@ The oblique random survival forest (ORSF) is an ensemble method for supervised l
 
 \section{Introduction}
 
-Risk prediction can reduce the burden of disease by educating patients and providers and guiding strategies to prevent and treat disease in a wide range of medical domains \citep{moons2012riskI, moons2012riskII}. The random survival forest (RSF), a supervised learning algorithm that can engage with censored outcomes, is frequently used for risk prediction. Notable characteristics of the RSF include uniform convergence of its ensemble survival function to the true population survival function when the predictor space is discrete. In addition, software implementing the RSF is freely available, extremely efficient, and full of tools to interpret and explain the RSF. However, there remains considerable potential to improve the RSF in risk prediction tasks where training samples are not large enough to guarantee asymptotic properties or predictor spaces are non-discrete (\ie, predictors are continuous).
+Risk prediction can reduce the burden of disease by educating patients and providers and guiding strategies to prevent and treat disease in a wide range of medical domains \citep{moons2012riskII, moons2012riskI}. The random survival forest (RSF), a supervised learning algorithm that can engage with censored outcomes, is frequently used for risk prediction. Notable characteristics of the RSF include uniform convergence of its ensemble survival function to the true population survival function when the predictor space is discrete \citep{ishwaran2010consistency}. In addition, software implementing the RSF is freely available, extremely efficient, and full of tools to interpret and explain the RSF \citep{randomForestSRC, ranger, hothorn2010party}. However, there remains considerable potential to improve the RSF in risk prediction tasks where training samples are not large enough to guarantee asymptotic properties or predictor spaces are non-discrete (\ie, predictors are continuous).
 
-RSFs may be axis based or oblique. The axis based RSF uses a single predictor whereas the oblique RSF uses a linear combination of predictors to create branches in trees. While axis based decision boundaries are always perpendicular to the axis of the relevant predictor, linear combinations of predictors create oblique decision boundaries that are neither parallel nor perpendicular to axes of their contributing predictors. Prior work has found the oblique RSF has higher prediction accuracy than the axis based RSF in general benchmarks \citep{jaeger2019oblique} and that oblique splitting is particularly effective when predictor spaces are non-discrete. However, existing methods to implement oblique RSFs use fully trained models in each non-leaf node to identify linear combinations of predictors, exponentially increasing the number of operations required for the oblique RSF versus its axis based counterpart. In addition, standard methods to estimate the importance of individual variables in the RSF are less effective in the oblique RSF.
+RSFs may be axis based or oblique. The axis based RSF uses a single predictor whereas the oblique RSF uses a linear combination of predictors to create branches in trees. While axis based decision boundaries are always perpendicular to the axis of the relevant predictor, linear combinations of predictors create oblique decision boundaries that are neither parallel nor perpendicular to axes of their contributing predictors. Prior work has found the oblique RSF has higher prediction accuracy than the axis based RSF in general benchmarks \citep{jaeger2019oblique} and that oblique splitting is particularly effective when predictors are continuous \citep{menze2011oblique}. However, existing methods to implement oblique splitting typically use fully trained models in each non-leaf node to identify linear combinations of predictors, exponentially increasing the number of operations required for the oblique RSF versus its axis based counterpart. In addition, standard methods to estimate variable importance (VI) in the RSF are less effective in the oblique RSF, and few methods have been introduced to estimate VI specifically for the oblique RSF.
 
-In this article, we introduce methods to increase computational efficiency and estimate variable importance (VI) for oblique RSFs. We evaluate computational efficiency, prediction accuracy, and the ability to discriminate between signal and noise variables using the proposed methods compared to standard and state-of-the-art methods. To accomplish these goals, we analyze 23 distinct risk prediction tasks from real data and conduct a simulation study. All methods introduced in this article for oblique RSFs are available in the \texttt{aorsf} R Package.
-
+The aim of this article is to improve the computational efficiency and interpretability of the oblique RSF. In a general benchmark experiment including YYYY risk prediction tasks, we show that oblique RSFs with partially trained models have equivalent or superior prediction accuracy and are orders of magnitude more efficient than oblique RSFs with fully trained models in non-leaf nodes. We introduce a method to estimate VI for oblique RSFs and compare its ability to discriminate between signal and noise variables versus standard and state-of-the-art methods. All methods proposed in this article are available in the \texttt{aorsf} R Package.
 
 \section{Related work}
 
+\subsection{Axis-based and oblique random forests}
 
-\citet{breiman2001random} introduced the axis-based random forest (RF) and the oblique RF (oRF). Axis based RFs recursively split data using a single predictor at each non-leaf node in decision trees, whereas oRFs use multiple predictors in linear combination. The splits are called `oblique' because linear combinations of predictors create decision boundaries that are neither parallel nor perpendicular to their axes have higher prediction accuracy in external data compared to their axis based counterparts. Several studies investigating RFs for classification and regression have noted that oblique RFs have lower generalization than their axis-based counterparts.
+After \citet{breiman2001random} introduced the axis-based and oblique random forest (RF), numerous methods were developed to grow oblique RFs for classification or regression tasks \citep{menze2011oblique, zhang2014oblique, rainforth2015canonical, zhu2015reinforcement, poona2016investigating, qiu2017oblique, tomita2020sparse, katuwal2020heterogeneous}. However, oblique splitting approaches for classification or regression may not generalize to survival tasks \citep[\eg, see][Section~4.5.1]{zhu2013tree}, and most research involving the RSF has focused on forests with axis-based trees \citep{wang2017selective}.
 
+Building on prior research for bagging survival trees \citep{hothorn2004bagging}, \citet{hothorn2006unbiased} developed an axis-based RSF in their framework for unbiased recursive partitioning, more commonly referred to as the conditional inference forest (CIF). \citet{zhou2016random} developed a rotation forest based on the CIF and \citet{wang2017random} developed a method for extending the predictor space of the CIF. \citet{ishwaran2008random} developed an axis-based RSF with strict adherence to the rules for growing trees proposed in \citet{breiman2001random}. \citet{jaeger2019oblique} developed the oblique RSF following the bootstrapping approach described in Breiman's original RF and incorporating early stopping rules from the CIF.
 
+\subsection{Variable importance}
 
-The axis-based RF proposed in \citet{breiman2001random} was extended to survival outcomes by \citet{ishwaran2008random} and the oblique RF  la soon after RFs for classification and regression were developed by \citet{breiman2001random}, and oblique RFs for survival were Several studies have shown that oblique recursive partitioning improves the generalization error of RFs for classification and regression, b
+\citet{breiman2001random} introduced permutation VI, defined for each predictor as the difference in a RF's estimated generalization error before versus after the predictor's values are randomly permuted. \citet{strobl2007bias} identified bias in permutation VI driven by variable selection bias and effects induced by bootstrap sampling, and proposed an unbiased permutation VI based on unbiased recursive partitioning (see \citet{hothorn2006unbiased}). \citet{menze2011oblique} introduced an approach to estimate VI for oblique RFs that computes an analysis of variance (ANOVA) table in non-leaf nodes to obtain p-values for each predictor contributing to the node. The ANOVA VI\footnote{\citet{menze2011oblique} name their method `oblique RF VI', but we use the name `ANOVA VI' in this article to avoid confusing Menze's approach with other approaches to estimate VI for oblique RFs.} is then defined for each predictor as the number of times a p-value associated with the predictor is $\leq 0.01$ while growing a forest. \citet{lundberg2017unified} introduced a method to estimate VI using SHapley Additive exPlanation (SHAP) values, which estimate the contribution of a predictor to a model's prediction for a given observation. SHAP VI is computed for each predictor by taking the mean absolute value of SHAP values for that predictor across all observations in a given set.
 
-% More recently, \citet{jaeger2019oblique} showed that the generalization error of RFs for survival outcomes improves when multiple predictors are used in linear combination instead of a single predictor to split non-leaf nodes in trees, similar to RFs for classification and regression \citet{breiman2001random}. Splitting data with a single predictor creates a decision boundary that is perpendicular to its axis, whereas the decision boundary formed by a linear combination of predictors is neither perpendicular nor parallel to their respective axes.
-
-% \citet{breiman2001random} introduced the axis-based random forest (RF) and oblique RF. Axis based RFs recursively split data using a single predictor at each non-leaf node in decision trees, whereas oRFs use multiple predictors in linear combination. The splits are called `oblique' because linear combinations of predictors create decision boundaries that are neither parallel nor perpendicular to their axes have higher prediction accuracy in external data compared to their axis based counterparts. However, many oRFs require a fully trained model to be embedded in each non-leaf node to identify linear combinations of predictors, exponentially increasing the number of operations required for fitting an oRF versus an axis based RF. In addition, standard methods to interpret RFs (\eg, permutation importance) are less effective when used to interpret the oRF because they are not designed to engage with oblique trees.
-
-
-Several supervised learning algorithms can develop prediction functions for right-censored time-to-event outcomes, henceforth referred to as survival outcomes. \cite{ishwaran2008random} developed the RF for survival, an extension of the RF for regression and classification developed by \citet{breiman2001random}. Fast algorithms to fit the RF for survival are available in the \texttt{randomForestSRC} R package \citep{randomForestSRC}. A similar implementation of the RF for survival can be found in the \texttt{ranger} R package \citep{ranger}, which is particularly suited for high dimensional data. The RF for survival can also be fit using unbiased recursive partitioning \citep{cif} via the \texttt{party} R package \citep{hothorn2010party}.
-
-
-\citet{zhu2015reinforcement}
-
-\citet{zhu2013tree}
-
-\citet{menze2011oblique} introduced an oblique RF (oRF) for classification that utilizes fully trained models at non-leaf nodes to identify linear combinations of predictors. \citet{tomita2020sparse} introduced sparse projections for oRFs for classification. \citet{katuwal2020heterogeneous} developed a heterogeneous oRF for classification that applies several linear classifiers at each non-leaf node. Compared to classification, fewer studies have developed oRFs for survival. \citet{jaeger2019oblique} introduced an oRF for survival that applies penalized regression at each non-leaf node and disseminated algorithms to fit the oRF for survival in the \texttt{obliqueRSF} R package \citep{obliqueRSF}.
-
-Variable importance (VI) for oRFs VI has been estimated for oRFs using analysis of variance (ANOVA),6 but this only applies in the rare case where p-values are calculable for coefficients in linear combinations. Permutation importance is used to estimate VI in RFs,14 but is not ideal for oRFs because it does not account for the coefficients used in linear combinations. Shapley VI, a method based in game theory,15 has excellent asymptotic properties for interpretation,16,17 but is computationally infeasible and can only be approximated efficiently for standard decision trees.18
+% Several supervised learning algorithms can develop prediction functions for right-censored time-to-event outcomes, henceforth referred to as survival outcomes. \cite{ishwaran2008random} developed the RF for survival, an extension of the RF for regression and classification developed by \citet{breiman2001random}. Fast algorithms to fit the RF for survival are available in the \texttt{randomForestSRC} R package \citep{randomForestSRC}. A similar implementation of the RF for survival can be found in the \texttt{ranger} R package \citep{ranger}, which is particularly suited for high dimensional data. The RF for survival can also be fit using unbiased recursive partitioning \citep{cif} via the \texttt{party} R package \citep{hothorn2010party}.
 
 \section{Novel techniques for oblique random survival forests}
 
 \subsection{Partial training at non-leaf nodes}
 
+Consider the usual framework for survival analysis with training data $$\dataset_{\text{train}} = \left\{ (T_i, \delta_i, \bm{x}_{i}) \right\}_{i=1}^{N_{\text{train}}}.$$ Here, $T_i$ is the event time if $\delta_i=1$ and last point of contact if $\delta_i=0$, and $\bm{x}_i$ is a vector of predictors values. Assuming there are no ties, let $t_1 < \, \ldots \, < t_m$ denote the $m$ unique event times in $\dataset_{\text{train}}$. We propose to identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model:
+\begin{equation}\label{eqn:cox-partial-likelihood}
+L(\bm\beta) = \prod_{i=1}^m \frac{e^{\bm{x}_{j(i)}^T \bm\beta}}{\sum_{j \in R_i} e^{\bm{x}_j^T \bm\beta}},
+\end{equation}
+where $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (i.e., those still at risk at time $t_i$), and $j(i)$ is the index of the observation for which an event occurred at time $t_i$. The \texttt{survival} package includes documentation that outlines how to complete this estimation procedure efficiently \citep[see][exact.nw]{therneau_survival_2022}. Briefly, a vector of estimated regression coefficients, $\hat{\beta}$, is updated in each step of the procedure based on its first derivative, $U(\hat{\beta})$, and second derivative, $H(\hat{\beta})$:
+$$ \hat{\beta}^{k+1} =  \hat{\beta}^{k} + U(\hat{\beta} = \hat{\beta}^{k})\, H^{-1}(\hat{\beta} = \hat{\beta}^{k}) $$
+It is vital to cycle through iterations until a convergence threshold is met for statistical inference, but it is only necessary to complete one iteration to identify coefficients for a linear combination of predictors. \citet{jaeger2019oblique} identified linear combinations using penalized regression models, which supply more flexible solutions for $\hat{\beta}$ at the cost of greater computational demand.
+
 \subsection{Negation variable importance}
 
-We propose a new VI method, ``negation importance",  that can be used for any oRF and accounts for the coefficients in linear combinations.
+Negation VI is similar to permutation VI in that it measures how much a model’s prediction error increases when a variable’s role in the model is de-stabilized. More specifically, negation VI measures the increase in an oblique RF's prediction error after flipping the sign of all coefficients linked to a variable (\ie, negating them). As the magnitude of a coefficient increases, so does the probability that negating it will change the oblique RF's predictions. Since the coefficients in each non-leaf node of an oblique RFs are adjusted for the accompanying predictors, negation VI may provide better estimation of VI in the presence of correlated variables compared to standard VI techniques. Although the current article focuses on oblique RSFs, negation VI can be applied to any oblique RF.
 
 \section{Numeric experiments}
 
@@ -218,7 +203,7 @@ We propose a new VI method, ``negation importance",  that can be used for any oR
 
 \subsubsection{Learners}
 
-In the current study, we consider four classes of learners: random forests, boosting ensembles, regression models, and neural networks (Table \ref{table:learners}). For random forest learners, the number of observations required in terminal nodes was fixed at 10, the number of randomly selected predictors was the nearest integer to the square root of the total number of predictors, and the number of trees in the ensemble was 500.
+In the current study, we consider four classes of learners: RFs, boosting ensembles, regression models, and neural networks (Table \ref{table:learners}). For RF learners, the number of observations required in terminal nodes was fixed at 10, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500. For boosting and regression learners, nested cross-validation was applied to identify the number of boosting steps and the magnitude of penalization, respectively.
 
 \newgeometry{margin=1cm} % modify this if you need even more space
 \begin{landscape}
@@ -337,362 +322,452 @@ R^2 = 1 - \frac{\bsbar}{\bskap}
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Overall}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 15) & 0.136 (0.123) & 0.763 (0.077) & 2.460 & 2.95 & 0.202 & 0.974\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.135 (0.124) & 0.763 (0.077) & 0.833 & 1.00 & 0.207 & 1.00\\
-\hspace{1em}aorsf-net & 0.133 (0.127) & 0.762 (0.077) & 53.399 & 64.1 & 0.200 & 0.966\\
-\hspace{1em}glmnet-cox & 0.124 (0.136) & 0.753 (0.081) & 0.209 & 0.251 & 0.004 & 0.019\\
-\hspace{1em}party-cif & 0.123 (0.111) & 0.755 (0.074) & 1.583 & 1.90 & 4.360 & 21.0\\
-\hspace{1em}rfsrc-standard & 0.120 (0.128) & 0.747 (0.080) & 1.554 & 1.86 & 0.150 & 0.725\\
-\hspace{1em}obliqueRSF-net & 0.120 (0.093) & 0.762 (0.076) & 268.416 & 322.0 & 18.002 & 86.9\\
-\hspace{1em}ranger-extratrees & 0.108 (0.097) & 0.753 (0.073) & 0.217 & 0.261 & 0.211 & 1.02\\
-\hspace{1em}aorsf-random & 0.102 (0.092) & 0.740 (0.072) & 1.857 & 2.23 & 0.191 & 0.924\\
-\hspace{1em}xgboost-cox & 0.080 (0.114) & 0.740 (0.095) & 3.645 & 4.37 & 0.005 & 0.024\\
-\hspace{1em}xgboost-aft & -3.86 (5.01) & 0.753 (0.078) & 12.587 & 15.1 & 0.008 & 0.039\\
+\hspace{1em}aorsf-cph & 0.132 (0.123) & 0.758 (0.077) & 0.852 & 2.86 & 0.070 & 0.922\\
+\hspace{1em}aorsf-fast & 0.132 (0.123) & 0.758 (0.077) & 0.297 & 1.00 & 0.076 & 1.00\\
+\hspace{1em}aorsf-net & 0.130 (0.126) & 0.756 (0.077) & 68.335 & 229.9 & 0.071 & 0.930\\
+\hspace{1em}cif-rotate & 0.125 (0.144) & 0.741 (0.090) & 30.981 & 104.2 & 7.536 & 98.6\\
+\hspace{1em}cif-standard & 0.120 (0.110) & 0.749 (0.076) & 2.213 & 7.44 & 5.283 & 69.2\\
+\hspace{1em}glmnet-cox & 0.119 (0.136) & 0.749 (0.079) & 0.522 & 1.76 & 0.005 & 0.066\\
+\hspace{1em}rsf-standard & 0.117 (0.127) & 0.741 (0.081) & 1.713 & 5.76 & 0.149 & 1.95\\
+\hspace{1em}obliqueRSF-net & 0.116 (0.092) & 0.755 (0.078) & 334.542 & 1,125.4 & 26.565 & 347.7\\
+\hspace{1em}cif-extension & 0.107 (0.107) & 0.746 (0.080) & 13.591 & 45.7 & 7.281 & 95.3\\
+\hspace{1em}ranger-extratrees & 0.104 (0.096) & 0.748 (0.074) & 0.745 & 2.51 & 0.510 & 6.68\\
+\hspace{1em}aorsf-random & 0.100 (0.091) & 0.735 (0.072) & 2.063 & 6.94 & 0.068 & 0.888\\
+\hspace{1em}xgboost-cox & 0.077 (0.111) & 0.737 (0.091) & 3.846 & 12.9 & 0.005 & 0.066\\
+\hspace{1em}nn-cox & 0.031 (0.116) & 0.615 (0.126) & 15.466 & 52.0 & 1.652 & 21.6\\
+\hspace{1em}xgboost-aft & -3.72 (4.96) & 0.746 (0.079) & 13.542 & 45.6 & 0.008 & 0.106\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{ACTG 320; AIDS diagnosis, n = 1151, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-random & 0.032 (0.017) & 0.749 (0.035) & 1.404 & 2.75 & 0.119 & 1.02\\
-\hspace{1em}obliqueRSF-net & 0.031 (0.018) & 0.751 (0.035) & 28.321 & 55.4 & 15.117 & 129.1\\
-\hspace{1em}ranger-extratrees & 0.030 (0.014) & 0.739 (0.035) & 0.358 & 0.701 & 0.159 & 1.36\\
-\hspace{1em}party-cif & 0.030 (0.024) & 0.749 (0.034) & 1.631 & 3.19 & 4.292 & 36.6\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.029 (0.023) & 0.755 (0.038) & 1.146 & 2.24 & 0.116 & 0.991\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.029 (0.023) & 0.750 (0.040) & 0.511 & 1.00 & 0.117 & 1.00\\
-\hspace{1em}aorsf-net & 0.024 (0.027) & 0.750 (0.036) & 19.546 & 38.2 & 0.119 & 1.01\\
-\hspace{1em}glmnet-cox & 0.023 (0.026) & 0.755 (0.038) & 0.179 & 0.349 & 0.003 & 0.026\\
-\hspace{1em}rfsrc-standard & 0.013 (0.034) & 0.736 (0.037) & 0.638 & 1.25 & 0.060 & 0.514\\
-\hspace{1em}xgboost-cox & 0.006 (0.045) & 0.762 (0.035) & 3.745 & 7.33 & 0.003 & 0.026\\
-\hspace{1em}xgboost-aft & -8.44 (1.61) & 0.744 (0.034) & 11.231 & 22.0 & 0.006 & 0.051\\
+\hspace{1em}aorsf-random & 0.032 (0.014) & 0.741 (0.030) & 0.637 & 4.08 & 0.041 & 1.09\\
+\hspace{1em}ranger-extratrees & 0.030 (0.013) & 0.737 (0.029) & 0.067 & 0.429 & 0.184 & 4.83\\
+\hspace{1em}cif-standard & 0.029 (0.024) & 0.743 (0.038) & 1.608 & 10.3 & 4.825 & 126.9\\
+\hspace{1em}obliqueRSF-net & 0.029 (0.019) & 0.739 (0.036) & 30.556 & 195.7 & 16.658 & 438.0\\
+\hspace{1em}aorsf-fast & 0.027 (0.020) & 0.738 (0.036) & 0.156 & 1.00 & 0.038 & 1.00\\
+\hspace{1em}aorsf-cph & 0.027 (0.022) & 0.744 (0.036) & 0.460 & 2.94 & 0.035 & 0.921\\
+\hspace{1em}cif-extension & 0.024 (0.013) & 0.716 (0.037) & 11.131 & 71.3 & 5.866 & 154.2\\
+\hspace{1em}aorsf-net & 0.022 (0.027) & 0.738 (0.036) & 20.456 & 131.0 & 0.038 & 1.00\\
+\hspace{1em}glmnet-cox & 0.016 (0.025) & 0.738 (0.030) & 0.189 & 1.21 & 0.003 & 0.079\\
+\hspace{1em}rsf-standard & 0.013 (0.028) & 0.728 (0.042) & 0.212 & 1.36 & 0.083 & 2.17\\
+\hspace{1em}cif-rotate & 0.010 (0.033) & 0.734 (0.034) & 15.072 & 96.5 & 4.201 & 110.4\\
+\hspace{1em}xgboost-cox & 0.008 (0.029) & 0.745 (0.033) & 3.452 & 22.1 & 0.003 & 0.079\\
+\hspace{1em}nn-cox & 0.002 (0.012) & 0.613 (0.089) & 12.733 & 81.5 & 0.615 & 16.2\\
+\hspace{1em}xgboost-aft & -7.79 (1.41) & 0.733 (0.030) & 11.574 & 74.1 & 0.007 & 0.184\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{ACTG 320; death, n = 1151, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 15) & 0.013 (0.017) & 0.831 (0.050) & 0.683 & 2.35 & 0.076 & 1.03\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.013 (0.018) & 0.835 (0.050) & 0.291 & 1.00 & 0.074 & 1.00\\
-\hspace{1em}aorsf-random & 0.011 (0.013) & 0.802 (0.060) & 1.081 & 3.72 & 0.086 & 1.16\\
-\hspace{1em}obliqueRSF-net & 0.010 (0.010) & 0.824 (0.048) & 8.654 & 29.8 & 11.022 & 148.8\\
-\hspace{1em}aorsf-net & 0.008 (0.030) & 0.821 (0.054) & 15.008 & 51.6 & 0.085 & 1.14\\
-\hspace{1em}ranger-extratrees & 0.005 (0.015) & 0.776 (0.055) & 0.040 & 0.139 & 0.136 & 1.84\\
-\hspace{1em}party-cif & 0.001 (0.024) & 0.781 (0.055) & 1.610 & 5.54 & 4.228 & 57.1\\
-\hspace{1em}xgboost-cox & -0.003 (0.003) & 0.500 (0.000) & 0.113 & 0.389 & 0.002 & 0.027\\
-\hspace{1em}rfsrc-standard & -0.014 (0.048) & 0.785 (0.058) & 0.084 & 0.287 & 0.036 & 0.480\\
-\hspace{1em}glmnet-cox & -0.036 (0.073) & 0.735 (0.109) & 0.285 & 0.981 & 0.002 & 0.027\\
-\hspace{1em}xgboost-aft & -22.6 (6.75) & 0.774 (0.058) & 10.436 & 35.9 & 0.005 & 0.068\\
+\hspace{1em}aorsf-fast & 0.012 (0.021) & 0.836 (0.045) & 0.091 & 1.00 & 0.021 & 1.00\\
+\hspace{1em}aorsf-cph & 0.011 (0.020) & 0.827 (0.052) & 0.367 & 4.02 & 0.021 & 1.02\\
+\hspace{1em}aorsf-random & 0.009 (0.015) & 0.804 (0.054) & 0.318 & 3.48 & 0.028 & 1.34\\
+\hspace{1em}obliqueRSF-net & 0.008 (0.013) & 0.829 (0.044) & 9.819 & 107.6 & 10.716 & 520.0\\
+\hspace{1em}aorsf-net & 0.005 (0.034) & 0.815 (0.052) & 14.708 & 161.2 & 0.025 & 1.19\\
+\hspace{1em}cif-extension & 0.001 (0.025) & 0.764 (0.053) & 9.440 & 103.4 & 4.147 & 201.2\\
+\hspace{1em}ranger-extratrees & 0.001 (0.023) & 0.782 (0.061) & 0.052 & 0.565 & 0.148 & 7.17\\
+\hspace{1em}cif-standard & -0.004 (0.030) & 0.777 (0.051) & 1.818 & 19.9 & 4.470 & 216.9\\
+\hspace{1em}xgboost-cox & -0.004 (0.003) & 0.500 (0.000) & 0.121 & 1.33 & 0.002 & 0.097\\
+\hspace{1em}nn-cox & -0.005 (0.003) & 0.541 (0.100) & 12.682 & 139.0 & 0.665 & 32.3\\
+\hspace{1em}rsf-standard & -0.019 (0.056) & 0.781 (0.053) & 0.091 & 0.992 & 0.043 & 2.06\\
+\hspace{1em}cif-rotate & -0.038 (0.056) & 0.701 (0.101) & 14.054 & 154.0 & 3.602 & 174.8\\
+\hspace{1em}glmnet-cox & -0.053 (0.100) & 0.743 (0.092) & 0.314 & 3.45 & 0.002 & 0.098\\
+\hspace{1em}xgboost-aft & -24.5 (8.08) & 0.757 (0.070) & 11.563 & 126.7 & 0.009 & 0.419\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Colon cancer; death, n = 929, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 1) & 0.102 (0.016) & 0.720 (0.015) & 0.818 & 1.00 & 0.208 & 1.00\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.101 (0.016) & 0.720 (0.015) & 1.917 & 2.34 & 0.205 & 0.984\\
-\hspace{1em}party-cif & 0.100 (0.012) & 0.713 (0.013) & 1.178 & 1.44 & 4.053 & 19.5\\
-\hspace{1em}aorsf-random & 0.098 (0.012) & 0.719 (0.015) & 1.640 & 2.00 & 0.191 & 0.918\\
-\hspace{1em}aorsf-net & 0.097 (0.016) & 0.720 (0.015) & 51.648 & 63.1 & 0.195 & 0.938\\
-\hspace{1em}rfsrc-standard & 0.091 (0.018) & 0.707 (0.013) & 1.462 & 1.79 & 0.149 & 0.716\\
-\hspace{1em}obliqueRSF-net & 0.090 (0.007) & 0.720 (0.014) & 241.184 & 294.8 & 44.328 & 213.1\\
-\hspace{1em}ranger-extratrees & 0.083 (0.008) & 0.710 (0.015) & 0.571 & 0.698 & 0.251 & 1.21\\
-\hspace{1em}glmnet-cox & 0.079 (0.016) & 0.712 (0.020) & 0.110 & 0.135 & 0.004 & 0.019\\
-\hspace{1em}xgboost-cox & 0.065 (0.014) & 0.703 (0.015) & 3.225 & 3.94 & 0.004 & 0.019\\
-\hspace{1em}xgboost-aft & -1.09 (0.188) & 0.708 (0.013) & 10.975 & 13.4 & 0.006 & 0.029\\
+\hspace{1em}aorsf-fast & 0.100 (0.015) & 0.718 (0.013) & 0.289 & 1.00 & 0.078 & 1.00\\
+\hspace{1em}aorsf-cph & 0.099 (0.015) & 0.716 (0.012) & 0.685 & 2.37 & 0.070 & 0.909\\
+\hspace{1em}cif-standard & 0.099 (0.014) & 0.712 (0.012) & 1.571 & 5.44 & 5.267 & 67.9\\
+\hspace{1em}aorsf-net & 0.097 (0.014) & 0.716 (0.012) & 55.870 & 193.4 & 0.065 & 0.839\\
+\hspace{1em}aorsf-random & 0.095 (0.009) & 0.715 (0.012) & 2.500 & 8.65 & 0.066 & 0.852\\
+\hspace{1em}cif-rotate & 0.092 (0.018) & 0.707 (0.014) & 15.603 & 54.0 & 6.537 & 84.3\\
+\hspace{1em}obliqueRSF-net & 0.089 (0.007) & 0.717 (0.012) & 269.561 & 932.9 & 43.786 & 564.9\\
+\hspace{1em}rsf-standard & 0.088 (0.021) & 0.703 (0.012) & 1.646 & 5.70 & 0.143 & 1.85\\
+\hspace{1em}ranger-extratrees & 0.082 (0.007) & 0.711 (0.012) & 0.822 & 2.84 & 0.274 & 3.53\\
+\hspace{1em}cif-extension & 0.081 (0.006) & 0.710 (0.012) & 8.656 & 30.0 & 6.253 & 80.7\\
+\hspace{1em}glmnet-cox & 0.074 (0.013) & 0.710 (0.017) & 0.125 & 0.433 & 0.004 & 0.052\\
+\hspace{1em}xgboost-cox & 0.064 (0.011) & 0.702 (0.012) & 3.446 & 11.9 & 0.005 & 0.065\\
+\hspace{1em}nn-cox & -0.006 (0.012) & 0.504 (0.048) & 15.123 & 52.3 & 2.166 & 27.9\\
+\hspace{1em}xgboost-aft & -1.07 (0.231) & 0.708 (0.013) & 14.169 & 49.0 & 0.008 & 0.103\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Colon cancer; recurrence, n = 929, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 1) & 0.103 (0.020) & 0.716 (0.019) & 0.819 & 1.00 & 0.210 & 1.00\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.102 (0.019) & 0.715 (0.018) & 1.939 & 2.37 & 0.205 & 0.975\\
-\hspace{1em}aorsf-net & 0.099 (0.020) & 0.716 (0.019) & 50.594 & 61.8 & 0.192 & 0.913\\
-\hspace{1em}party-cif & 0.096 (0.016) & 0.705 (0.017) & 1.142 & 1.39 & 3.756 & 17.9\\
-\hspace{1em}obliqueRSF-net & 0.090 (0.010) & 0.715 (0.018) & 250.487 & 305.8 & 42.658 & 203.0\\
-\hspace{1em}aorsf-random & 0.089 (0.014) & 0.705 (0.018) & 1.653 & 2.02 & 0.190 & 0.905\\
-\hspace{1em}rfsrc-standard & 0.086 (0.021) & 0.697 (0.017) & 1.473 & 1.80 & 0.151 & 0.719\\
-\hspace{1em}ranger-extratrees & 0.080 (0.011) & 0.699 (0.018) & 0.498 & 0.608 & 0.243 & 1.15\\
-\hspace{1em}glmnet-cox & 0.078 (0.017) & 0.710 (0.023) & 0.111 & 0.135 & 0.004 & 0.019\\
-\hspace{1em}xgboost-cox & 0.061 (0.013) & 0.698 (0.019) & 2.951 & 3.60 & 0.004 & 0.019\\
-\hspace{1em}xgboost-aft & -1.16 (0.240) & 0.705 (0.019) & 11.566 & 14.1 & 0.006 & 0.029\\
+\hspace{1em}aorsf-fast & 0.096 (0.015) & 0.711 (0.014) & 0.276 & 1.00 & 0.070 & 1.00\\
+\hspace{1em}aorsf-cph & 0.095 (0.015) & 0.710 (0.014) & 0.704 & 2.55 & 0.070 & 0.994\\
+\hspace{1em}aorsf-net & 0.093 (0.017) & 0.711 (0.016) & 52.298 & 189.5 & 0.069 & 0.980\\
+\hspace{1em}cif-standard & 0.092 (0.015) & 0.701 (0.015) & 1.183 & 4.28 & 4.119 & 58.4\\
+\hspace{1em}cif-rotate & 0.088 (0.019) & 0.698 (0.016) & 14.170 & 51.3 & 5.936 & 84.2\\
+\hspace{1em}obliqueRSF-net & 0.087 (0.008) & 0.711 (0.013) & 328.771 & 1,191.0 & 45.669 & 648.0\\
+\hspace{1em}aorsf-random & 0.083 (0.012) & 0.700 (0.014) & 1.998 & 7.24 & 0.075 & 1.07\\
+\hspace{1em}cif-extension & 0.081 (0.009) & 0.706 (0.013) & 9.934 & 36.0 & 6.899 & 97.9\\
+\hspace{1em}rsf-standard & 0.080 (0.020) & 0.693 (0.014) & 1.308 & 4.74 & 0.135 & 1.92\\
+\hspace{1em}ranger-extratrees & 0.076 (0.012) & 0.696 (0.012) & 0.555 & 2.01 & 0.235 & 3.34\\
+\hspace{1em}glmnet-cox & 0.071 (0.014) & 0.705 (0.020) & 0.171 & 0.621 & 0.006 & 0.085\\
+\hspace{1em}xgboost-cox & 0.059 (0.011) & 0.696 (0.014) & 3.291 & 11.9 & 0.005 & 0.071\\
+\hspace{1em}nn-cox & -0.006 (0.006) & 0.511 (0.045) & 14.010 & 50.8 & 1.651 & 23.4\\
+\hspace{1em}xgboost-aft & -1.16 (0.238) & 0.702 (0.015) & 12.004 & 43.5 & 0.007 & 0.099\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Early breast cancer; recurrence or death, n = 614, p = 1692}}}\\
 \hline
-\hspace{1em}obliqueRSF-net & 0.076 (0.024) & 0.754 (0.031) & 1867.133 & 705.0 & 14.418 & 37.5\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.072 (0.027) & 0.752 (0.028) & 5.022 & 1.90 & 0.398 & 1.04\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.070 (0.028) & 0.752 (0.029) & 2.648 & 1.00 & 0.384 & 1.00\\
-\hspace{1em}party-cif & 0.069 (0.020) & 0.749 (0.034) & 8.450 & 3.19 & 4.065 & 10.6\\
-\hspace{1em}ranger-extratrees & 0.061 (0.022) & 0.742 (0.032) & 0.220 & 0.083 & 0.179 & 0.467\\
-\hspace{1em}glmnet-cox & 0.046 (0.031) & 0.724 (0.036) & 5.730 & 2.16 & 0.006 & 0.016\\
-\hspace{1em}xgboost-cox & 0.030 (0.028) & 0.745 (0.032) & 2.586 & 0.977 & 0.006 & 0.016\\
-\hspace{1em}rfsrc-standard & 0.029 (0.034) & 0.699 (0.030) & 0.606 & 0.229 & 0.617 & 1.61\\
-\hspace{1em}aorsf-random & 0.028 (0.015) & 0.692 (0.034) & 3.622 & 1.37 & 0.359 & 0.934\\
-\hspace{1em}aorsf-net & 0.025 (0.062) & 0.750 (0.027) & 451.897 & 170.6 & 0.381 & 0.991\\
-\hspace{1em}xgboost-aft & -2.92 (0.594) & 0.749 (0.028) & 10.199 & 3.85 & 0.009 & 0.024\\
+\hspace{1em}obliqueRSF-net & 0.070 (0.029) & 0.748 (0.029) & 1972.453 & 2,151.1 & 15.992 & 88.3\\
+\hspace{1em}cif-rotate & 0.070 (0.020) & 0.746 (0.028) & 6858.572 & 7,479.6 & 386.651 & 2,135.1\\
+\hspace{1em}cif-standard & 0.067 (0.022) & 0.744 (0.030) & 9.810 & 10.7 & 4.401 & 24.3\\
+\hspace{1em}cif-extension & 0.066 (0.017) & 0.746 (0.027) & 46.010 & 50.2 & 7.191 & 39.7\\
+\hspace{1em}aorsf-cph & 0.063 (0.038) & 0.746 (0.028) & 1.352 & 1.47 & 0.182 & 1.00\\
+\hspace{1em}aorsf-fast & 0.061 (0.037) & 0.744 (0.027) & 0.917 & 1.00 & 0.181 & 1.00\\
+\hspace{1em}ranger-extratrees & 0.059 (0.029) & 0.741 (0.028) & 0.245 & 0.267 & 0.180 & 0.994\\
+\hspace{1em}xgboost-cox & 0.040 (0.013) & 0.745 (0.032) & 2.231 & 2.43 & 0.007 & 0.036\\
+\hspace{1em}glmnet-cox & 0.035 (0.038) & 0.721 (0.037) & 5.766 & 6.29 & 0.006 & 0.031\\
+\hspace{1em}aorsf-random & 0.027 (0.018) & 0.692 (0.038) & 2.369 & 2.58 & 0.214 & 1.18\\
+\hspace{1em}rsf-standard & 0.020 (0.050) & 0.699 (0.037) & 0.404 & 0.440 & 0.662 & 3.65\\
+\hspace{1em}aorsf-net & 0.005 (0.080) & 0.743 (0.025) & 464.340 & 506.4 & 0.181 & 0.998\\
+\hspace{1em}nn-cox & -0.017 (0.076) & 0.679 (0.050) & 18.858 & 20.6 & 1.907 & 10.5\\
+\hspace{1em}xgboost-aft & -3.09 (0.743) & 0.741 (0.021) & 12.057 & 13.1 & 0.013 & 0.072\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{FCL; death, n = 541, p = 7}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.118 (0.034) & 0.790 (0.034) & 0.080 & 0.331 & 0.002 & 0.039\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.098 (0.044) & 0.771 (0.034) & 0.440 & 1.81 & 0.051 & 1.01\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.097 (0.043) & 0.770 (0.034) & 0.243 & 1.00 & 0.051 & 1.00\\
-\hspace{1em}aorsf-net & 0.095 (0.044) & 0.762 (0.034) & 13.416 & 55.3 & 0.052 & 1.01\\
-\hspace{1em}obliqueRSF-net & 0.089 (0.032) & 0.764 (0.035) & 97.197 & 400.4 & 5.365 & 105.1\\
-\hspace{1em}party-cif & 0.083 (0.042) & 0.750 (0.036) & 0.281 & 1.16 & 1.574 & 30.8\\
-\hspace{1em}aorsf-random & 0.082 (0.034) & 0.756 (0.032) & 0.459 & 1.89 & 0.052 & 1.02\\
-\hspace{1em}ranger-extratrees & 0.072 (0.019) & 0.748 (0.036) & 0.032 & 0.130 & 0.080 & 1.58\\
-\hspace{1em}rfsrc-standard & 0.065 (0.053) & 0.736 (0.035) & 0.111 & 0.458 & 0.040 & 0.784\\
-\hspace{1em}xgboost-cox & 0.028 (0.055) & 0.694 (0.117) & 0.325 & 1.34 & 0.002 & 0.039\\
-\hspace{1em}xgboost-aft & -2.63 (0.596) & 0.757 (0.034) & 7.205 & 29.7 & 0.005 & 0.098\\
+\hspace{1em}glmnet-cox & 0.119 (0.031) & 0.791 (0.040) & 0.133 & 1.48 & 0.003 & 0.150\\
+\hspace{1em}aorsf-cph & 0.102 (0.039) & 0.769 (0.034) & 0.175 & 1.94 & 0.020 & 1.00\\
+\hspace{1em}aorsf-fast & 0.101 (0.039) & 0.769 (0.032) & 0.090 & 1.00 & 0.020 & 1.00\\
+\hspace{1em}aorsf-net & 0.097 (0.041) & 0.760 (0.037) & 18.501 & 205.4 & 0.021 & 1.05\\
+\hspace{1em}obliqueRSF-net & 0.093 (0.027) & 0.766 (0.038) & 115.794 & 1,285.4 & 5.807 & 290.1\\
+\hspace{1em}aorsf-random & 0.090 (0.030) & 0.763 (0.033) & 0.319 & 3.54 & 0.020 & 1.00\\
+\hspace{1em}cif-standard & 0.087 (0.043) & 0.752 (0.038) & 1.227 & 13.6 & 1.275 & 63.7\\
+\hspace{1em}cif-extension & 0.086 (0.041) & 0.731 (0.042) & 6.649 & 73.8 & 2.610 & 130.4\\
+\hspace{1em}cif-rotate & 0.085 (0.051) & 0.756 (0.028) & 7.713 & 85.6 & 2.159 & 107.9\\
+\hspace{1em}ranger-extratrees & 0.075 (0.013) & 0.744 (0.034) & 0.038 & 0.425 & 0.087 & 4.33\\
+\hspace{1em}rsf-standard & 0.071 (0.056) & 0.734 (0.039) & 0.620 & 6.88 & 0.040 & 2.00\\
+\hspace{1em}xgboost-cox & 0.049 (0.055) & 0.724 (0.097) & 2.219 & 24.6 & 0.002 & 0.100\\
+\hspace{1em}nn-cox & -0.001 (0.014) & 0.548 (0.082) & 12.668 & 140.6 & 0.510 & 25.5\\
+\hspace{1em}xgboost-aft & -2.68 (0.479) & 0.754 (0.044) & 7.761 & 86.2 & 0.006 & 0.300\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{FCL; relapse, n = 541, p = 7}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.024 (0.020) & 0.611 (0.033) & 0.086 & 0.236 & 0.002 & 0.027\\
-\hspace{1em}ranger-extratrees & 0.016 (0.016) & 0.593 (0.024) & 0.031 & 0.086 & 0.081 & 1.07\\
-\hspace{1em}obliqueRSF-net & 0.010 (0.018) & 0.589 (0.023) & 221.459 & 610.5 & 10.676 & 141.1\\
-\hspace{1em}xgboost-cox & 0.006 (0.016) & 0.591 (0.030) & 1.383 & 3.81 & 0.003 & 0.040\\
-\hspace{1em}aorsf-random & 0.006 (0.020) & 0.585 (0.026) & 0.697 & 1.92 & 0.071 & 0.937\\
-\hspace{1em}party-cif & 0.003 (0.020) & 0.589 (0.021) & 0.280 & 0.772 & 1.775 & 23.5\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.002 (0.023) & 0.590 (0.027) & 0.709 & 1.95 & 0.075 & 0.997\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.002 (0.023) & 0.589 (0.026) & 0.363 & 1.00 & 0.076 & 1.00\\
-\hspace{1em}aorsf-net & 0.001 (0.023) & 0.587 (0.027) & 20.256 & 55.8 & 0.075 & 0.996\\
-\hspace{1em}rfsrc-standard & -0.033 (0.031) & 0.572 (0.025) & 0.917 & 2.53 & 0.087 & 1.16\\
-\hspace{1em}xgboost-aft & -0.858 (0.311) & 0.578 (0.031) & 6.260 & 17.3 & 0.005 & 0.066\\
+\hspace{1em}glmnet-cox & 0.033 (0.015) & 0.624 (0.019) & 0.101 & 0.791 & 0.002 & 0.074\\
+\hspace{1em}ranger-extratrees & 0.017 (0.018) & 0.594 (0.029) & 0.034 & 0.269 & 0.090 & 3.32\\
+\hspace{1em}obliqueRSF-net & 0.015 (0.015) & 0.595 (0.023) & 263.391 & 2,072.0 & 11.192 & 412.4\\
+\hspace{1em}xgboost-cox & 0.014 (0.014) & 0.605 (0.029) & 1.352 & 10.6 & 0.003 & 0.111\\
+\hspace{1em}aorsf-random & 0.013 (0.021) & 0.599 (0.027) & 0.530 & 4.17 & 0.025 & 0.922\\
+\hspace{1em}aorsf-cph & 0.009 (0.023) & 0.600 (0.028) & 0.272 & 2.14 & 0.028 & 1.04\\
+\hspace{1em}cif-standard & 0.008 (0.021) & 0.595 (0.024) & 1.143 & 8.99 & 1.784 & 65.7\\
+\hspace{1em}aorsf-fast & 0.008 (0.023) & 0.598 (0.028) & 0.127 & 1.00 & 0.027 & 1.00\\
+\hspace{1em}aorsf-net & 0.007 (0.024) & 0.596 (0.029) & 20.392 & 160.4 & 0.026 & 0.959\\
+\hspace{1em}nn-cox & -0.003 (0.018) & 0.535 (0.056) & 13.504 & 106.2 & 0.781 & 28.8\\
+\hspace{1em}cif-extension & -0.005 (0.026) & 0.581 (0.030) & 6.550 & 51.5 & 3.511 & 129.4\\
+\hspace{1em}cif-rotate & -0.011 (0.026) & 0.586 (0.031) & 8.441 & 66.4 & 3.303 & 121.7\\
+\hspace{1em}rsf-standard & -0.026 (0.034) & 0.580 (0.027) & 1.337 & 10.5 & 0.087 & 3.21\\
+\hspace{1em}xgboost-aft & -0.826 (0.317) & 0.586 (0.039) & 7.490 & 58.9 & 0.007 & 0.258\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{GBSG II; recurrence or death, n = 686, p = 10}}}\\
 \hline
-\hspace{1em}obliqueRSF-net & 0.125 (0.015) & 0.747 (0.018) & 283.036 & 530.9 & 10.993 & 80.3\\
-\hspace{1em}party-cif & 0.125 (0.021) & 0.745 (0.020) & 0.465 & 0.873 & 2.516 & 18.4\\
-\hspace{1em}aorsf-net & 0.123 (0.024) & 0.741 (0.019) & 37.619 & 70.6 & 0.132 & 0.963\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.121 (0.026) & 0.739 (0.018) & 1.202 & 2.25 & 0.136 & 0.993\\
-\hspace{1em}rfsrc-standard & 0.120 (0.026) & 0.739 (0.019) & 1.528 & 2.87 & 0.113 & 0.825\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.117 (0.025) & 0.736 (0.018) & 0.533 & 1.00 & 0.137 & 1.00\\
-\hspace{1em}aorsf-random & 0.108 (0.022) & 0.729 (0.025) & 1.226 & 2.30 & 0.130 & 0.948\\
-\hspace{1em}ranger-extratrees & 0.094 (0.014) & 0.737 (0.023) & 0.061 & 0.113 & 0.141 & 1.03\\
-\hspace{1em}glmnet-cox & 0.088 (0.017) & 0.731 (0.021) & 0.091 & 0.170 & 0.003 & 0.022\\
-\hspace{1em}xgboost-cox & 0.086 (0.019) & 0.736 (0.021) & 2.596 & 4.87 & 0.003 & 0.022\\
-\hspace{1em}xgboost-aft & -1.10 (0.176) & 0.734 (0.021) & 10.121 & 19.0 & 0.006 & 0.044\\
+\hspace{1em}obliqueRSF-net & 0.120 (0.016) & 0.741 (0.019) & 334.738 & 1,750.9 & 12.512 & 271.2\\
+\hspace{1em}cif-standard & 0.120 (0.022) & 0.739 (0.021) & 1.134 & 5.93 & 2.323 & 50.4\\
+\hspace{1em}aorsf-net & 0.118 (0.027) & 0.735 (0.022) & 38.945 & 203.7 & 0.046 & 1.00\\
+\hspace{1em}rsf-standard & 0.117 (0.025) & 0.734 (0.021) & 1.872 & 9.79 & 0.112 & 2.42\\
+\hspace{1em}aorsf-cph & 0.113 (0.029) & 0.729 (0.019) & 0.441 & 2.30 & 0.047 & 1.02\\
+\hspace{1em}cif-extension & 0.112 (0.020) & 0.740 (0.022) & 8.962 & 46.9 & 4.709 & 102.1\\
+\hspace{1em}aorsf-fast & 0.111 (0.028) & 0.729 (0.018) & 0.191 & 1.00 & 0.046 & 1.00\\
+\hspace{1em}cif-rotate & 0.108 (0.025) & 0.728 (0.018) & 13.378 & 70.0 & 5.546 & 120.2\\
+\hspace{1em}aorsf-random & 0.100 (0.028) & 0.718 (0.029) & 1.373 & 7.18 & 0.047 & 1.02\\
+\hspace{1em}ranger-extratrees & 0.091 (0.020) & 0.734 (0.028) & 0.489 & 2.56 & 0.137 & 2.98\\
+\hspace{1em}glmnet-cox & 0.084 (0.018) & 0.721 (0.021) & 0.143 & 0.750 & 0.003 & 0.065\\
+\hspace{1em}xgboost-cox & 0.081 (0.017) & 0.725 (0.019) & 2.309 & 12.1 & 0.003 & 0.065\\
+\hspace{1em}nn-cox & -0.004 (0.004) & 0.505 (0.033) & 12.705 & 66.5 & 1.348 & 29.2\\
+\hspace{1em}xgboost-aft & -1.11 (0.152) & 0.724 (0.022) & 11.618 & 60.8 & 0.007 & 0.152\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{GUIDE-IT; CVD death, n = 894, p = 59}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 1) & 0.075 (0.019) & 0.739 (0.030) & 0.578 & 1.00 & 0.130 & 1.00\\
-\hspace{1em}aorsf-net & 0.074 (0.020) & 0.738 (0.030) & 27.827 & 48.2 & 0.134 & 1.03\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.072 (0.020) & 0.738 (0.029) & 1.369 & 2.37 & 0.129 & 0.993\\
-\hspace{1em}obliqueRSF-net & 0.061 (0.015) & 0.736 (0.029) & 220.667 & 382.1 & 11.349 & 87.2\\
-\hspace{1em}party-cif & 0.056 (0.015) & 0.732 (0.030) & 1.431 & 2.48 & 3.202 & 24.6\\
-\hspace{1em}glmnet-cox & 0.056 (0.041) & 0.704 (0.097) & 0.497 & 0.860 & 0.002 & 0.015\\
-\hspace{1em}ranger-extratrees & 0.052 (0.013) & 0.729 (0.032) & 0.521 & 0.902 & 0.182 & 1.40\\
-\hspace{1em}rfsrc-standard & 0.048 (0.026) & 0.704 (0.029) & 0.776 & 1.34 & 0.061 & 0.470\\
-\hspace{1em}aorsf-random & 0.034 (0.012) & 0.694 (0.033) & 1.064 & 1.84 & 0.134 & 1.03\\
-\hspace{1em}xgboost-cox & 0.021 (0.066) & 0.744 (0.024) & 3.668 & 6.35 & 0.003 & 0.023\\
-\hspace{1em}xgboost-aft & -4.95 (0.885) & 0.729 (0.027) & 11.776 & 20.4 & 0.007 & 0.054\\
+\hspace{1em}aorsf-fast & 0.075 (0.018) & 0.749 (0.029) & 0.181 & 1.00 & 0.037 & 1.00\\
+\hspace{1em}aorsf-net & 0.073 (0.017) & 0.745 (0.029) & 28.715 & 158.4 & 0.040 & 1.08\\
+\hspace{1em}aorsf-cph & 0.070 (0.019) & 0.744 (0.029) & 0.423 & 2.33 & 0.040 & 1.08\\
+\hspace{1em}glmnet-cox & 0.069 (0.037) & 0.737 (0.071) & 1.067 & 5.89 & 0.003 & 0.081\\
+\hspace{1em}obliqueRSF-net & 0.062 (0.014) & 0.742 (0.025) & 245.122 & 1,352.1 & 11.754 & 317.4\\
+\hspace{1em}cif-rotate & 0.060 (0.014) & 0.718 (0.027) & 37.291 & 205.7 & 4.865 & 131.4\\
+\hspace{1em}cif-standard & 0.057 (0.014) & 0.738 (0.025) & 2.289 & 12.6 & 3.756 & 101.4\\
+\hspace{1em}ranger-extratrees & 0.052 (0.014) & 0.739 (0.031) & 0.766 & 4.22 & 0.218 & 5.89\\
+\hspace{1em}cif-extension & 0.050 (0.013) & 0.727 (0.024) & 13.957 & 77.0 & 5.947 & 160.6\\
+\hspace{1em}rsf-standard & 0.044 (0.022) & 0.705 (0.029) & 1.611 & 8.89 & 0.075 & 2.03\\
+\hspace{1em}xgboost-cox & 0.037 (0.046) & 0.743 (0.020) & 4.400 & 24.3 & 0.003 & 0.081\\
+\hspace{1em}aorsf-random & 0.030 (0.013) & 0.696 (0.030) & 1.521 & 8.39 & 0.042 & 1.12\\
+\hspace{1em}nn-cox & 0.020 (0.040) & 0.677 (0.093) & 13.762 & 75.9 & 0.675 & 18.2\\
+\hspace{1em}xgboost-aft & -5.15 (1.19) & 0.733 (0.021) & 15.383 & 84.9 & 0.007 & 0.189\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{GUIDE-IT; HF hospitalization, n = 894, p = 59}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.081 (0.019) & 0.719 (0.023) & 54.048 & 60.8 & 0.207 & 1.03\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.081 (0.019) & 0.719 (0.023) & 2.465 & 2.77 & 0.198 & 0.986\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.080 (0.020) & 0.719 (0.024) & 0.889 & 1.00 & 0.200 & 1.00\\
-\hspace{1em}ranger-extratrees & 0.073 (0.012) & 0.717 (0.024) & 0.566 & 0.636 & 0.202 & 1.01\\
-\hspace{1em}obliqueRSF-net & 0.073 (0.012) & 0.715 (0.025) & 382.769 & 430.5 & 13.800 & 68.9\\
-\hspace{1em}party-cif & 0.070 (0.012) & 0.711 (0.024) & 1.381 & 1.55 & 3.363 & 16.8\\
-\hspace{1em}rfsrc-standard & 0.059 (0.019) & 0.691 (0.023) & 1.511 & 1.70 & 0.118 & 0.591\\
-\hspace{1em}glmnet-cox & 0.053 (0.023) & 0.692 (0.030) & 0.433 & 0.488 & 0.003 & 0.015\\
-\hspace{1em}aorsf-random & 0.051 (0.011) & 0.682 (0.025) & 2.100 & 2.36 & 0.196 & 0.980\\
-\hspace{1em}xgboost-cox & 0.039 (0.019) & 0.694 (0.027) & 2.967 & 3.34 & 0.002 & 0.010\\
-\hspace{1em}xgboost-aft & -2.12 (0.324) & 0.696 (0.025) & 12.660 & 14.2 & 0.006 & 0.030\\
+\hspace{1em}aorsf-net & 0.086 (0.017) & 0.727 (0.025) & 68.304 & 241.1 & 0.070 & 1.12\\
+\hspace{1em}aorsf-fast & 0.085 (0.018) & 0.728 (0.027) & 0.283 & 1.00 & 0.063 & 1.00\\
+\hspace{1em}aorsf-cph & 0.085 (0.020) & 0.727 (0.025) & 0.713 & 2.52 & 0.063 & 1.00\\
+\hspace{1em}obliqueRSF-net & 0.076 (0.011) & 0.725 (0.024) & 472.412 & 1,667.8 & 14.859 & 235.6\\
+\hspace{1em}ranger-extratrees & 0.073 (0.011) & 0.722 (0.023) & 0.801 & 2.83 & 0.514 & 8.15\\
+\hspace{1em}cif-standard & 0.072 (0.011) & 0.719 (0.023) & 2.043 & 7.21 & 3.784 & 60.0\\
+\hspace{1em}cif-rotate & 0.070 (0.020) & 0.711 (0.031) & 47.306 & 167.0 & 8.016 & 127.1\\
+\hspace{1em}cif-extension & 0.066 (0.009) & 0.719 (0.021) & 18.091 & 63.9 & 8.846 & 140.3\\
+\hspace{1em}glmnet-cox & 0.064 (0.019) & 0.705 (0.024) & 1.076 & 3.80 & 0.003 & 0.048\\
+\hspace{1em}rsf-standard & 0.059 (0.023) & 0.698 (0.027) & 1.775 & 6.27 & 0.109 & 1.73\\
+\hspace{1em}aorsf-random & 0.051 (0.011) & 0.687 (0.025) & 1.882 & 6.64 & 0.062 & 0.984\\
+\hspace{1em}xgboost-cox & 0.042 (0.014) & 0.703 (0.027) & 2.982 & 10.5 & 0.003 & 0.048\\
+\hspace{1em}nn-cox & 0.039 (0.032) & 0.680 (0.077) & 14.131 & 49.9 & 0.644 & 10.2\\
+\hspace{1em}xgboost-aft & -2.22 (0.313) & 0.698 (0.028) & 12.951 & 45.7 & 0.007 & 0.111\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Heart Transplant; graft-loss or death, n = 3787, p = 52}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.051 (0.007) & 0.730 (0.013) & 126.867 & 33.3 & 1.065 & 1.03\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.050 (0.007) & 0.731 (0.014) & 3.809 & 1.00 & 1.034 & 1.00\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.050 (0.007) & 0.730 (0.013) & 10.098 & 2.65 & 1.029 & 0.995\\
-\hspace{1em}party-cif & 0.048 (0.006) & 0.731 (0.012) & 10.755 & 2.82 & 39.378 & 38.1\\
-\hspace{1em}rfsrc-standard & 0.048 (0.009) & 0.727 (0.012) & 3.702 & 0.972 & 1.115 & 1.08\\
-\hspace{1em}obliqueRSF-net & 0.048 (0.006) & 0.729 (0.013) & 365.863 & 96.1 & 161.863 & 156.6\\
-\hspace{1em}ranger-extratrees & 0.044 (0.006) & 0.727 (0.013) & 5.396 & 1.42 & 3.471 & 3.36\\
-\hspace{1em}glmnet-cox & 0.035 (0.005) & 0.710 (0.017) & 1.362 & 0.358 & 0.010 & 0.010\\
-\hspace{1em}xgboost-cox & 0.032 (0.008) & 0.717 (0.015) & 3.871 & 1.02 & 0.016 & 0.016\\
-\hspace{1em}aorsf-random & 0.028 (0.004) & 0.691 (0.014) & 6.272 & 1.65 & 1.040 & 1.01\\
-\hspace{1em}xgboost-aft & -4.26 (0.534) & 0.726 (0.012) & 12.730 & 3.34 & 0.009 & 0.009\\
+\hspace{1em}cif-rotate & 0.054 (0.011) & 0.730 (0.019) & 161.908 & 164.7 & 34.066 & 110.1\\
+\hspace{1em}aorsf-net & 0.051 (0.007) & 0.731 (0.015) & 132.397 & 134.7 & 0.313 & 1.01\\
+\hspace{1em}aorsf-fast & 0.051 (0.007) & 0.734 (0.016) & 0.983 & 1.00 & 0.309 & 1.00\\
+\hspace{1em}aorsf-cph & 0.051 (0.007) & 0.732 (0.015) & 3.094 & 3.15 & 0.311 & 1.01\\
+\hspace{1em}cif-standard & 0.049 (0.007) & 0.732 (0.016) & 12.017 & 12.2 & 46.520 & 150.3\\
+\hspace{1em}obliqueRSF-net & 0.048 (0.007) & 0.729 (0.017) & 362.862 & 369.2 & 168.051 & 543.1\\
+\hspace{1em}rsf-standard & 0.048 (0.010) & 0.726 (0.013) & 3.527 & 3.59 & 1.138 & 3.68\\
+\hspace{1em}ranger-extratrees & 0.046 (0.007) & 0.729 (0.016) & 4.963 & 5.05 & 3.527 & 11.4\\
+\hspace{1em}glmnet-cox & 0.035 (0.006) & 0.709 (0.017) & 1.023 & 1.04 & 0.013 & 0.042\\
+\hspace{1em}cif-extension & 0.035 (0.004) & 0.726 (0.019) & 50.426 & 51.3 & 24.989 & 80.8\\
+\hspace{1em}xgboost-cox & 0.030 (0.008) & 0.716 (0.021) & 3.520 & 3.58 & 0.011 & 0.036\\
+\hspace{1em}aorsf-random & 0.028 (0.003) & 0.688 (0.014) & 3.025 & 3.08 & 0.296 & 0.956\\
+\hspace{1em}nn-cox & 0.023 (0.011) & 0.679 (0.023) & 16.704 & 17.0 & 11.675 & 37.7\\
+\hspace{1em}xgboost-aft & -4.38 (0.466) & 0.721 (0.013) & 13.594 & 13.8 & 0.008 & 0.026\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Monoclonal gammopathy; death, n = 1384, p = 8}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 15) & 0.158 (0.017) & 0.743 (0.011) & 3.015 & 2.22 & 0.332 & 1.00\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.157 (0.017) & 0.742 (0.011) & 1.360 & 1.00 & 0.332 & 1.00\\
-\hspace{1em}obliqueRSF-net & 0.155 (0.013) & 0.743 (0.011) & 240.551 & 176.9 & 16.910 & 50.9\\
-\hspace{1em}aorsf-net & 0.154 (0.017) & 0.741 (0.011) & 90.724 & 66.7 & 0.325 & 0.979\\
-\hspace{1em}party-cif & 0.152 (0.016) & 0.739 (0.012) & 1.585 & 1.17 & 6.240 & 18.8\\
-\hspace{1em}rfsrc-standard & 0.150 (0.018) & 0.737 (0.011) & 2.484 & 1.83 & 0.192 & 0.579\\
-\hspace{1em}aorsf-random & 0.147 (0.014) & 0.736 (0.012) & 2.999 & 2.21 & 0.316 & 0.951\\
-\hspace{1em}glmnet-cox & 0.139 (0.022) & 0.728 (0.014) & 0.121 & 0.089 & 0.004 & 0.012\\
-\hspace{1em}xgboost-cox & 0.122 (0.014) & 0.734 (0.012) & 3.480 & 2.56 & 0.005 & 0.015\\
-\hspace{1em}ranger-extratrees & 0.116 (0.007) & 0.745 (0.012) & 0.063 & 0.046 & 0.202 & 0.607\\
-\hspace{1em}xgboost-aft & -0.863 (0.151) & 0.732 (0.013) & 11.184 & 8.23 & 0.006 & 0.018\\
+\hspace{1em}cif-rotate & 0.158 (0.020) & 0.742 (0.015) & 17.616 & 38.2 & 8.081 & 71.1\\
+\hspace{1em}aorsf-cph & 0.157 (0.015) & 0.741 (0.010) & 1.254 & 2.72 & 0.112 & 0.983\\
+\hspace{1em}aorsf-fast & 0.156 (0.015) & 0.740 (0.010) & 0.461 & 1.00 & 0.114 & 1.00\\
+\hspace{1em}obliqueRSF-net & 0.154 (0.012) & 0.742 (0.011) & 244.591 & 530.3 & 17.341 & 152.5\\
+\hspace{1em}aorsf-net & 0.154 (0.014) & 0.739 (0.010) & 97.606 & 211.6 & 0.108 & 0.946\\
+\hspace{1em}cif-standard & 0.150 (0.014) & 0.737 (0.011) & 2.419 & 5.24 & 8.105 & 71.3\\
+\hspace{1em}rsf-standard & 0.150 (0.015) & 0.735 (0.010) & 1.834 & 3.98 & 0.182 & 1.60\\
+\hspace{1em}aorsf-random & 0.145 (0.013) & 0.733 (0.011) & 2.662 & 5.77 & 0.105 & 0.924\\
+\hspace{1em}cif-extension & 0.142 (0.009) & 0.745 (0.012) & 11.262 & 24.4 & 6.808 & 59.9\\
+\hspace{1em}glmnet-cox & 0.134 (0.019) & 0.724 (0.013) & 0.140 & 0.304 & 0.005 & 0.044\\
+\hspace{1em}xgboost-cox & 0.122 (0.012) & 0.731 (0.012) & 3.765 & 8.16 & 0.005 & 0.044\\
+\hspace{1em}ranger-extratrees & 0.115 (0.005) & 0.741 (0.011) & 0.098 & 0.212 & 0.645 & 5.68\\
+\hspace{1em}nn-cox & 0.030 (0.053) & 0.610 (0.092) & 15.851 & 34.4 & 1.194 & 10.5\\
+\hspace{1em}xgboost-aft & -0.854 (0.157) & 0.732 (0.013) & 12.951 & 28.1 & 0.009 & 0.083\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Monoclonal gammopathy; malignancy, n = 1384, p = 8}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.015 (0.011) & 0.650 (0.046) & 0.101 & 0.138 & 0.002 & 0.014\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.009 (0.014) & 0.639 (0.031) & 1.456 & 2.00 & 0.141 & 0.995\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.008 (0.014) & 0.636 (0.030) & 0.728 & 1.00 & 0.142 & 1.00\\
-\hspace{1em}ranger-extratrees & 0.007 (0.007) & 0.633 (0.030) & 0.058 & 0.080 & 0.162 & 1.14\\
-\hspace{1em}aorsf-random & 0.007 (0.014) & 0.628 (0.029) & 1.149 & 1.58 & 0.140 & 0.983\\
-\hspace{1em}xgboost-cox & 0.007 (0.014) & 0.644 (0.040) & 1.932 & 2.65 & 0.002 & 0.014\\
-\hspace{1em}aorsf-net & 0.006 (0.014) & 0.634 (0.029) & 23.343 & 32.1 & 0.141 & 0.996\\
-\hspace{1em}obliqueRSF-net & 0.005 (0.012) & 0.626 (0.032) & 39.064 & 53.6 & 16.273 & 114.6\\
-\hspace{1em}party-cif & 0.004 (0.013) & 0.626 (0.031) & 1.558 & 2.14 & 5.620 & 39.6\\
-\hspace{1em}rfsrc-standard & -0.011 (0.018) & 0.611 (0.032) & 0.793 & 1.09 & 0.075 & 0.528\\
-\hspace{1em}xgboost-aft & -5.45 (1.09) & 0.630 (0.037) & 9.725 & 13.4 & 0.006 & 0.042\\
+\hspace{1em}glmnet-cox & 0.016 (0.011) & 0.660 (0.055) & 0.119 & 0.558 & 0.003 & 0.069\\
+\hspace{1em}aorsf-cph & 0.011 (0.009) & 0.648 (0.034) & 0.626 & 2.94 & 0.044 & 1.02\\
+\hspace{1em}aorsf-fast & 0.011 (0.010) & 0.646 (0.035) & 0.213 & 1.00 & 0.044 & 1.00\\
+\hspace{1em}cif-extension & 0.008 (0.007) & 0.631 (0.024) & 11.659 & 54.8 & 5.776 & 132.5\\
+\hspace{1em}aorsf-net & 0.008 (0.011) & 0.646 (0.034) & 26.190 & 123.1 & 0.044 & 1.01\\
+\hspace{1em}xgboost-cox & 0.008 (0.013) & 0.645 (0.039) & 1.886 & 8.86 & 0.003 & 0.069\\
+\hspace{1em}ranger-extratrees & 0.008 (0.007) & 0.646 (0.033) & 0.071 & 0.334 & 0.888 & 20.4\\
+\hspace{1em}obliqueRSF-net & 0.007 (0.008) & 0.634 (0.031) & 49.465 & 232.5 & 17.992 & 412.8\\
+\hspace{1em}aorsf-random & 0.007 (0.012) & 0.638 (0.033) & 1.737 & 8.16 & 0.046 & 1.06\\
+\hspace{1em}cif-standard & 0.007 (0.008) & 0.632 (0.031) & 1.981 & 9.31 & 6.793 & 155.9\\
+\hspace{1em}nn-cox & -0.005 (0.006) & 0.501 (0.044) & 12.103 & 56.9 & 1.392 & 31.9\\
+\hspace{1em}rsf-standard & -0.009 (0.015) & 0.623 (0.029) & 0.906 & 4.26 & 0.074 & 1.70\\
+\hspace{1em}cif-rotate & -0.026 (0.022) & 0.551 (0.031) & 13.529 & 63.6 & 4.724 & 108.4\\
+\hspace{1em}xgboost-aft & -5.70 (1.21) & 0.634 (0.041) & 11.718 & 55.1 & 0.007 & 0.161\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Movies released in 2015-2018; gross 1M USD, n = 551, p = 46}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.619 (0.029) & 0.941 (0.009) & 0.180 & 0.226 & 0.004 & 0.019\\
-\hspace{1em}aorsf-net & 0.531 (0.024) & 0.929 (0.010) & 52.636 & 66.0 & 0.182 & 1.00\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.523 (0.022) & 0.927 (0.010) & 2.814 & 3.53 & 0.182 & 1.00\\
-\hspace{1em}rfsrc-standard & 0.521 (0.023) & 0.923 (0.011) & 1.705 & 2.14 & 0.103 & 0.567\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.517 (0.024) & 0.923 (0.011) & 0.797 & 1.00 & 0.181 & 1.00\\
-\hspace{1em}xgboost-cox & 0.508 (0.030) & 0.932 (0.010) & 12.812 & 16.1 & 0.006 & 0.033\\
-\hspace{1em}party-cif & 0.479 (0.025) & 0.904 (0.015) & 0.393 & 0.493 & 2.302 & 12.7\\
-\hspace{1em}ranger-extratrees & 0.432 (0.025) & 0.901 (0.016) & 0.058 & 0.073 & 0.108 & 0.594\\
-\hspace{1em}obliqueRSF-net & 0.323 (0.021) & 0.911 (0.015) & 163.647 & 205.2 & 27.707 & 152.7\\
-\hspace{1em}aorsf-random & 0.300 (0.025) & 0.850 (0.023) & 1.511 & 1.90 & 0.170 & 0.934\\
-\hspace{1em}xgboost-aft & -0.483 (0.078) & 0.927 (0.011) & 50.372 & 63.2 & 0.009 & 0.047\\
+\hspace{1em}cif-rotate & 0.641 (0.024) & 0.943 (0.007) & 23.806 & 89.0 & 6.131 & 105.6\\
+\hspace{1em}glmnet-cox & 0.621 (0.034) & 0.939 (0.010) & 0.200 & 0.747 & 0.004 & 0.069\\
+\hspace{1em}nn-cox & 0.542 (0.072) & 0.905 (0.030) & 22.066 & 82.5 & 1.527 & 26.3\\
+\hspace{1em}aorsf-net & 0.531 (0.027) & 0.928 (0.010) & 68.367 & 255.5 & 0.061 & 1.05\\
+\hspace{1em}aorsf-cph & 0.523 (0.025) & 0.925 (0.011) & 0.812 & 3.04 & 0.060 & 1.04\\
+\hspace{1em}rsf-standard & 0.520 (0.023) & 0.922 (0.011) & 1.205 & 4.50 & 0.105 & 1.81\\
+\hspace{1em}aorsf-fast & 0.515 (0.027) & 0.921 (0.013) & 0.268 & 1.00 & 0.058 & 1.00\\
+\hspace{1em}xgboost-cox & 0.509 (0.025) & 0.931 (0.010) & 13.948 & 52.1 & 0.005 & 0.086\\
+\hspace{1em}cif-standard & 0.475 (0.027) & 0.900 (0.018) & 0.971 & 3.63 & 1.894 & 32.6\\
+\hspace{1em}cif-extension & 0.454 (0.027) & 0.919 (0.013) & 10.381 & 38.8 & 6.372 & 109.8\\
+\hspace{1em}ranger-extratrees & 0.429 (0.022) & 0.897 (0.018) & 0.079 & 0.295 & 0.975 & 16.8\\
+\hspace{1em}obliqueRSF-net & 0.320 (0.026) & 0.907 (0.018) & 157.741 & 589.5 & 27.372 & 471.5\\
+\hspace{1em}aorsf-random & 0.296 (0.034) & 0.844 (0.029) & 1.520 & 5.68 & 0.054 & 0.936\\
+\hspace{1em}xgboost-aft & -0.449 (0.081) & 0.927 (0.011) & 54.157 & 202.4 & 0.009 & 0.155\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Non-alcohol fatty liver disease; death, n = 17549, p = 24}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 15) & 0.217 (0.010) & 0.868 (0.006) & 50.582 & 2.70 & 43.776 & 1.15\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.217 (0.010) & 0.869 (0.006) & 18.704 & 1.00 & 37.967 & 1.00\\
-\hspace{1em}aorsf-net & 0.214 (0.010) & 0.865 (0.006) & 478.494 & 25.6 & 37.231 & 0.981\\
-\hspace{1em}obliqueRSF-net & 0.213 (0.010) & 0.868 (0.006) & 1560.671 & 83.4 & 6530.150 & 172.0\\
-\hspace{1em}rfsrc-standard & 0.212 (0.011) & 0.860 (0.007) & 12.257 & 0.655 & 1.293 & 0.034\\
-\hspace{1em}glmnet-cox & 0.211 (0.011) & 0.860 (0.006) & 1.509 & 0.081 & 0.464 & 0.012\\
-\hspace{1em}party-cif & 0.208 (0.009) & 0.863 (0.006) & 72.349 & 3.87 & 716.204 & 18.9\\
-\hspace{1em}ranger-extratrees & 0.184 (0.007) & 0.860 (0.006) & 44.210 & 2.36 & 96.730 & 2.55\\
-\hspace{1em}aorsf-random & 0.144 (0.006) & 0.838 (0.007) & 25.720 & 1.38 & 37.114 & 0.978\\
-\hspace{1em}xgboost-cox & 0.022 (0.015) & 0.876 (0.006) & 9.865 & 0.527 & 1.013 & 0.027\\
-\hspace{1em}xgboost-aft & -7.06 (0.796) & 0.874 (0.006) & 29.664 & 1.59 & 1.001 & 0.026\\
+\hspace{1em}aorsf-cph & 0.217 (0.009) & 0.870 (0.005) & 20.788 & 3.65 & 18.417 & 1.35\\
+\hspace{1em}aorsf-fast & 0.217 (0.009) & 0.870 (0.005) & 5.700 & 1.00 & 13.667 & 1.00\\
+\hspace{1em}aorsf-net & 0.214 (0.008) & 0.866 (0.006) & 502.140 & 88.1 & 10.280 & 0.752\\
+\hspace{1em}obliqueRSF-net & 0.213 (0.008) & 0.870 (0.006) & 1549.268 & 271.8 & 6853.986 & 501.5\\
+\hspace{1em}glmnet-cox & 0.212 (0.009) & 0.862 (0.005) & 2.153 & 0.378 & 1.017 & 0.074\\
+\hspace{1em}rsf-standard & 0.211 (0.009) & 0.861 (0.005) & 13.233 & 2.32 & 1.564 & 0.114\\
+\hspace{1em}cif-standard & 0.209 (0.007) & 0.865 (0.006) & 72.946 & 12.8 & 760.360 & 55.6\\
+\hspace{1em}cif-rotate & 0.194 (0.007) & 0.866 (0.005) & 292.104 & 51.2 & 235.407 & 17.2\\
+\hspace{1em}ranger-extratrees & 0.184 (0.007) & 0.861 (0.005) & 50.579 & 8.87 & 142.725 & 10.4\\
+\hspace{1em}cif-extension & 0.169 (0.002) & 0.867 (0.006) & 128.534 & 22.5 & 214.030 & 15.7\\
+\hspace{1em}aorsf-random & 0.143 (0.007) & 0.840 (0.007) & 17.955 & 3.15 & 21.539 & 1.58\\
+\hspace{1em}xgboost-cox & 0.020 (0.014) & 0.877 (0.005) & 9.073 & 1.59 & 1.098 & 0.080\\
+\hspace{1em}nn-cox & -0.002 (0.012) & 0.570 (0.109) & 59.880 & 10.5 & 334.754 & 24.5\\
+\hspace{1em}xgboost-aft & -7.40 (0.776) & 0.875 (0.006) & 28.666 & 5.03 & 0.807 & 0.059\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Primary biliary cholangitis; death, n = 276, p = 19}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 1) & 0.418 (0.048) & 0.905 (0.023) & 0.191 & 1.00 & 0.045 & 1.00\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.408 (0.047) & 0.902 (0.023) & 0.443 & 2.32 & 0.047 & 1.05\\
-\hspace{1em}aorsf-net & 0.402 (0.044) & 0.901 (0.024) & 14.653 & 76.7 & 0.046 & 1.03\\
-\hspace{1em}rfsrc-standard & 0.378 (0.048) & 0.890 (0.026) & 0.101 & 0.527 & 0.038 & 0.854\\
-\hspace{1em}obliqueRSF-net & 0.363 (0.037) & 0.903 (0.024) & 109.549 & 573.2 & 1.750 & 39.1\\
-\hspace{1em}aorsf-random & 0.345 (0.038) & 0.889 (0.022) & 0.433 & 2.27 & 0.046 & 1.03\\
-\hspace{1em}party-cif & 0.344 (0.039) & 0.899 (0.027) & 0.194 & 1.02 & 0.401 & 8.95\\
-\hspace{1em}glmnet-cox & 0.337 (0.053) & 0.885 (0.027) & 0.101 & 0.526 & 0.002 & 0.045\\
-\hspace{1em}ranger-extratrees & 0.270 (0.034) & 0.890 (0.029) & 0.026 & 0.135 & 0.038 & 0.855\\
-\hspace{1em}xgboost-cox & 0.263 (0.095) & 0.879 (0.026) & 4.438 & 23.2 & 0.002 & 0.045\\
-\hspace{1em}xgboost-aft & -0.985 (0.345) & 0.881 (0.024) & 9.390 & 49.1 & 0.007 & 0.146\\
+\hspace{1em}aorsf-fast & 0.423 (0.031) & 0.902 (0.022) & 0.080 & 1.00 & 0.020 & 1.00\\
+\hspace{1em}aorsf-cph & 0.411 (0.032) & 0.901 (0.022) & 0.161 & 2.01 & 0.020 & 1.00\\
+\hspace{1em}aorsf-net & 0.405 (0.033) & 0.900 (0.022) & 16.130 & 201.4 & 0.020 & 1.01\\
+\hspace{1em}cif-rotate & 0.395 (0.042) & 0.893 (0.023) & 10.099 & 126.1 & 2.363 & 118.0\\
+\hspace{1em}rsf-standard & 0.383 (0.033) & 0.888 (0.024) & 0.111 & 1.38 & 0.040 & 2.01\\
+\hspace{1em}obliqueRSF-net & 0.360 (0.032) & 0.900 (0.023) & 122.137 & 1,525.3 & 2.067 & 103.3\\
+\hspace{1em}aorsf-random & 0.349 (0.026) & 0.889 (0.021) & 0.373 & 4.65 & 0.020 & 1.00\\
+\hspace{1em}cif-standard & 0.338 (0.033) & 0.895 (0.026) & 0.260 & 3.25 & 1.471 & 73.5\\
+\hspace{1em}cif-extension & 0.336 (0.031) & 0.893 (0.024) & 11.191 & 139.8 & 4.839 & 241.7\\
+\hspace{1em}glmnet-cox & 0.336 (0.050) & 0.882 (0.029) & 0.121 & 1.51 & 0.002 & 0.100\\
+\hspace{1em}ranger-extratrees & 0.264 (0.026) & 0.886 (0.029) & 0.030 & 0.377 & 0.041 & 2.05\\
+\hspace{1em}xgboost-cox & 0.242 (0.110) & 0.875 (0.024) & 4.640 & 58.0 & 0.002 & 0.100\\
+\hspace{1em}nn-cox & -0.024 (0.019) & 0.613 (0.174) & 11.186 & 139.7 & 0.252 & 12.6\\
+\hspace{1em}xgboost-aft & -0.969 (0.333) & 0.877 (0.022) & 9.772 & 122.0 & 0.006 & 0.300\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Rotterdam tumor bank; death, n = 2982, p = 11}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.170 (0.014) & 0.764 (0.011) & 156.389 & 51.8 & 1.283 & 0.947\\
-\hspace{1em}obliqueRSF-net & 0.167 (0.012) & 0.764 (0.012) & 453.760 & 150.2 & 117.582 & 86.7\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.167 (0.014) & 0.762 (0.011) & 7.285 & 2.41 & 1.353 & 0.998\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.165 (0.015) & 0.760 (0.012) & 3.021 & 1.00 & 1.356 & 1.00\\
-\hspace{1em}party-cif & 0.164 (0.012) & 0.762 (0.012) & 4.837 & 1.60 & 28.933 & 21.3\\
-\hspace{1em}rfsrc-standard & 0.163 (0.014) & 0.759 (0.011) & 3.315 & 1.10 & 1.024 & 0.755\\
-\hspace{1em}aorsf-random & 0.157 (0.012) & 0.755 (0.012) & 5.742 & 1.90 & 1.275 & 0.941\\
-\hspace{1em}ranger-extratrees & 0.141 (0.007) & 0.751 (0.011) & 3.462 & 1.15 & 2.475 & 1.83\\
-\hspace{1em}xgboost-cox & 0.135 (0.014) & 0.756 (0.012) & 3.849 & 1.27 & 0.020 & 0.015\\
-\hspace{1em}glmnet-cox & 0.120 (0.010) & 0.732 (0.011) & 0.211 & 0.070 & 0.025 & 0.018\\
-\hspace{1em}xgboost-aft & -1.36 (0.159) & 0.763 (0.011) & 15.373 & 5.09 & 0.009 & 0.007\\
+\hspace{1em}aorsf-net & 0.164 (0.012) & 0.760 (0.009) & 154.345 & 134.0 & 0.397 & 0.395\\
+\hspace{1em}obliqueRSF-net & 0.162 (0.010) & 0.759 (0.009) & 554.274 & 481.3 & 124.158 & 123.4\\
+\hspace{1em}aorsf-cph & 0.160 (0.012) & 0.757 (0.010) & 2.673 & 2.32 & 0.909 & 0.904\\
+\hspace{1em}aorsf-fast & 0.158 (0.013) & 0.755 (0.010) & 1.152 & 1.00 & 1.006 & 1.00\\
+\hspace{1em}cif-standard & 0.158 (0.010) & 0.757 (0.009) & 8.251 & 7.16 & 47.391 & 47.1\\
+\hspace{1em}rsf-standard & 0.156 (0.014) & 0.754 (0.009) & 3.058 & 2.66 & 0.277 & 0.276\\
+\hspace{1em}aorsf-random & 0.151 (0.010) & 0.750 (0.010) & 5.985 & 5.20 & 0.414 & 0.411\\
+\hspace{1em}cif-rotate & 0.150 (0.012) & 0.752 (0.012) & 34.744 & 30.2 & 29.541 & 29.4\\
+\hspace{1em}ranger-extratrees & 0.139 (0.005) & 0.747 (0.009) & 3.357 & 2.91 & 2.866 & 2.85\\
+\hspace{1em}xgboost-cox & 0.131 (0.014) & 0.753 (0.009) & 5.214 & 4.53 & 0.019 & 0.019\\
+\hspace{1em}cif-extension & 0.131 (0.005) & 0.750 (0.009) & 26.506 & 23.0 & 30.945 & 30.7\\
+\hspace{1em}glmnet-cox & 0.118 (0.009) & 0.731 (0.010) & 0.770 & 0.668 & 0.018 & 0.018\\
+\hspace{1em}nn-cox & -0.003 (0.009) & 0.521 (0.036) & 17.492 & 15.2 & 8.753 & 8.70\\
+\hspace{1em}xgboost-aft & -1.33 (0.121) & 0.760 (0.007) & 14.435 & 12.5 & 0.010 & 0.010\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Rotterdam tumor bank; recurrence, n = 2982, p = 11}}}\\
 \hline
-\hspace{1em}obliqueRSF-net & 0.151 (0.011) & 0.739 (0.010) & 533.082 & 162.9 & 134.838 & 89.5\\
-\hspace{1em}aorsf-net & 0.150 (0.013) & 0.738 (0.010) & 170.007 & 52.0 & 1.437 & 0.954\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.148 (0.013) & 0.736 (0.010) & 8.035 & 2.46 & 1.523 & 1.01\\
-\hspace{1em}party-cif & 0.147 (0.012) & 0.736 (0.010) & 5.107 & 1.56 & 31.190 & 20.7\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.147 (0.013) & 0.735 (0.010) & 3.272 & 1.00 & 1.506 & 1.00\\
-\hspace{1em}aorsf-random & 0.143 (0.010) & 0.733 (0.009) & 6.299 & 1.93 & 1.394 & 0.926\\
-\hspace{1em}rfsrc-standard & 0.142 (0.013) & 0.733 (0.010) & 3.258 & 0.996 & 0.925 & 0.614\\
-\hspace{1em}ranger-extratrees & 0.137 (0.007) & 0.736 (0.009) & 3.429 & 1.05 & 2.687 & 1.78\\
-\hspace{1em}glmnet-cox & 0.119 (0.008) & 0.729 (0.010) & 0.252 & 0.077 & 0.022 & 0.014\\
-\hspace{1em}xgboost-cox & 0.115 (0.008) & 0.732 (0.011) & 3.302 & 1.01 & 0.022 & 0.015\\
-\hspace{1em}xgboost-aft & -1.06 (0.148) & 0.737 (0.010) & 14.130 & 4.32 & 0.010 & 0.007\\
+\hspace{1em}obliqueRSF-net & 0.147 (0.013) & 0.736 (0.011) & 547.423 & 368.6 & 134.826 & 288.4\\
+\hspace{1em}aorsf-net & 0.146 (0.014) & 0.735 (0.011) & 170.103 & 114.5 & 0.431 & 0.923\\
+\hspace{1em}cif-standard & 0.144 (0.013) & 0.734 (0.011) & 5.107 & 3.44 & 32.549 & 69.6\\
+\hspace{1em}aorsf-cph & 0.143 (0.014) & 0.734 (0.011) & 3.336 & 2.25 & 0.462 & 0.988\\
+\hspace{1em}aorsf-fast & 0.142 (0.014) & 0.732 (0.011) & 1.485 & 1.00 & 0.467 & 1.00\\
+\hspace{1em}aorsf-random & 0.139 (0.013) & 0.730 (0.011) & 4.762 & 3.21 & 0.428 & 0.916\\
+\hspace{1em}rsf-standard & 0.138 (0.014) & 0.731 (0.011) & 3.256 & 2.19 & 0.285 & 0.609\\
+\hspace{1em}ranger-extratrees & 0.135 (0.009) & 0.734 (0.011) & 4.162 & 2.80 & 3.054 & 6.53\\
+\hspace{1em}cif-rotate & 0.130 (0.012) & 0.727 (0.011) & 37.933 & 25.5 & 38.363 & 82.1\\
+\hspace{1em}cif-extension & 0.119 (0.007) & 0.731 (0.011) & 23.917 & 16.1 & 28.877 & 61.8\\
+\hspace{1em}glmnet-cox & 0.117 (0.009) & 0.727 (0.010) & 0.788 & 0.531 & 0.027 & 0.058\\
+\hspace{1em}xgboost-cox & 0.112 (0.008) & 0.730 (0.011) & 3.856 & 2.60 & 0.021 & 0.045\\
+\hspace{1em}nn-cox & -0.002 (0.002) & 0.536 (0.072) & 23.903 & 16.1 & 11.126 & 23.8\\
+\hspace{1em}xgboost-aft & -1.01 (0.126) & 0.734 (0.011) & 17.639 & 11.9 & 0.010 & 0.022\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Serum free light chain; death, n = 7874, p = 10}}}\\
 \hline
-\hspace{1em}aorsf-cph(maxit = 15) & 0.249 (0.013) & 0.824 (0.008) & 19.646 & 2.34 & 17.424 & 0.761\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.249 (0.014) & 0.824 (0.007) & 8.398 & 1.00 & 22.885 & 1.00\\
-\hspace{1em}aorsf-net & 0.249 (0.013) & 0.821 (0.008) & 305.832 & 36.4 & 21.792 & 0.952\\
-\hspace{1em}glmnet-cox & 0.248 (0.012) & 0.819 (0.007) & 0.615 & 0.073 & 0.234 & 0.010\\
-\hspace{1em}obliqueRSF-net & 0.247 (0.012) & 0.820 (0.008) & 1107.351 & 131.9 & 817.888 & 35.7\\
-\hspace{1em}ranger-extratrees & 0.243 (0.010) & 0.819 (0.008) & 15.165 & 1.81 & 15.048 & 0.658\\
-\hspace{1em}party-cif & 0.243 (0.012) & 0.817 (0.008) & 19.999 & 2.38 & 155.997 & 6.82\\
-\hspace{1em}rfsrc-standard & 0.242 (0.013) & 0.814 (0.008) & 6.781 & 0.807 & 0.620 & 0.027\\
-\hspace{1em}aorsf-random & 0.230 (0.012) & 0.815 (0.008) & 14.450 & 1.72 & 20.496 & 0.896\\
-\hspace{1em}xgboost-cox & 0.091 (0.035) & 0.822 (0.008) & 6.066 & 0.722 & 0.136 & 0.006\\
-\hspace{1em}xgboost-aft & -2.69 (0.251) & 0.822 (0.008) & 18.993 & 2.26 & 0.650 & 0.028\\
+\hspace{1em}aorsf-fast & 0.253 (0.017) & 0.825 (0.009) & 2.773 & 1.00 & 3.620 & 1.00\\
+\hspace{1em}aorsf-cph & 0.253 (0.016) & 0.825 (0.010) & 7.965 & 2.87 & 5.799 & 1.60\\
+\hspace{1em}aorsf-net & 0.252 (0.014) & 0.823 (0.009) & 341.019 & 123.0 & 5.805 & 1.60\\
+\hspace{1em}glmnet-cox & 0.250 (0.014) & 0.820 (0.008) & 1.330 & 0.480 & 0.093 & 0.026\\
+\hspace{1em}obliqueRSF-net & 0.249 (0.013) & 0.821 (0.009) & 1185.401 & 427.5 & 803.301 & 221.9\\
+\hspace{1em}ranger-extratrees & 0.246 (0.011) & 0.821 (0.008) & 17.067 & 6.15 & 13.889 & 3.84\\
+\hspace{1em}rsf-standard & 0.245 (0.015) & 0.816 (0.009) & 4.618 & 1.67 & 0.575 & 0.159\\
+\hspace{1em}cif-standard & 0.245 (0.013) & 0.818 (0.009) & 20.846 & 7.52 & 162.079 & 44.8\\
+\hspace{1em}aorsf-random & 0.235 (0.013) & 0.818 (0.010) & 9.661 & 3.48 & 5.046 & 1.39\\
+\hspace{1em}cif-rotate & 0.228 (0.009) & 0.819 (0.008) & 71.056 & 25.6 & 137.166 & 37.9\\
+\hspace{1em}cif-extension & 0.203 (0.005) & 0.821 (0.008) & 46.895 & 16.9 & 184.798 & 51.0\\
+\hspace{1em}xgboost-cox & 0.095 (0.042) & 0.824 (0.009) & 6.667 & 2.40 & 0.098 & 0.027\\
+\hspace{1em}nn-cox & 0.004 (0.007) & 0.664 (0.116) & 30.033 & 10.8 & 32.325 & 8.93\\
+\hspace{1em}xgboost-aft & -2.73 (0.324) & 0.823 (0.009) & 23.886 & 8.61 & 0.035 & 0.010\\
+\addlinespace[0.3em]
+\hline
+\multicolumn{7}{l}{\textit{\textbf{sim}}}\\
+\hline
+\hspace{1em}aorsf-net & 0.044 (0.015) & 0.649 (0.027) & 227.140 & 172.6 & 89.309 & 1.82\\
+\hspace{1em}aorsf-cph & 0.043 (0.015) & 0.653 (0.025) & 3.021 & 2.30 & 51.086 & 1.04\\
+\hspace{1em}aorsf-fast & 0.039 (0.016) & 0.654 (0.025) & 1.316 & 1.00 & 48.973 & 1.00\\
+\hspace{1em}aorsf-random & 0.034 (0.011) & 0.631 (0.027) & 7.939 & 6.03 & 87.358 & 1.78\\
+\hspace{1em}obliqueRSF-net & 0.034 (0.012) & 0.632 (0.030) & 930.202 & 707.0 & 388.323 & 7.93\\
+\hspace{1em}cif-standard & 0.029 (0.011) & 0.622 (0.029) & 7.953 & 6.04 & 282.681 & 5.77\\
+\hspace{1em}cif-rotate & 0.029 (0.016) & 0.614 (0.038) & 342.777 & 260.5 & 714.891 & 14.6\\
+\hspace{1em}rsf-standard & 0.024 (0.010) & 0.623 (0.021) & 5.085 & 3.86 & 2.070 & 0.042\\
+\hspace{1em}ranger-extratrees & 0.021 (0.006) & 0.637 (0.025) & 4.566 & 3.47 & 6.406 & 0.131\\
+\hspace{1em}cif-extension & 0.018 (0.006) & 0.617 (0.027) & 107.534 & 81.7 & 1067.369 & 21.8\\
+\hspace{1em}glmnet-cox & -0.003 (0.038) & 0.637 (0.027) & 0.552 & 0.420 & 1.597 & 0.033\\
+\hspace{1em}xgboost-cox & -0.005 (0.036) & 0.633 (0.029) & 16.874 & 12.8 & 1.507 & 0.031\\
+\hspace{1em}nn-cox & -0.032 (0.051) & 0.639 (0.024) & 37.356 & 28.4 & 20.600 & 0.421\\
+\hspace{1em}xgboost-aft & -1.65 (0.119) & 0.642 (0.025) & 50.341 & 38.3 & 1.301 & 0.027\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{SPRINT; CVD death, n = 9361, p = 174}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.071 (0.011) & 0.793 (0.014) & 13.662 & 1.13 & 0.027 & 0.006\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.070 (0.007) & 0.795 (0.013) & 36.982 & 3.06 & 4.419 & 0.951\\
-\hspace{1em}aorsf-net & 0.069 (0.009) & 0.794 (0.013) & 358.365 & 29.7 & 4.222 & 0.909\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.069 (0.007) & 0.795 (0.013) & 12.084 & 1.00 & 4.645 & 1.00\\
-\hspace{1em}obliqueRSF-net & 0.067 (0.006) & 0.796 (0.014) & 1138.135 & 94.2 & 1242.623 & 267.5\\
-\hspace{1em}rfsrc-standard & 0.064 (0.008) & 0.786 (0.015) & 5.499 & 0.455 & 1.247 & 0.268\\
-\hspace{1em}party-cif & 0.061 (0.005) & 0.796 (0.013) & 49.198 & 4.07 & 194.676 & 41.9\\
-\hspace{1em}ranger-extratrees & 0.054 (0.004) & 0.789 (0.014) & 8.810 & 0.729 & 9.762 & 2.10\\
-\hspace{1em}aorsf-random & 0.027 (0.002) & 0.745 (0.016) & 16.090 & 1.33 & 4.634 & 0.998\\
-\hspace{1em}xgboost-cox & 0.007 (0.019) & 0.797 (0.013) & 7.793 & 0.645 & 0.031 & 0.007\\
-\hspace{1em}xgboost-aft & -10.7 (0.853) & 0.794 (0.013) & 23.758 & 1.97 & 0.017 & 0.004\\
+\hspace{1em}aorsf-net & 0.070 (0.007) & 0.794 (0.012) & 340.154 & 104.7 & 0.934 & 0.970\\
+\hspace{1em}aorsf-cph & 0.070 (0.006) & 0.796 (0.011) & 10.101 & 3.11 & 0.971 & 1.01\\
+\hspace{1em}glmnet-cox & 0.069 (0.012) & 0.793 (0.010) & 14.356 & 4.42 & 0.035 & 0.036\\
+\hspace{1em}aorsf-fast & 0.069 (0.006) & 0.795 (0.010) & 3.248 & 1.00 & 0.963 & 1.00\\
+\hspace{1em}obliqueRSF-net & 0.068 (0.005) & 0.795 (0.012) & 1222.666 & 376.4 & 1319.126 & 1,369.4\\
+\hspace{1em}rsf-standard & 0.064 (0.007) & 0.785 (0.015) & 5.389 & 1.66 & 0.654 & 0.679\\
+\hspace{1em}cif-standard & 0.061 (0.004) & 0.795 (0.011) & 50.214 & 15.5 & 199.723 & 207.3\\
+\hspace{1em}cif-rotate & 0.060 (0.005) & 0.787 (0.010) & 1115.642 & 343.5 & 139.444 & 144.8\\
+\hspace{1em}ranger-extratrees & 0.054 (0.004) & 0.790 (0.013) & 7.376 & 2.27 & 9.679 & 10.0\\
+\hspace{1em}nn-cox & 0.043 (0.010) & 0.765 (0.016) & 24.813 & 7.64 & 35.150 & 36.5\\
+\hspace{1em}cif-extension & 0.034 (0.002) & 0.786 (0.011) & 125.227 & 38.6 & 53.842 & 55.9\\
+\hspace{1em}aorsf-random & 0.026 (0.003) & 0.743 (0.018) & 6.889 & 2.12 & 1.101 & 1.14\\
+\hspace{1em}xgboost-cox & 0.010 (0.016) & 0.796 (0.010) & 7.945 & 2.45 & 0.033 & 0.034\\
+\hspace{1em}xgboost-aft & -10.7 (0.988) & 0.792 (0.011) & 28.849 & 8.88 & 0.017 & 0.018\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{SPRINT; death, n = 9361, p = 174}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.123 (0.012) & 0.770 (0.010) & 5.748 & 0.327 & 0.072 & 0.005\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.117 (0.009) & 0.770 (0.010) & 55.731 & 3.17 & 13.261 & 0.895\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.116 (0.009) & 0.769 (0.009) & 17.581 & 1.00 & 14.818 & 1.00\\
-\hspace{1em}aorsf-net & 0.114 (0.010) & 0.769 (0.010) & 614.727 & 35.0 & 11.692 & 0.789\\
-\hspace{1em}obliqueRSF-net & 0.113 (0.007) & 0.767 (0.010) & 3120.498 & 177.5 & 1215.032 & 82.0\\
-\hspace{1em}rfsrc-standard & 0.110 (0.009) & 0.762 (0.010) & 8.948 & 0.509 & 0.805 & 0.054\\
-\hspace{1em}party-cif & 0.107 (0.007) & 0.764 (0.010) & 51.458 & 2.93 & 222.920 & 15.0\\
-\hspace{1em}ranger-extratrees & 0.097 (0.005) & 0.756 (0.010) & 15.249 & 0.867 & 11.477 & 0.774\\
-\hspace{1em}aorsf-random & 0.053 (0.003) & 0.719 (0.011) & 23.393 & 1.33 & 15.908 & 1.07\\
-\hspace{1em}xgboost-cox & 0.031 (0.022) & 0.772 (0.009) & 9.917 & 0.564 & 0.082 & 0.006\\
-\hspace{1em}xgboost-aft & -4.39 (0.355) & 0.772 (0.010) & 24.150 & 1.37 & 0.027 & 0.002\\
+\hspace{1em}glmnet-cox & 0.125 (0.010) & 0.771 (0.010) & 4.785 & 0.846 & 0.079 & 0.013\\
+\hspace{1em}aorsf-cph & 0.119 (0.007) & 0.770 (0.009) & 14.349 & 2.54 & 3.891 & 0.624\\
+\hspace{1em}aorsf-fast & 0.119 (0.007) & 0.771 (0.008) & 5.654 & 1.00 & 6.238 & 1.00\\
+\hspace{1em}aorsf-net & 0.115 (0.007) & 0.769 (0.009) & 663.058 & 117.3 & 4.744 & 0.760\\
+\hspace{1em}obliqueRSF-net & 0.114 (0.006) & 0.768 (0.008) & 3192.241 & 564.6 & 1289.532 & 206.7\\
+\hspace{1em}rsf-standard & 0.112 (0.006) & 0.763 (0.008) & 6.376 & 1.13 & 0.728 & 0.117\\
+\hspace{1em}cif-standard & 0.108 (0.006) & 0.765 (0.009) & 46.063 & 8.15 & 211.693 & 33.9\\
+\hspace{1em}nn-cox & 0.103 (0.011) & 0.758 (0.009) & 95.278 & 16.9 & 85.933 & 13.8\\
+\hspace{1em}ranger-extratrees & 0.098 (0.004) & 0.758 (0.009) & 9.978 & 1.76 & 11.653 & 1.87\\
+\hspace{1em}cif-rotate & 0.093 (0.005) & 0.746 (0.009) & 1057.791 & 187.1 & 188.939 & 30.3\\
+\hspace{1em}cif-extension & 0.056 (0.002) & 0.748 (0.009) & 138.879 & 24.6 & 110.890 & 17.8\\
+\hspace{1em}aorsf-random & 0.053 (0.003) & 0.720 (0.010) & 14.509 & 2.57 & 5.249 & 0.841\\
+\hspace{1em}xgboost-cox & 0.033 (0.022) & 0.772 (0.008) & 11.262 & 1.99 & 0.090 & 0.014\\
+\hspace{1em}xgboost-aft & -4.40 (0.306) & 0.772 (0.008) & 32.854 & 5.81 & 0.719 & 0.115\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{Systolic Heart Failure; death, n = 2231, p = 41}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.114 (0.012) & 0.747 (0.012) & 0.272 & 0.113 & 0.010 & 0.013\\
-\hspace{1em}obliqueRSF-net & 0.114 (0.011) & 0.747 (0.012) & 388.113 & 161.6 & 56.165 & 70.8\\
-\hspace{1em}aorsf-net & 0.112 (0.013) & 0.743 (0.012) & 119.347 & 49.7 & 0.813 & 1.02\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.111 (0.013) & 0.744 (0.012) & 6.734 & 2.80 & 0.798 & 1.01\\
-\hspace{1em}party-cif & 0.111 (0.010) & 0.745 (0.012) & 4.287 & 1.79 & 18.913 & 23.8\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.110 (0.015) & 0.744 (0.012) & 2.401 & 1.00 & 0.793 & 1.00\\
-\hspace{1em}rfsrc-standard & 0.105 (0.012) & 0.735 (0.012) & 2.526 & 1.05 & 0.273 & 0.345\\
-\hspace{1em}ranger-extratrees & 0.092 (0.008) & 0.738 (0.013) & 3.196 & 1.33 & 1.399 & 1.76\\
-\hspace{1em}xgboost-cox & 0.090 (0.012) & 0.745 (0.011) & 4.108 & 1.71 & 0.010 & 0.013\\
-\hspace{1em}aorsf-random & 0.081 (0.006) & 0.731 (0.013) & 4.722 & 1.97 & 0.779 & 0.983\\
-\hspace{1em}xgboost-aft & -1.97 (0.226) & 0.741 (0.010) & 13.112 & 5.46 & 0.008 & 0.010\\
+\hspace{1em}glmnet-cox & 0.113 (0.015) & 0.745 (0.012) & 0.833 & 0.568 & 0.019 & 0.080\\
+\hspace{1em}obliqueRSF-net & 0.113 (0.014) & 0.746 (0.012) & 419.889 & 286.1 & 60.875 & 254.5\\
+\hspace{1em}cif-rotate & 0.113 (0.016) & 0.741 (0.011) & 72.369 & 49.3 & 22.019 & 92.1\\
+\hspace{1em}aorsf-net & 0.111 (0.015) & 0.743 (0.012) & 123.021 & 83.8 & 0.242 & 1.01\\
+\hspace{1em}cif-standard & 0.109 (0.013) & 0.743 (0.012) & 5.397 & 3.68 & 23.166 & 96.9\\
+\hspace{1em}aorsf-fast & 0.108 (0.018) & 0.743 (0.011) & 1.468 & 1.00 & 0.239 & 1.00\\
+\hspace{1em}aorsf-cph & 0.107 (0.016) & 0.742 (0.011) & 3.011 & 2.05 & 0.239 & 1.00\\
+\hspace{1em}rsf-standard & 0.105 (0.013) & 0.736 (0.010) & 3.688 & 2.51 & 0.734 & 3.07\\
+\hspace{1em}cif-extension & 0.095 (0.006) & 0.744 (0.012) & 31.103 & 21.2 & 18.063 & 75.5\\
+\hspace{1em}xgboost-cox & 0.092 (0.009) & 0.745 (0.010) & 4.791 & 3.26 & 0.010 & 0.042\\
+\hspace{1em}ranger-extratrees & 0.090 (0.009) & 0.735 (0.012) & 4.377 & 2.98 & 1.483 & 6.20\\
+\hspace{1em}aorsf-random & 0.081 (0.005) & 0.729 (0.010) & 3.206 & 2.18 & 0.231 & 0.964\\
+\hspace{1em}nn-cox & 0.079 (0.026) & 0.712 (0.021) & 24.930 & 17.0 & 5.889 & 24.6\\
+\hspace{1em}xgboost-aft & -2.03 (0.186) & 0.741 (0.008) & 14.681 & 10.0 & 0.500 & 2.09\\
 \addlinespace[0.3em]
 \hline
 \multicolumn{7}{l}{\textit{\textbf{VA lung cancer trial; death, n = 137, p = 8}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.200 (0.049) & 0.792 (0.036) & 10.492 & 91.2 & 0.024 & 1.00\\
-\hspace{1em}aorsf-cph(maxit = 1) & 0.199 (0.049) & 0.790 (0.036) & 0.115 & 1.00 & 0.024 & 1.00\\
-\hspace{1em}aorsf-cph(maxit = 15) & 0.198 (0.050) & 0.789 (0.037) & 0.225 & 1.95 & 0.024 & 1.00\\
-\hspace{1em}rfsrc-standard & 0.176 (0.046) & 0.781 (0.035) & 0.063 & 0.546 & 0.026 & 1.08\\
-\hspace{1em}glmnet-cox & 0.161 (0.044) & 0.784 (0.041) & 0.071 & 0.614 & 0.002 & 0.083\\
-\hspace{1em}aorsf-random & 0.151 (0.047) & 0.772 (0.044) & 0.295 & 2.56 & 0.023 & 0.958\\
-\hspace{1em}party-cif & 0.129 (0.039) & 0.766 (0.036) & 0.098 & 0.855 & 0.121 & 5.04\\
-\hspace{1em}obliqueRSF-net & 0.127 (0.035) & 0.791 (0.034) & 60.532 & 525.9 & 0.660 & 27.5\\
-\hspace{1em}ranger-extratrees & 0.091 (0.036) & 0.772 (0.038) & 0.020 & 0.175 & 0.026 & 1.09\\
-\hspace{1em}xgboost-cox & 0.069 (0.066) & 0.742 (0.055) & 1.400 & 12.2 & 0.002 & 0.083\\
-\hspace{1em}xgboost-aft & -0.010 (0.131) & 0.750 (0.044) & 5.934 & 51.5 & 0.005 & 0.208\\*
+\hspace{1em}aorsf-fast & 0.198 (0.045) & 0.789 (0.036) & 0.058 & 1.00 & 0.013 & 1.00\\
+\hspace{1em}aorsf-cph & 0.197 (0.049) & 0.789 (0.039) & 0.104 & 1.78 & 0.013 & 0.994\\
+\hspace{1em}aorsf-net & 0.197 (0.044) & 0.789 (0.037) & 10.595 & 181.7 & 0.013 & 0.994\\
+\hspace{1em}cif-rotate & 0.196 (0.061) & 0.782 (0.039) & 5.268 & 90.3 & 1.148 & 87.7\\
+\hspace{1em}rsf-standard & 0.174 (0.048) & 0.780 (0.042) & 0.086 & 1.47 & 0.032 & 2.41\\
+\hspace{1em}cif-extension & 0.171 (0.047) & 0.788 (0.036) & 5.560 & 95.3 & 1.611 & 123.1\\
+\hspace{1em}glmnet-cox & 0.155 (0.031) & 0.781 (0.038) & 0.093 & 1.59 & 0.002 & 0.153\\
+\hspace{1em}aorsf-random & 0.154 (0.046) & 0.773 (0.042) & 0.225 & 3.86 & 0.012 & 0.918\\
+\hspace{1em}cif-standard & 0.128 (0.037) & 0.764 (0.037) & 0.097 & 1.67 & 0.122 & 9.33\\
+\hspace{1em}obliqueRSF-net & 0.125 (0.035) & 0.791 (0.029) & 66.665 & 1,143.0 & 0.709 & 54.2\\
+\hspace{1em}ranger-extratrees & 0.091 (0.037) & 0.779 (0.041) & 0.025 & 0.433 & 0.031 & 2.37\\
+\hspace{1em}xgboost-cox & 0.041 (0.070) & 0.736 (0.053) & 0.809 & 13.9 & 0.002 & 0.153\\
+\hspace{1em}nn-cox & -0.040 (0.041) & 0.481 (0.058) & 11.874 & 203.6 & 0.148 & 11.3\\
+\hspace{1em}xgboost-aft & -0.042 (0.142) & 0.748 (0.049) & 7.545 & 129.4 & 0.006 & 0.459\\*
 \end{longtable}
 
 \end{knitrout}

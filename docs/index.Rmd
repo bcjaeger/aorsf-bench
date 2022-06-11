@@ -1,0 +1,660 @@
+---
+title: "Accelerated oblique random survival forests"
+author: "Byron C. Jaeger"
+date: Last updated `r Sys.Date()`
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: center, middle
+background-image: url("img/meme_slow_R.jpg")
+background-size: contain
+
+```{r setup, include=FALSE}
+
+options(htmltools.dir.version = FALSE)
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  dpi = 600,
+  fig.align='center',
+  fig.height=5
+)
+
+library(tidyverse)
+library(ggforce)
+library(rpart)
+library(rpart.plot)
+library(party)
+library(parttree)
+library(palmerpenguins)
+library(gt)
+library(table.glue)
+library(xaringanExtra)
+
+# infinite moon reader doesn't like targets,
+# this commented code sets up files that work for infinite moon reader
+# tar_load(
+#   names = c(
+#     bm_pred_model_viz,
+#     bm_pred_time_viz,
+#     bm_pred_viz,
+#     data_key
+#   )
+# )
+# 
+# write_rds(bm_pred_model_viz, "docs/index_files/bm_pred_model_viz.rds")
+# write_rds(bm_pred_time_viz, "docs/index_files/bm_pred_time_viz.rds")
+# write_rds(bm_pred_viz, "docs/index_files/bm_pred_viz.rds")
+# write_rds(data_key, "docs/index_files/data_key.rds")
+
+
+bm_pred_model_viz <- read_rds('index_files/bm_pred_model_viz.rds')
+bm_pred_time_viz <- read_rds('index_files/bm_pred_time_viz.rds')
+bm_pred_viz <- read_rds('index_files/bm_pred_viz.rds')
+data_key <- read_rds('index_files/data_key.rds')
+
+```
+
+```{css texts}
+
+.medium { font-size: 25px; }
+.mediumer { font-size: 40px; }
+.large { font-size: 80px; }
+.larger { font-size: 160px; }
+.huge { font-size: 240px; }
+
+.rainbow-text {
+  background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);   -webkit-background-clip: text;
+  color: transparent;
+}
+
+```
+
+
+---
+
+## Overview
+
+- Random forests (axis based and oblique)
+
+    + Decision trees
+    
+    + Random survival forests (RSF)
+
+- Accelerating the oblique RSF
+
+    + Newton Raphson scoring
+
+- Benchmark
+
+    + Datasets & learners
+    
+    + Evaluation
+    
+    + Results
+    
+- Software
+    
+    + R package & website
+
+---
+class: center, middle, inverse
+
+# .larger[Random forests] 
+## (axis based and oblique)
+
+---
+background-image: url(img/penguins.png)
+background-size: 45%
+background-position: 85% 72.5%
+
+## Decision trees
+
+- Frequently used in supervised learning.
+
+- Partitions the space of predictor variables.
+
+- Can be used for classification, regression, and survival analysis. 
+
+## 
+
+.pull-left[
+.medium[_Demo_:] <br><br> Axis-based and oblique decision trees for classification of penguin species (chinstrap, gentoo, or adelie) based on bill and flipper length.<sup>1</sup>
+]
+
+.footnote[
+<sup>1</sup>Data were collected and made available by [Dr. Kristen Gorman](https://www.uaf.edu/cfos/people/faculty/detail/kristen-gorman.php) and the [Palmer Station](https://pal.lternet.edu/), a member of the [Long Term Ecological Research Network](https://lternet.edu/).
+]
+
+---
+
+Dimensions for Adelie, Chinstrap and Gentoo Penguins at Palmer Station
+
+```{r fig_penguins_nopart}
+
+penguins <- drop_na(penguins)
+
+ggplot(data = penguins) +
+  aes(x = flipper_length_mm, y = bill_length_mm, label = species) +
+  geom_point(aes(color = species, shape = species),
+             size = 3,
+             alpha = 0.8) +
+  geom_mark_ellipse(aes(color = species, fill = species), alpha = 0.075) +
+  theme_minimal() +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "\nFlipper length, mm",
+       y = "Bill length, mm\n",
+       color = "Penguin species",
+       shape = "Penguin species") +
+  coord_cartesian(ylim = c(30, 70),
+                  xlim = c(170, 235)) +
+  theme(panel.grid = element_blank(),
+        legend.position = '')
+
+```
+
+---
+
+Partition all the penguins into flipper length < 207 or ≥ 207 mm
+
+```{r fig_penguins_part1}
+
+mdl_tree <- rpart(
+ formula = species ~ flipper_length_mm + bill_length_mm,
+ data = penguins, 
+ control = rpart.control(maxdepth = 1)
+)
+
+
+ggplot(data = penguins) +
+  aes(x = flipper_length_mm, y = bill_length_mm, label = species) +
+  geom_point(aes(color = species, shape = species),
+             size = 3,
+             alpha = 0.8) +
+  geom_parttree(data = mdl_tree, aes(fill=species), alpha = 0.1) +
+  theme_minimal() +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "\nFlipper length, mm",
+       y = "Bill length, mm\n",
+       color = "Penguin species",
+       shape = "Penguin species") +
+  coord_cartesian(ylim = c(30, 70),
+                  xlim = c(170, 235)) +
+  scale_x_continuous(expand = c(0,0), breaks = c(180, 200, 220)) + 
+  scale_y_continuous(expand = c(0,0)) +
+  theme(panel.grid = element_blank(),
+        legend.position = '')
+
+
+```
+
+---
+
+Partition penguins on the left side into into bill length < 43 or ≥ 43 mm
+
+```{r fig_penguins_part2}
+
+mdl_tree <- rpart(
+ formula = species ~ flipper_length_mm + bill_length_mm,
+ data = penguins, 
+ control = rpart.control(maxdepth = 2)
+)
+
+ggplot(data = penguins) +
+  aes(x = flipper_length_mm, y = bill_length_mm, label = species) +
+  geom_point(aes(color = species, shape = species),
+             size = 3,
+             alpha = 0.8) +
+  geom_parttree(data = mdl_tree, aes(fill=species), alpha = 0.1) +
+  theme_minimal() +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "\nFlipper length, mm",
+       y = "Bill length, mm\n",
+       color = "Penguin species",
+       shape = "Penguin species") +
+  coord_cartesian(ylim = c(30, 70),
+                  xlim = c(170, 235)) +
+  scale_x_continuous(expand = c(0,0), breaks = c(180, 200, 220)) + 
+  scale_y_continuous(expand = c(0,0)) +
+  theme(panel.grid = element_blank(),
+        legend.position = '')
+
+
+# ---
+# background-image: url(img/penguins_logo.png)
+# background-position: 95% 5%
+# background-size: 110px 120px
+# layout: true
+
+```
+
+---
+
+With oblique splits, partitions do not need to be rectangles
+
+```{r fig_penguins_part2_oblique}
+
+x_delta <- 206.5 - 170
+y_delta <- 46 - 40
+
+slope <- y_delta / x_delta
+intercept <- 46 - 206.5 * slope
+
+text_lower <-
+  table_glue("bill length - {slope} * flipper length < {intercept}")
+text_upper <-
+  table_glue("bill length - {slope} * flipper length \u2265 {intercept}")
+
+data_poly <- tribble(
+  ~flipper_length_mm, ~bill_length_mm    , ~species,
+  170               ,  30                , 'Adelie',
+  206.5             ,  30                , 'Adelie',
+  206.5             ,  46                , 'Adelie',
+  170               ,  40                , 'Adelie',
+  170               ,  40                , 'Chinstrap',
+  206.5             ,  46                , 'Chinstrap',
+  206.5             ,  70                , 'Chinstrap',
+  170               ,  70                , 'Chinstrap',
+  206.5             ,  30                , 'Gentoo',
+  235               ,  30                , 'Gentoo',
+  235               ,  70                , 'Gentoo',
+  206.5             ,  70                , 'Gentoo',
+)
+
+ggplot(data = penguins) +
+  aes(x = flipper_length_mm, y = bill_length_mm, label = species) +
+  geom_polygon(data = data_poly, 
+               aes(fill = species, group = species),
+               alpha = 0.1,
+               col = 'black') +
+  geom_point(aes(color = species, shape = species),
+             size = 3,
+             alpha = 0.8) +
+  # geom_abline(slope = slope, intercept = intercept, col = 'red')
+  geom_text(
+    data = tibble(flipper_length_mm = c(172, 172), 
+                  bill_length_mm = c(68, 32), 
+                  species = c(text_upper, text_lower)),
+    hjust = 0
+  ) + 
+  theme_minimal() +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  labs(x = "\nFlipper length, mm",
+       y = "Bill length, mm\n",
+       color = "Penguin species",
+       shape = "Penguin species") +
+  coord_cartesian(ylim = c(30, 70),
+                  xlim = c(170, 235)) +
+  scale_x_continuous(expand = c(0,0), breaks = c(180, 200, 220)) + 
+  scale_y_continuous(expand = c(0,0)) +
+  theme(panel.grid = element_blank(),
+        legend.position = '')
+
+```
+
+---
+
+## Random survival forests (RSFs)
+
+1. Breiman developed the random forest, a large set of decision trees injected with randomness.<sup>1, 2</sup>
+
+.footnote[<sup>1</sup>Breiman, Leo. "Bagging predictors." Machine learning 24.2 (1996): 123-140.<br/><sup>2</sup>Breiman, Leo. "Random forests." Machine learning 45.1 (2001): 5-32.]
+
+---
+
+## Random survival forests (RSFs)
+
+1. Breiman developed the random forest, a large set of decision trees injected with randomness.<sup>1, 2</sup>
+
+1. Hothorn and, separately, Ishwaran developed extensions of the random forest for survival outcomes.<sup>3, 4</sup>
+
+Specifically, 
+
+- Hothorn developed the conditional inference forest (CIF) 
+
+- Ishwaran developed the random survival forest (RSF)
+
+.footnote[<sup>3</sup>Hothorn, Torsten, et al. "Unbiased recursive partitioning: A conditional inference framework." Journal of Computational and Graphical statistics 15.3 (2006): 651-674.<br/><sup>4</sup> Ishwaran, Hemant, et al. "Random survival forests." Annals of Applied Statistics 2.3 (2008): 841-860.]
+
+---
+
+Each leaf in the RSF contains a Kaplan-Meier estimate of survival. In the CIF, weights are applied based on sample size.
+
+```{r}
+
+penguins_sim <- penguins %>%
+  mutate(
+    time_mean = if_else(
+      bill_length_mm < 40,
+      true = 80,
+      false = 20
+    ),
+    time = rnorm(n = n(), mean = time_mean, sd = 20),
+    time = pmax(time, 1),
+    status = rbinom(n = n(), size = 1, prob = 0.75)
+  )
+
+# png(res = 300,
+#     width = 6,
+#     height = 3.75,
+#     units = 'in',
+#     filename = 'rpart_plot_surv.png')
+
+mdl_ctree <-
+  ctree(formula = Surv(time, status) ~ bill_length_mm,
+        data = penguins_sim,
+        controls = ctree_control(maxdepth = 1))
+
+plot(
+  mdl_ctree,
+  inner_panel = node_inner(mdl_ctree, pval = FALSE)
+)
+
+```
+
+---
+
+## Random survival forests (RSFs)
+
+1. Breiman developed the random forest, a large set of decision trees injected with randomness.<sup>1, 2</sup>
+
+1. Hothorn and, separately, Ishwaran developed extensions of the random forest to engage with survival outcomes (CIF and RSF).<sup>3, 4</sup>
+
+1. Zhou developed a rotation survival forest and Wang developed a survival forest with an extended predictor space.<sup>5, 6</sup>
+
+Both Zhou and Wang's extensions were based on the CIF
+
+
+.footnote[<sup>5</sup>Zhou L, et al. "Rotation survival forest for right censored data." PeerJ. 2015 Jun 11;3:e1009.<br/><sup>6</sup> Wang H, et al. "Random survival forest with space extensions for censored data." Artif Intell Med. 2017 Jun;79:52-61.]
+
+---
+
+## Random survival forests (RSFs)
+
+1. Breiman developed the random forest, a large set of decision trees injected with randomness.<sup>1, 2</sup>
+
+1. Hothorn and, separately, Ishwaran developed extensions of the random forest to engage with survival outcomes (CIF and RSF).<sup>3, 4</sup>
+
+1. Zhou developed a rotation survival forest and Wang developed a survival forest with an extended predictor based on the CIF.<sup>5, 6</sup>
+
+1. Jaeger developed the oblique RSF, which used penalized regression to find oblique splits.<sup>7</sup>
+
+.footnote[<sup>7</sup>Jaeger BC, et al. "Oblique random survival forests." The Annals of Applied Statistics 13.3 (2019): 1847-1883.]
+
+---
+class: center, middle, inverse
+
+# .larger[Accelerating the oblique RSF]
+
+---
+
+## Accelerating the oblique RSF
+
+Consider the usual framework for survival analysis:
+$$\mathcal{D}_{\text{train}} = \left\{ (T_i, \delta_i, x_{i}) \right\}_{i=1}^{N_{\text{train}}}.$$
+- $T_i$ is the event time if $\delta_i=1$ and last point of contact if $\delta_i=0$, 
+
+- $x_i$ is a vector of predictors values.
+
+Let $t_1 < \, \ldots \, < t_m$ denote the $m$ unique event times in $\mathcal{D}_{\text{train}}$
+
+---
+
+## Accelerating the oblique RSF
+
+We identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model: $$L(\beta) = \prod_{i=1}^m \frac{e^{x_{j(i)}^T \beta}}{\sum_{j \in R_i} e^{x_j^T \beta}}$$
+
+- $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (i.e., those still at risk at time $t_i$)
+
+- $j(i)$ is the index of the observation for which an event occurred at time $t_i$.
+
+---
+
+## Newton Raphson scoring
+
+Estimated regression coefficients $\hat{\beta}$ are updated in each step based on their first derivative, $U(\hat{\beta})$, and second derivative, $H(\hat{\beta})$:
+$$\hat{\beta}^{k+1} =  \hat{\beta}^{k} + U(\hat{\beta} = \hat{\beta}^{k})\, H^{-1}(\hat{\beta} = \hat{\beta}^{k})$$
+
+For statistical inference, iterate until a convergence threshold is met. 
+
+For identifying linear combination of predictors in the oblique RSF, .mediumer[🤷]
+
+- `aorsf-fast` completes one iteration.
+
+- `aorsf-cph` iterates until convergence or 15 iterations.
+
+---
+class: center, middle, inverse
+
+# .larger[Benchmark]
+
+---
+
+## Learners
+
+__Oblique RSFs__:
+
+- _aorsf-fast_: the fast version of aorsf
+
+- _aorsf-cph_: the less fast but still pretty fast version of aorsf
+
+- _aorsf-random_: randomized coefficients (Breiman's idea)
+
+- _aorsf-net_: aorsf's copy of obliqueRSF
+
+- _obliqueRSF-net_: oblique RSF using penalized cox regression (the original)
+
+---
+
+## Learners
+
+__Oblique RSFs__:
+
+- .rainbow-text[_aorsf-fast_]: the fast version of aorsf
+
+- _aorsf-cph_: the less fast but still pretty fast version of aorsf
+
+- _aorsf-random_: randomized coefficients (Breiman's idea)
+
+- _aorsf-net_: aorsf's copy of obliqueRSF
+
+- _obliqueRSF-net_: oblique RSF using penalized cox regression (the original)
+
+---
+
+## Learners
+
+__Axis based RSFs__:
+
+- _cif-standard_: standard CIF
+
+- _cif-extension_: CIF with space extension
+
+- _cif-rotate_: CIF with rotation
+
+- _rsf-standard_: standard RSF
+
+- _ranger-extratrees_: RSF with extremely randomized trees
+
+---
+
+## Learners
+
+__Other__:
+
+- _glmnet-cox_: Penalized Cox regression model
+
+- _nn-cox_: Cox neural network with time-varying effects
+
+- _xgboost-cox_: Boosted trees fitted to Cox log likelihood
+
+- _xgboost-aft_: Boosted trees fitted to accelerated failure time.
+
+---
+
+## Data sets
+
+A total of 23 risk prediction tasks in 16 data sets were analyzed.
+
+This table is continued on the next 2 slides.
+
+```{r}
+
+tbls <- data_key |> 
+  select(label, outcome, nrow, ncol, nevent, pcens, pmiss, pctns) |> 
+  mutate(
+    across(starts_with('p'),  ~.x * 100),
+    across(where(is.numeric), .fns = table_value),
+    outcome = Hmisc::capitalize(outcome)
+  ) |> 
+  arrange(label) |> 
+  mutate(grp = seq(n()),
+         grp = case_when(
+           grp > 2 * n()/3 ~ 3, 
+           grp > 1 * n()/3 ~ 2,
+           TRUE ~ 1
+         )) |> 
+  group_by(grp) |> 
+  group_map(
+    ~ .x |> 
+      gt(rowname_col = 'label') |> 
+      cols_label(
+        outcome = 'Outcome',
+        nrow = 'N Obs',
+        ncol = 'N Predictors',
+        nevent = 'N Events',
+        pcens = '% Censored',
+        pmiss = '% Missing',
+        pctns = "% Continuous"
+      ) |> 
+      cols_align(align = 'center') |> 
+      cols_align(align = 'left', columns = 'outcome')
+  )
+
+tbls[[1]]
+
+```
+
+---
+## Data sets contd.
+
+```{r}
+
+tbls[[2]]
+
+```
+
+---
+
+## Data sets contd.
+
+```{r}
+
+tbls[[3]]
+
+```
+
+---
+
+
+## Evaluation
+
+Consider a testing data set:
+$$\mathcal{D}_{\text{test}} = \left\{ (T_i, \delta_i, x_{i}) \right\}_{i=1}^{N_{\text{test}}}.$$
+Let $\widehat{S}(t \mid x_i)$ be the predicted probability of survival up to a given prediction horizon of $t > 0$. 
+The Brier score at time $t$ is $$\widehat{\text{BS}}(t) = \frac{1}{N_{\text{test}}} \sum_{i=1}^{N_{\text{test}}} \left\{ \widehat{S}(t \mid x_i)^2 \cdot I(T_i \leq t, \delta_i = 1) \cdot \widehat{G}(T_i)^{-1} + \\ [1-\widehat{S}(t \mid x_i)]^2 \cdot I(T_i > t) \cdot \widehat{G}(t)^{-1}\right\}$$ 
+
+where $\widehat{G}(\cdot)$ is the Kaplan-Meier estimate of the censoring distribution. 
+
+---
+
+## Evaluation
+
+As the Brier score is time dependent, integration over time provides a summary measure of performance over a range of plausible prediction horizons. The integrated Brier score is defined as 
+
+$$\mathcal{\widehat{BS}}(t_a, t_b) = \frac{1}{t_b - t_a}\int_{t_a}^{t_b} \widehat{\text{BS}}(t) dt.$$ 
+In our results 
+
+- $t_a$ is the 25th percentile of event times
+
+- $t_b$ is the 75th percentile of event times
+
+---
+
+## Evaluation
+
+$\mathcal{\widehat{BS}}(t_a, t_b)$, a sum of squared prediction errors, can be scaled to produce a measure of explained residual variation (i.e., an $R^2$ statistic) by computing $$R^2 = 1 - \frac{\mathcal{\widehat{BS}}(t_a, t_b)}{\mathcal{\widehat{BS}}_0(t_a, t_b)}$$ where $\mathcal{\widehat{BS}}_0(t_a, t_b)$ is the integrated Brier score when a Kaplan-Meier estimate for survival based on the training data is used as the survival prediction function $\widehat{S}(t)$. 
+
+_Jargon_: $R^2$ = __index of prediction accuracy__ (IPA) 
+
+_Presentation_: We scale the IPA by 100 to avoid unnecessary leading zero's. 
+
+---
+
+## Evaluation
+
+Step 1: Collect IPA values from ten 50/50 train/test splits on each data set for each learner.
+
+Step 2: Fit a hierarchical Bayesian model to analyze posterior expected IPA values for each learner:
+
+$$\text{IPA} = \widehat{\gamma} \cdot \text{model} + (1\,|\, \text{data/run})$$
+
+where `run` refers to the specific train/test split of `data`.
+
+
+
+---
+
+```{r bm_pred_viz_ibs, fig.height=9, fig.width=11}
+bm_pred_viz$ibs_scaled
+```
+
+---
+
+```{r bm_pred_viz_cstat, fig.height=9, fig.width=11}
+bm_pred_viz$cstat
+```
+
+---
+
+```{r bm_pred_model_viz_ibs, fig.height=6.9, fig.width=9}
+bm_pred_model_viz$ibs_scaled
+```
+
+---
+
+```{r bm_pred_model_viz_cstat, fig.height=6.9, fig.width=9}
+bm_pred_model_viz$cstat
+```
+
+---
+
+```{r bm_pred_time_viz, fig.height=6.5, fig.width=8}
+bm_pred_time_viz
+```
+
+---
+
+## Using the accelerated oblique RSF
+
+```{r out.width='100%'}
+
+knitr::include_url("https://bcjaeger.github.io/aorsf/")
+
+```
+
+---
+
+# Thank you!
+

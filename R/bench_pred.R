@@ -22,7 +22,10 @@ bench_pred <- function(data_source,
                             n_z = n_z,
                             correlated_x = correlated_x)
 
+
   if(data_source == 'sim'){
+
+    data_all <- data_all$data
 
     train <- data_all
 
@@ -32,6 +35,12 @@ bench_pred <- function(data_source,
       getElement('data')
 
   } else {
+
+    # Some R packages (not aorsf) have trouble
+    # with factors that have special characters
+    data_all <-  data_all |>
+      mutate(across(where(is.character), as.factor),
+             across(where(is.factor), simplify_levels))
 
     test_index <- sample(x = seq(nrow(data_all)),
                          size = round(nrow(data_all) * test_prop),
@@ -68,12 +77,17 @@ bench_pred <- function(data_source,
   # Don't pipe here - it can mess up the measurement
   # of time during model fitting and model predictions.
 
-  model <- model_fit_fun(train = .train,
-                         pred_horizon = pred_horizon)
+  model <- try(
+    model_fit_fun(train = .train, pred_horizon = pred_horizon),
+    silent = TRUE
+  )
 
-  predictions <- model_pred_fun(object = model,
-                                test = .test,
-                                pred_horizon = pred_horizon)
+  predictions <- try(
+    model_pred_fun(object = model,
+                   test = .test,
+                   pred_horizon = pred_horizon),
+    silent = TRUE
+  )
 
   sc <- try(
     Score(
@@ -83,7 +97,9 @@ bench_pred <- function(data_source,
       summary = c('IPA', 'ibs'),
       times = pred_horizon
     ),
-    silent = TRUE)
+    silent = TRUE
+  )
+
 
   score <- tibble(model = model_type,
                   cstat = NA_real_,
@@ -116,8 +132,14 @@ bench_pred <- function(data_source,
 
   out$train_mean_time   <- mean(.train$time)
   out$train_mean_status <- mean(.train$status)
-  out$time_fit          <- model$time_fit
-  out$time_pred         <- predictions$time
+
+  if( !inherits(model, 'try-error') ) {
+    out$time_fit <- model$time_fit
+  }
+
+  if( !inherits(predictions, 'try-error') ) {
+    out$time_pred <- predictions$time
+  }
 
   if(data_source == 'sim'){
     out$n_obs <- n_obs
@@ -125,7 +147,7 @@ bench_pred <- function(data_source,
     out$correlated_x <- correlated_x
   }
 
-  # print(out)
+  print(out)
   out
 
 }

@@ -59,7 +59,7 @@ sim_surv <- function(n_obs = 2500,
 
     # Make the Z variables correlate with the others
 
-    mat_covar[x_names, z_names] <-
+    mat_covar[z_names, x_names] <-
       runif(n = n_z * n_x,
             min = -correlated_x,
             max = correlated_x)
@@ -201,11 +201,11 @@ sim_surv <- function(n_obs = 2500,
   betas <- vector(mode = 'numeric', length = ncol(covs))
   names(betas) <- names(covs)
 
-  if(n_x > 0)  x_effect   <- effect_size_by_group / n_x else x_effect   <- 0
-  if(n_g > 0)  int_effect <- effect_size_by_group / n_g else int_effect <- 0
-  if(n_w > 0)  nl_effect  <- effect_size_by_group / n_w else nl_effect  <- 0
-  if(n_v > 0)  lc_effect  <- effect_size_by_group / n_v else lc_effect  <- 0
-  if(n_c > 0)  c_effect   <- effect_size_by_group / n_c else c_effect   <- 0
+  if(n_x>0) x_effect   <- effect_size_by_group*1 / n_x else x_effect   <- 0
+  if(n_g>0) int_effect <- effect_size_by_group*2 / n_g else int_effect <- 0
+  if(n_w>0) nl_effect  <- effect_size_by_group*2 / n_w else nl_effect  <- 0
+  if(n_v>0) lc_effect  <- effect_size_by_group*2 / n_v else lc_effect  <- 0
+  if(n_c>0) c_effect   <- effect_size_by_group*1 / n_c else c_effect   <- 0
 
   betas[str_detect(names(betas), '^x')] <- x_effect
 

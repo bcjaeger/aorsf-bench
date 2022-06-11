@@ -4,43 +4,18 @@
 #'
 #' @title
 #' @param x
-summarize_data_source <- function() {
+summarize_data_source <- function(analyses_real) {
 
 
-  funs <- list(
-    accord_acm      = accord_acm_load,
-    accord_cvd      = accord_cvd_load,
-    actg_aids       = actg_aids_load,
-    actg_death      = actg_death_load,
-    breast          = breast_load,
-    colon_acm       = colon_acm_load,
-    colon_recur     = colon_recur_load,
-    flchain         = flchain_load,
-    follic_death    = follic_death_load,
-    follic_relapse  = follic_relapse_load,
-    gbsg2           = gbsg2_load,
-    guide_it_hfhosp = guide_it_hfhosp_load,
-    guide_it_cvd    = guide_it_cvd_load,
-    mgus2_death     = mgus2_death_load,
-    mgus2_pcm       = mgus2_pcm_load,
-    nafld           = nafld_load,
-    pbc_orsf        = pbc_orsf_load,
-    peakV02         = peakV02_load,
-    phts            = phts_load,
-    rotterdam_acm   = rotterdam_acm_load,
-    rotterdam_recur = rotterdam_recur_load,
-    sprint_acm      = sprint_acm_load,
-    sprint_cvd      = sprint_cvd_load,
-    time_to_million = time_to_million_load,
-    vdv             = vdv_load,
-    veteran         = veteran_load
-  )
+  funs <- analyses_real |>
+    distinct(data_source, data_load_fun) |>
+    deframe()
 
   data_info <- map_dfr(
     .x = funs,
     .f = function(f){
 
-      .x <- f()
+      .x <- do.call(what = as.character(f), args = list())
 
       list(
         nrow = nrow(.x),
@@ -53,9 +28,6 @@ summarize_data_source <- function() {
     },
     .id = 'data'
   )
-
-
-
 
   data_info |>
     mutate(
@@ -179,30 +151,6 @@ summarize_data_source <- function() {
       .before = 2
     )
 
-  # data_info |>
-  #   mutate(
-  #     label = recode(
-  #       data,
-  #       vdv = "Van't Veer LJ (2002); breast cancer",
-  #       veteran = "Kalbfleisch JD (1980); lung cancer",
-  #       colon = "Laurie JA (1989); colon cancer",
-  #       pbc_orsf = "Therneau T (2000); Primary biliary cholangitis",
-  #       time_to_million = "Hvitfeldt E (2022), Movie grosses 1M USD",
-  #       gbsg2 = "Schumacher M (1994); breast cancer",
-  #       peakV02 = "Hsich E (2011); Systolic heart failure",
-  #       flchain = "Dispenzieri A (2012); serum free light chain",
-  #       nafld = "Allen AM (2018); Non-alcohol fatty liver disease",
-  #       rotterdam = "Royston P (2013); breast cancer",
-  #       actg = "Hosmer DW (2008); ACTG 320",
-  #       guide_it = "Felker GM (2017); GUIDE-IT",
-  #       breast = "Desmedt C (2011); breast cancer",
-  #       sprint_cvd = "Jaeger BC (2022); cardiovascular mortality",
-  #       sprint_acm = "Jaeger BC (2022); all-cause mortality"
-  #     ),
-  #     tbl_label = glue("{label}; n = {nrow}, p = {ncol}")
-  #   )
-
-
 }
 
 is_double_ish <- function(x){
@@ -212,4 +160,26 @@ is_double_ish <- function(x){
 }
 
 
+# data_info |>
+#   mutate(
+#     label = recode(
+#       data,
+#       vdv = "Van't Veer LJ (2002); breast cancer",
+#       veteran = "Kalbfleisch JD (1980); lung cancer",
+#       colon = "Laurie JA (1989); colon cancer",
+#       pbc_orsf = "Therneau T (2000); Primary biliary cholangitis",
+#       time_to_million = "Hvitfeldt E (2022), Movie grosses 1M USD",
+#       gbsg2 = "Schumacher M (1994); breast cancer",
+#       peakV02 = "Hsich E (2011); Systolic heart failure",
+#       flchain = "Dispenzieri A (2012); serum free light chain",
+#       nafld = "Allen AM (2018); Non-alcohol fatty liver disease",
+#       rotterdam = "Royston P (2013); breast cancer",
+#       actg = "Hosmer DW (2008); ACTG 320",
+#       guide_it = "Felker GM (2017); GUIDE-IT",
+#       breast = "Desmedt C (2011); breast cancer",
+#       sprint_cvd = "Jaeger BC (2022); cardiovascular mortality",
+#       sprint_acm = "Jaeger BC (2022); all-cause mortality"
+#     ),
+#     tbl_label = glue("{label}; n = {nrow}, p = {ncol}")
+#   )
 

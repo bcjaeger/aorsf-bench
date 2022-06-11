@@ -10,9 +10,12 @@ make_model_key <- function() {
     term = c(
       "aorsf_cph_1",
       "aorsf_cph_15",
+      "aorsf_cph_1_filter",
       "aorsf_random",
       "aorsf_net",
       "obliqueRSF",
+      "rsfse",
+      "rotsf",
       "cif",
       "cox_net",
       "coxtime",
@@ -22,17 +25,20 @@ make_model_key <- function() {
       "ranger"
     ),
     label = c(
-      "aorsf-cph(maxit = 1)",
-      "aorsf-cph(maxit = 15)",
+      "aorsf-fast",
+      "aorsf-cph",
+      "aorsf-filter",
       "aorsf-random",
       "aorsf-net",
       "obliqueRSF-net",
-      "party-cif",
+      "cif-extension",
+      "cif-rotate",
+      "cif-standard",
       "glmnet-cox",
       "nn-cox",
       "xgboost-cox",
       "xgboost-aft",
-      "rfsrc-standard",
+      "rsf-standard",
       "ranger-extratrees"
     ),
   )

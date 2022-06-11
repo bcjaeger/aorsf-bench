@@ -15,7 +15,7 @@ bench_pred_visualize <- function(bm_pred_clean,
 
   list(
     ibs_scaled = bench_pred_visualize_(
-      bm_pred_clean,
+      filter(bm_pred_clean, data != 'sim'),
       data_recoder,
       model_recoder,
       f_smry = mean,
@@ -26,7 +26,7 @@ bench_pred_visualize <- function(bm_pred_clean,
       eval_label = 'Index of Prediction Accuracy'
     ),
     cstat = bench_pred_visualize_(
-      bm_pred_clean,
+      filter(bm_pred_clean, data != 'sim'),
       data_recoder,
       model_recoder,
       f_smry = mean,
@@ -100,6 +100,7 @@ bench_pred_visualize_ <- function(
 
   aorsf_wins <- data_fig |>
     filter(model != 'aorsf_cph_15',
+           model != 'aorsf_cph_1_filter',
            model != 'aorsf_net',
            model != 'obliqueRSF') |>
     arrange(data, desc(eval)) |>
@@ -109,6 +110,7 @@ bench_pred_visualize_ <- function(
 
   gg_text_diffs <- data_fig |>
     filter(model != 'aorsf_cph_15',
+           model != 'aorsf_cph_1_filter',
            model != 'aorsf_net',
            model != 'obliqueRSF') |>
     arrange(data, desc(eval)) |>
@@ -177,7 +179,7 @@ bench_pred_visualize_ <- function(
   xmax <- max(data_fig$x)
 
   gg_text_header <- tibble(
-    x = c(xmax + 1, xmax + 1),
+    x = c(xmax + 3/4, xmax + 3/4),
     eval = c(y_col_1, (min(y_breaks) + max(y_breaks)) / 2),
     label = c("Dataset; outcome", eval_label),
     hjust = c(0, 1/2)
@@ -208,7 +210,8 @@ bench_pred_visualize_ <- function(
               hjust = -0.2,
               color = standout) +
     geom_text(data = gg_text_header,
-              aes(label = label, hjust = hjust)) +
+              aes(label = label,
+                  hjust = hjust)) +
     coord_flip() +
     theme_bw() +
     theme(panel.grid = element_blank(),
