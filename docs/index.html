@@ -14,13 +14,10 @@ class: center, middle, inverse, title-slide
 
 # Accelerated oblique random survival forests
 ### Byron C. Jaeger
-### Last updated 2022-06-10
+### Last updated 2022-06-12
 
 ---
 
-class: center, middle
-background-image: url("img/meme_slow_R.jpg")
-background-size: contain
 
 
 
@@ -38,9 +35,6 @@ background-size: contain
 }
 
 &lt;/style&gt;
-
-
----
 
 ## Overview
 
@@ -84,8 +78,6 @@ background-position: 85% 72.5%
 - Partitions the space of predictor variables.
 
 - Can be used for classification, regression, and survival analysis. 
-
-## 
 
 .pull-left[
 .medium[_Demo_:] &lt;br&gt;&lt;br&gt; Axis-based and oblique decision trees for classification of penguin species (chinstrap, gentoo, or adelie) based on bill and flipper length.&lt;sup&gt;1&lt;/sup&gt;
@@ -176,7 +168,14 @@ Both Zhou and Wang's extensions were based on the CIF
 
 1. Jaeger developed the oblique RSF, which used penalized regression to find oblique splits.&lt;sup&gt;7&lt;/sup&gt;
 
+Jaeger showed in general benchmarks that the oblique RSF had higher prediction accuracy than axis-based RSFs. However, the obliqueRSF R package is hundreds of times slower than standard R packages for axis based RSFs.
+
 .footnote[&lt;sup&gt;7&lt;/sup&gt;Jaeger BC, et al. "Oblique random survival forests." The Annals of Applied Statistics 13.3 (2019): 1847-1883.]
+
+---
+class: center, middle
+background-image: url("img/meme_slow_R.jpg")
+background-size: contain
 
 ---
 class: center, middle, inverse
@@ -295,12 +294,12 @@ A total of 23 risk prediction tasks in 16 data sets were analyzed.
 
 This table is continued on the next 2 slides.
 
-<div id="oqyzfolzan" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="qyzekowydg" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#oqyzfolzan .gt_table {
+#qyzekowydg .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -325,7 +324,7 @@ This table is continued on the next 2 slides.
   border-left-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_heading {
+#qyzekowydg .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -337,7 +336,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_title {
+#qyzekowydg .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -349,7 +348,7 @@ This table is continued on the next 2 slides.
   border-bottom-width: 0;
 }
 
-#oqyzfolzan .gt_subtitle {
+#qyzekowydg .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -361,13 +360,13 @@ This table is continued on the next 2 slides.
   border-top-width: 0;
 }
 
-#oqyzfolzan .gt_bottom_border {
+#qyzekowydg .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_col_headings {
+#qyzekowydg .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -382,7 +381,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_col_heading {
+#qyzekowydg .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -402,7 +401,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#oqyzfolzan .gt_column_spanner_outer {
+#qyzekowydg .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -414,15 +413,15 @@ This table is continued on the next 2 slides.
   padding-right: 4px;
 }
 
-#oqyzfolzan .gt_column_spanner_outer:first-child {
+#qyzekowydg .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#oqyzfolzan .gt_column_spanner_outer:last-child {
+#qyzekowydg .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#oqyzfolzan .gt_column_spanner {
+#qyzekowydg .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -434,7 +433,7 @@ This table is continued on the next 2 slides.
   width: 100%;
 }
 
-#oqyzfolzan .gt_group_heading {
+#qyzekowydg .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -459,7 +458,7 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#oqyzfolzan .gt_empty_group_heading {
+#qyzekowydg .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -474,15 +473,15 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#oqyzfolzan .gt_from_md > :first-child {
+#qyzekowydg .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#oqyzfolzan .gt_from_md > :last-child {
+#qyzekowydg .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#oqyzfolzan .gt_row {
+#qyzekowydg .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -501,7 +500,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#oqyzfolzan .gt_stub {
+#qyzekowydg .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -514,7 +513,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#oqyzfolzan .gt_stub_row_group {
+#qyzekowydg .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -528,11 +527,11 @@ This table is continued on the next 2 slides.
   vertical-align: top;
 }
 
-#oqyzfolzan .gt_row_group_first td {
+#qyzekowydg .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#oqyzfolzan .gt_summary_row {
+#qyzekowydg .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -542,16 +541,16 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#oqyzfolzan .gt_first_summary_row {
+#qyzekowydg .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_first_summary_row.thick {
+#qyzekowydg .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#oqyzfolzan .gt_last_summary_row {
+#qyzekowydg .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -561,7 +560,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_grand_summary_row {
+#qyzekowydg .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -571,7 +570,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#oqyzfolzan .gt_first_grand_summary_row {
+#qyzekowydg .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -581,11 +580,11 @@ This table is continued on the next 2 slides.
   border-top-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_striped {
+#qyzekowydg .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#oqyzfolzan .gt_table_body {
+#qyzekowydg .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -594,7 +593,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_footnotes {
+#qyzekowydg .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -608,7 +607,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_footnote {
+#qyzekowydg .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -617,7 +616,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#oqyzfolzan .gt_sourcenotes {
+#qyzekowydg .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -631,7 +630,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#oqyzfolzan .gt_sourcenote {
+#qyzekowydg .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -639,60 +638,60 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#oqyzfolzan .gt_left {
+#qyzekowydg .gt_left {
   text-align: left;
 }
 
-#oqyzfolzan .gt_center {
+#qyzekowydg .gt_center {
   text-align: center;
 }
 
-#oqyzfolzan .gt_right {
+#qyzekowydg .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#oqyzfolzan .gt_font_normal {
+#qyzekowydg .gt_font_normal {
   font-weight: normal;
 }
 
-#oqyzfolzan .gt_font_bold {
+#qyzekowydg .gt_font_bold {
   font-weight: bold;
 }
 
-#oqyzfolzan .gt_font_italic {
+#qyzekowydg .gt_font_italic {
   font-style: italic;
 }
 
-#oqyzfolzan .gt_super {
+#qyzekowydg .gt_super {
   font-size: 65%;
 }
 
-#oqyzfolzan .gt_footnote_marks {
+#qyzekowydg .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#oqyzfolzan .gt_asterisk {
+#qyzekowydg .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#oqyzfolzan .gt_slash_mark {
+#qyzekowydg .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#oqyzfolzan .gt_fraction_numerator {
+#qyzekowydg .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#oqyzfolzan .gt_fraction_denominator {
+#qyzekowydg .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -776,14 +775,14 @@ This table is continued on the next 2 slides.
 </div>
 
 ---
-## Data sets contd.
+## Data sets continued
 
-<div id="bvgfjztcub" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="vbtywkrvgm" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#bvgfjztcub .gt_table {
+#vbtywkrvgm .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -808,7 +807,7 @@ This table is continued on the next 2 slides.
   border-left-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_heading {
+#vbtywkrvgm .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -820,7 +819,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_title {
+#vbtywkrvgm .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -832,7 +831,7 @@ This table is continued on the next 2 slides.
   border-bottom-width: 0;
 }
 
-#bvgfjztcub .gt_subtitle {
+#vbtywkrvgm .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -844,13 +843,13 @@ This table is continued on the next 2 slides.
   border-top-width: 0;
 }
 
-#bvgfjztcub .gt_bottom_border {
+#vbtywkrvgm .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_col_headings {
+#vbtywkrvgm .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -865,7 +864,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_col_heading {
+#vbtywkrvgm .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -885,7 +884,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#bvgfjztcub .gt_column_spanner_outer {
+#vbtywkrvgm .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -897,15 +896,15 @@ This table is continued on the next 2 slides.
   padding-right: 4px;
 }
 
-#bvgfjztcub .gt_column_spanner_outer:first-child {
+#vbtywkrvgm .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#bvgfjztcub .gt_column_spanner_outer:last-child {
+#vbtywkrvgm .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#bvgfjztcub .gt_column_spanner {
+#vbtywkrvgm .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -917,7 +916,7 @@ This table is continued on the next 2 slides.
   width: 100%;
 }
 
-#bvgfjztcub .gt_group_heading {
+#vbtywkrvgm .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -942,7 +941,7 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#bvgfjztcub .gt_empty_group_heading {
+#vbtywkrvgm .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -957,15 +956,15 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#bvgfjztcub .gt_from_md > :first-child {
+#vbtywkrvgm .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#bvgfjztcub .gt_from_md > :last-child {
+#vbtywkrvgm .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#bvgfjztcub .gt_row {
+#vbtywkrvgm .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -984,7 +983,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#bvgfjztcub .gt_stub {
+#vbtywkrvgm .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -997,7 +996,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bvgfjztcub .gt_stub_row_group {
+#vbtywkrvgm .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1011,11 +1010,11 @@ This table is continued on the next 2 slides.
   vertical-align: top;
 }
 
-#bvgfjztcub .gt_row_group_first td {
+#vbtywkrvgm .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#bvgfjztcub .gt_summary_row {
+#vbtywkrvgm .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1025,16 +1024,16 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bvgfjztcub .gt_first_summary_row {
+#vbtywkrvgm .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_first_summary_row.thick {
+#vbtywkrvgm .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#bvgfjztcub .gt_last_summary_row {
+#vbtywkrvgm .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1044,7 +1043,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_grand_summary_row {
+#vbtywkrvgm .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1054,7 +1053,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bvgfjztcub .gt_first_grand_summary_row {
+#vbtywkrvgm .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1064,11 +1063,11 @@ This table is continued on the next 2 slides.
   border-top-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_striped {
+#vbtywkrvgm .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#bvgfjztcub .gt_table_body {
+#vbtywkrvgm .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1077,7 +1076,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_footnotes {
+#vbtywkrvgm .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1091,7 +1090,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_footnote {
+#vbtywkrvgm .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1100,7 +1099,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bvgfjztcub .gt_sourcenotes {
+#vbtywkrvgm .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1114,7 +1113,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#bvgfjztcub .gt_sourcenote {
+#vbtywkrvgm .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1122,60 +1121,60 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bvgfjztcub .gt_left {
+#vbtywkrvgm .gt_left {
   text-align: left;
 }
 
-#bvgfjztcub .gt_center {
+#vbtywkrvgm .gt_center {
   text-align: center;
 }
 
-#bvgfjztcub .gt_right {
+#vbtywkrvgm .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#bvgfjztcub .gt_font_normal {
+#vbtywkrvgm .gt_font_normal {
   font-weight: normal;
 }
 
-#bvgfjztcub .gt_font_bold {
+#vbtywkrvgm .gt_font_bold {
   font-weight: bold;
 }
 
-#bvgfjztcub .gt_font_italic {
+#vbtywkrvgm .gt_font_italic {
   font-style: italic;
 }
 
-#bvgfjztcub .gt_super {
+#vbtywkrvgm .gt_super {
   font-size: 65%;
 }
 
-#bvgfjztcub .gt_footnote_marks {
+#vbtywkrvgm .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#bvgfjztcub .gt_asterisk {
+#vbtywkrvgm .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#bvgfjztcub .gt_slash_mark {
+#vbtywkrvgm .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#bvgfjztcub .gt_fraction_numerator {
+#vbtywkrvgm .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#bvgfjztcub .gt_fraction_denominator {
+#vbtywkrvgm .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -1268,14 +1267,14 @@ This table is continued on the next 2 slides.
 
 ---
 
-## Data sets contd.
+## Data sets continued
 
-<div id="bbgwdtjqcj" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="eyipvbcfot" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#bbgwdtjqcj .gt_table {
+#eyipvbcfot .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1300,7 +1299,7 @@ This table is continued on the next 2 slides.
   border-left-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_heading {
+#eyipvbcfot .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1312,7 +1311,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_title {
+#eyipvbcfot .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1324,7 +1323,7 @@ This table is continued on the next 2 slides.
   border-bottom-width: 0;
 }
 
-#bbgwdtjqcj .gt_subtitle {
+#eyipvbcfot .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1336,13 +1335,13 @@ This table is continued on the next 2 slides.
   border-top-width: 0;
 }
 
-#bbgwdtjqcj .gt_bottom_border {
+#eyipvbcfot .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_col_headings {
+#eyipvbcfot .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1357,7 +1356,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_col_heading {
+#eyipvbcfot .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1377,7 +1376,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#bbgwdtjqcj .gt_column_spanner_outer {
+#eyipvbcfot .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1389,15 +1388,15 @@ This table is continued on the next 2 slides.
   padding-right: 4px;
 }
 
-#bbgwdtjqcj .gt_column_spanner_outer:first-child {
+#eyipvbcfot .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#bbgwdtjqcj .gt_column_spanner_outer:last-child {
+#eyipvbcfot .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#bbgwdtjqcj .gt_column_spanner {
+#eyipvbcfot .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1409,7 +1408,7 @@ This table is continued on the next 2 slides.
   width: 100%;
 }
 
-#bbgwdtjqcj .gt_group_heading {
+#eyipvbcfot .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1434,7 +1433,7 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#bbgwdtjqcj .gt_empty_group_heading {
+#eyipvbcfot .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1449,15 +1448,15 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#bbgwdtjqcj .gt_from_md > :first-child {
+#eyipvbcfot .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#bbgwdtjqcj .gt_from_md > :last-child {
+#eyipvbcfot .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#bbgwdtjqcj .gt_row {
+#eyipvbcfot .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1476,7 +1475,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#bbgwdtjqcj .gt_stub {
+#eyipvbcfot .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1489,7 +1488,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bbgwdtjqcj .gt_stub_row_group {
+#eyipvbcfot .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1503,11 +1502,11 @@ This table is continued on the next 2 slides.
   vertical-align: top;
 }
 
-#bbgwdtjqcj .gt_row_group_first td {
+#eyipvbcfot .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#bbgwdtjqcj .gt_summary_row {
+#eyipvbcfot .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1517,16 +1516,16 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bbgwdtjqcj .gt_first_summary_row {
+#eyipvbcfot .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_first_summary_row.thick {
+#eyipvbcfot .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#bbgwdtjqcj .gt_last_summary_row {
+#eyipvbcfot .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1536,7 +1535,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_grand_summary_row {
+#eyipvbcfot .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1546,7 +1545,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bbgwdtjqcj .gt_first_grand_summary_row {
+#eyipvbcfot .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1556,11 +1555,11 @@ This table is continued on the next 2 slides.
   border-top-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_striped {
+#eyipvbcfot .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#bbgwdtjqcj .gt_table_body {
+#eyipvbcfot .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1569,7 +1568,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_footnotes {
+#eyipvbcfot .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1583,7 +1582,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_footnote {
+#eyipvbcfot .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1592,7 +1591,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bbgwdtjqcj .gt_sourcenotes {
+#eyipvbcfot .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1606,7 +1605,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#bbgwdtjqcj .gt_sourcenote {
+#eyipvbcfot .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1614,60 +1613,60 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#bbgwdtjqcj .gt_left {
+#eyipvbcfot .gt_left {
   text-align: left;
 }
 
-#bbgwdtjqcj .gt_center {
+#eyipvbcfot .gt_center {
   text-align: center;
 }
 
-#bbgwdtjqcj .gt_right {
+#eyipvbcfot .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#bbgwdtjqcj .gt_font_normal {
+#eyipvbcfot .gt_font_normal {
   font-weight: normal;
 }
 
-#bbgwdtjqcj .gt_font_bold {
+#eyipvbcfot .gt_font_bold {
   font-weight: bold;
 }
 
-#bbgwdtjqcj .gt_font_italic {
+#eyipvbcfot .gt_font_italic {
   font-style: italic;
 }
 
-#bbgwdtjqcj .gt_super {
+#eyipvbcfot .gt_super {
   font-size: 65%;
 }
 
-#bbgwdtjqcj .gt_footnote_marks {
+#eyipvbcfot .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#bbgwdtjqcj .gt_asterisk {
+#eyipvbcfot .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#bbgwdtjqcj .gt_slash_mark {
+#eyipvbcfot .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#bbgwdtjqcj .gt_fraction_numerator {
+#eyipvbcfot .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#bbgwdtjqcj .gt_fraction_denominator {
+#eyipvbcfot .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -1825,7 +1824,7 @@ where `run` refers to the specific train/test split of `data`.
 
 ---
 
-&lt;img src="index_files/figure-html/bm_pred_time_viz-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/bm_pred_time_ridges-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 

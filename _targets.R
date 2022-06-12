@@ -61,7 +61,7 @@ analyses_real <- expand_grid(
     "mgus2_pcm"
   ),
   model_type = model_fitters,
-  run_seed = 1:15
+  run_seed = 1:25
 ) |>
   mutate(
     data_load_fun = syms(glue("{data_source}_load")),
@@ -73,7 +73,7 @@ analyses_sim <- expand_grid(data_source = 'sim',
                             n_obs = c(1000),
                             n_z = c(20),
                             correlated_x = c(0.3),
-                            run_seed = 1:15,
+                            run_seed = 1:25,
                             model_type = model_fitters) |>
   mutate(
     data_load_fun = syms("sim_surv"),
@@ -188,7 +188,7 @@ tar_plan(
   #   bench_vi_summarize(bm_vi_comb)
   # )
 
-  # tar_render(slides, "docs/index.Rmd")
+  tar_render(slides, "docs/index.Rmd")
 
 
 ) |>

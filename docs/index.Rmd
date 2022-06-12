@@ -10,9 +10,6 @@ output:
       highlightLines: true
       countIncrementalSlides: false
 ---
-class: center, middle
-background-image: url("img/meme_slow_R.jpg")
-background-size: contain
 
 ```{r setup, include=FALSE}
 
@@ -36,29 +33,15 @@ library(parttree)
 library(palmerpenguins)
 library(gt)
 library(table.glue)
-library(xaringanExtra)
 
-# infinite moon reader doesn't like targets,
-# this commented code sets up files that work for infinite moon reader
-# tar_load(
-#   names = c(
-#     bm_pred_model_viz,
-#     bm_pred_time_viz,
-#     bm_pred_viz,
-#     data_key
-#   )
-# )
-# 
-# write_rds(bm_pred_model_viz, "docs/index_files/bm_pred_model_viz.rds")
-# write_rds(bm_pred_time_viz, "docs/index_files/bm_pred_time_viz.rds")
-# write_rds(bm_pred_viz, "docs/index_files/bm_pred_viz.rds")
-# write_rds(data_key, "docs/index_files/data_key.rds")
-
-
-bm_pred_model_viz <- read_rds('index_files/bm_pred_model_viz.rds')
-bm_pred_time_viz <- read_rds('index_files/bm_pred_time_viz.rds')
-bm_pred_viz <- read_rds('index_files/bm_pred_viz.rds')
-data_key <- read_rds('index_files/data_key.rds')
+tar_load(
+  names = c(
+    bm_pred_model_viz,
+    bm_pred_time_viz,
+    bm_pred_viz,
+    data_key
+  )
+)
 
 ```
 
@@ -76,9 +59,6 @@ data_key <- read_rds('index_files/data_key.rds')
 }
 
 ```
-
-
----
 
 ## Overview
 
@@ -122,8 +102,6 @@ background-position: 85% 72.5%
 - Partitions the space of predictor variables.
 
 - Can be used for classification, regression, and survival analysis. 
-
-## 
 
 .pull-left[
 .medium[_Demo_:] <br><br> Axis-based and oblique decision trees for classification of penguin species (chinstrap, gentoo, or adelie) based on bill and flipper length.<sup>1</sup>
@@ -390,7 +368,14 @@ Both Zhou and Wang's extensions were based on the CIF
 
 1. Jaeger developed the oblique RSF, which used penalized regression to find oblique splits.<sup>7</sup>
 
+Jaeger showed in general benchmarks that the oblique RSF had higher prediction accuracy than axis-based RSFs. However, the obliqueRSF R package is hundreds of times slower than standard R packages for axis based RSFs.
+
 .footnote[<sup>7</sup>Jaeger BC, et al. "Oblique random survival forests." The Annals of Applied Statistics 13.3 (2019): 1847-1883.]
+
+---
+class: center, middle
+background-image: url("img/meme_slow_R.jpg")
+background-size: contain
 
 ---
 class: center, middle, inverse
@@ -547,7 +532,7 @@ tbls[[1]]
 ```
 
 ---
-## Data sets contd.
+## Data sets continued
 
 ```{r}
 
@@ -557,7 +542,7 @@ tbls[[2]]
 
 ---
 
-## Data sets contd.
+## Data sets continued
 
 ```{r}
 
@@ -640,7 +625,7 @@ bm_pred_model_viz$cstat
 
 ---
 
-```{r bm_pred_time_viz, fig.height=6.5, fig.width=8}
+```{r bm_pred_time_ridges, fig.height=6.5, fig.width=8}
 bm_pred_time_viz
 ```
 
