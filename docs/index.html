@@ -14,7 +14,7 @@ class: center, middle, inverse, title-slide
 
 # Accelerated oblique random survival forests
 ### Byron C. Jaeger
-### Last updated 2022-06-12
+### Last updated 2022-06-14
 
 ---
 
@@ -184,23 +184,16 @@ class: center, middle, inverse
 
 ---
 
+
 ## Accelerating the oblique RSF
 
-Consider the usual framework for survival analysis:
-`$$\mathcal{D}_{\text{train}} = \left\{ (T_i, \delta_i, x_{i}) \right\}_{i=1}^{N_{\text{train}}}.$$`
-- `\(T_i\)` is the event time if `\(\delta_i=1\)` and last point of contact if `\(\delta_i=0\)`, 
+We identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model: `$$L(\beta) = \prod_{i=1}^m \frac{e^{x_{j(i)}^{'} \beta}}{\sum_{j \in R_i} e^{x_j^{'} \beta}}$$`
 
 - `\(x_i\)` is a vector of predictors values.
 
-Let `\(t_1 &lt; \, \ldots \, &lt; t_m\)` denote the `\(m\)` unique event times in `\(\mathcal{D}_{\text{train}}\)`
-
----
-
-## Accelerating the oblique RSF
-
-We identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model: `$$L(\beta) = \prod_{i=1}^m \frac{e^{x_{j(i)}^T \beta}}{\sum_{j \in R_i} e^{x_j^T \beta}}$$`
-
 - `\(R_i\)` is the set of indices, `\(j\)`, with `\(T_j \geq t_i\)` (i.e., those still at risk at time `\(t_i\)`)
+
+- `\(t_1 &lt; \, \ldots \, &lt; t_m\)` are the `\(m\)` unique event times in the training data.
 
 - `\(j(i)\)` is the index of the observation for which an event occurred at time `\(t_i\)`.
 
@@ -246,7 +239,7 @@ __Oblique RSFs__:
 
 __Oblique RSFs__:
 
-- .rainbow-text[_aorsf-fast_]: the fast version of aorsf
+- .rainbow-text[_aorsf-fast_]: this is the only oblique RSF we show in the racing model plots.
 
 - _aorsf-cph_: the less fast but still pretty fast version of aorsf
 
@@ -289,6 +282,93 @@ __Other__:
 ---
 
 ## Data sets
+
+A total of 23 risk prediction tasks in 16 data sets were analyzed.
+
+- number of observations ranged from 137 to 17549 (median = 1151)
+
+- number of predictors ranged from 7 to 1692 (median = 12)
+
+- % censored ranged from 5 to 98 (median = 68)
+
+(Full table is shown in the bonus slides)
+
+---
+
+## Evaluation
+
+We measured performance of each learner with:
+
+- index of prediction accuracy (IPA); __higher__ is 👍 
+
+- time-dependent concordance (C)-statistic; __higher__ is 👍
+
+- total time to fit a model and compute predictions; __lower__ is 👍
+
+---
+
+## Evaluation
+
+How do we estimate overall performance based on all 23 risk prediction tasks?
+
+Step 1: Collect IPA and C-statistic values:
+
+- For each of the 23 risk prediction problems,
+
+    + split the corresponding data into a 50/50 train/test split
+    + fit each learner to the training set
+    + evaluate each learner's predictions in the testing set
+
+--
+
+Step 2: Fit a hierarchical Bayesian model to analyze posterior expected performance for each learner:
+
+`$$\text{metric} = \widehat{\gamma} \cdot \text{model} + (1\,|\, \text{data/run})$$`
+
+- `run` refers to the specific train/test split of `data` 
+
+- `metric` is either the IPA or the time-dependent C-statistic.
+
+
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_viz_ibs-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_viz_cstat-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_model_viz_ibs-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_model_viz_cstat-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;img src="index_files/figure-html/bm_pred_time_ridges-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Using the accelerated oblique RSF
+
+&lt;iframe src="https://bcjaeger.github.io/aorsf/" width="100%" height="400px" data-external="1"&gt;&lt;/iframe&gt;
+
+---
+
+# Thank you!
+
+---
+class: center, middle
+
+# .huge[.rainbow-text[BONUS ROUND]]
+
+---
+
+# Data sets
 
 A total of 23 risk prediction tasks in 16 data sets were analyzed.
 
@@ -1759,8 +1839,7 @@ This table is continued on the next 2 slides.
 
 ---
 
-
-## Evaluation
+## Evaluation (bonus round)
 
 Consider a testing data set:
 `$$\mathcal{D}_{\text{test}} = \left\{ (T_i, \delta_i, x_{i}) \right\}_{i=1}^{N_{\text{test}}}.$$`
@@ -1771,7 +1850,7 @@ where `\(\widehat{G}(\cdot)\)` is the Kaplan-Meier estimate of the censoring dis
 
 ---
 
-## Evaluation
+## Evaluation (bonus round)
 
 As the Brier score is time dependent, integration over time provides a summary measure of performance over a range of plausible prediction horizons. The integrated Brier score is defined as 
 
@@ -1784,57 +1863,13 @@ In our results
 
 ---
 
-## Evaluation
+## Evaluation (bonus round)
 
 `\(\mathcal{\widehat{BS}}(t_a, t_b)\)`, a sum of squared prediction errors, can be scaled to produce a measure of explained residual variation (i.e., an `\(R^2\)` statistic) by computing `$$R^2 = 1 - \frac{\mathcal{\widehat{BS}}(t_a, t_b)}{\mathcal{\widehat{BS}}_0(t_a, t_b)}$$` where `\(\mathcal{\widehat{BS}}_0(t_a, t_b)\)` is the integrated Brier score when a Kaplan-Meier estimate for survival based on the training data is used as the survival prediction function `\(\widehat{S}(t)\)`. 
 
 _Jargon_: `\(R^2\)` = __index of prediction accuracy__ (IPA) 
 
-_Presentation_: We scale the IPA by 100 to avoid unnecessary leading zero's. 
 
----
-
-## Evaluation
-
-Step 1: Collect IPA values from ten 50/50 train/test splits on each data set for each learner.
-
-Step 2: Fit a hierarchical Bayesian model to analyze posterior expected IPA values for each learner:
-
-`$$\text{IPA} = \widehat{\gamma} \cdot \text{model} + (1\,|\, \text{data/run})$$`
-
-where `run` refers to the specific train/test split of `data`.
-
-
-
----
-
-&lt;img src="index_files/figure-html/bm_pred_viz_ibs-1.png" style="display: block; margin: auto;" /&gt;
-
----
-
-&lt;img src="index_files/figure-html/bm_pred_viz_cstat-1.png" style="display: block; margin: auto;" /&gt;
-
----
-
-&lt;img src="index_files/figure-html/bm_pred_model_viz_ibs-1.png" style="display: block; margin: auto;" /&gt;
-
----
-
-&lt;img src="index_files/figure-html/bm_pred_model_viz_cstat-1.png" style="display: block; margin: auto;" /&gt;
-
----
-
-&lt;img src="index_files/figure-html/bm_pred_time_ridges-1.png" style="display: block; margin: auto;" /&gt;
-
----
-
-## Using the accelerated oblique RSF
-
-&lt;iframe src="https://bcjaeger.github.io/aorsf/" width="100%" height="400px" data-external="1"&gt;&lt;/iframe&gt;
-
----
-
-# Thank you!
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>

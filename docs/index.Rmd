@@ -384,23 +384,16 @@ class: center, middle, inverse
 
 ---
 
+
 ## Accelerating the oblique RSF
 
-Consider the usual framework for survival analysis:
-$$\mathcal{D}_{\text{train}} = \left\{ (T_i, \delta_i, x_{i}) \right\}_{i=1}^{N_{\text{train}}}.$$
-- $T_i$ is the event time if $\delta_i=1$ and last point of contact if $\delta_i=0$, 
+We identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model: $$L(\beta) = \prod_{i=1}^m \frac{e^{x_{j(i)}^{'} \beta}}{\sum_{j \in R_i} e^{x_j^{'} \beta}}$$
 
 - $x_i$ is a vector of predictors values.
 
-Let $t_1 < \, \ldots \, < t_m$ denote the $m$ unique event times in $\mathcal{D}_{\text{train}}$
-
----
-
-## Accelerating the oblique RSF
-
-We identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model: $$L(\beta) = \prod_{i=1}^m \frac{e^{x_{j(i)}^T \beta}}{\sum_{j \in R_i} e^{x_j^T \beta}}$$
-
 - $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (i.e., those still at risk at time $t_i$)
+
+- $t_1 < \, \ldots \, < t_m$ are the $m$ unique event times in the training data.
 
 - $j(i)$ is the index of the observation for which an event occurred at time $t_i$.
 
@@ -446,7 +439,7 @@ __Oblique RSFs__:
 
 __Oblique RSFs__:
 
-- .rainbow-text[_aorsf-fast_]: the fast version of aorsf
+- .rainbow-text[_aorsf-fast_]: this is the only oblique RSF we show in the racing model plots.
 
 - _aorsf-cph_: the less fast but still pretty fast version of aorsf
 
@@ -489,6 +482,107 @@ __Other__:
 ---
 
 ## Data sets
+
+A total of 23 risk prediction tasks in 16 data sets were analyzed.
+
+- number of observations ranged from `r min(data_key$nrow)` to `r max(data_key$nrow)` (median = `r median(data_key$nrow)`)
+
+- number of predictors ranged from `r min(data_key$ncol)` to `r max(data_key$ncol)` (median = `r median(data_key$ncol)`)
+
+- % censored ranged from `r round(100*min(data_key$pcens))` to `r round(100*max(data_key$pcens))` (median = `r round(100*median(data_key$pcens))`)
+
+(Full table is shown in the bonus slides)
+
+---
+
+## Evaluation
+
+We measured performance of each learner with:
+
+- index of prediction accuracy (IPA); __higher__ is 👍 
+
+- time-dependent concordance (C)-statistic; __higher__ is 👍
+
+- total time to fit a model and compute predictions; __lower__ is 👍
+
+---
+
+## Evaluation
+
+How do we estimate overall performance based on all 23 risk prediction tasks?
+
+Step 1: Collect IPA and C-statistic values:
+
+- For each of the 23 risk prediction problems,
+
+    + split the corresponding data into a 50/50 train/test split
+    + fit each learner to the training set
+    + evaluate each learner's predictions in the testing set
+
+--
+
+Step 2: Fit a hierarchical Bayesian model to analyze posterior expected performance for each learner:
+
+$$\text{metric} = \widehat{\gamma} \cdot \text{model} + (1\,|\, \text{data/run})$$
+
+- `run` refers to the specific train/test split of `data` 
+
+- `metric` is either the IPA or the time-dependent C-statistic.
+
+
+
+---
+
+```{r bm_pred_viz_ibs, fig.height=9, fig.width=11}
+bm_pred_viz$ibs_scaled
+```
+
+---
+
+```{r bm_pred_viz_cstat, fig.height=9, fig.width=11}
+bm_pred_viz$cstat
+```
+
+---
+
+```{r bm_pred_model_viz_ibs, fig.height=6.9, fig.width=9}
+bm_pred_model_viz$ibs_scaled
+```
+
+---
+
+```{r bm_pred_model_viz_cstat, fig.height=6.9, fig.width=9}
+bm_pred_model_viz$cstat
+```
+
+---
+
+```{r bm_pred_time_ridges, fig.height=6.5, fig.width=8}
+bm_pred_time_viz
+```
+
+---
+
+## Using the accelerated oblique RSF
+
+```{r out.width='100%'}
+
+knitr::include_url("https://bcjaeger.github.io/aorsf/")
+
+```
+
+---
+
+# Thank you!
+
+---
+class: center, middle
+
+# .huge[.rainbow-text[BONUS ROUND]]
+
+---
+
+# Data sets
 
 A total of 23 risk prediction tasks in 16 data sets were analyzed.
 
@@ -552,8 +646,7 @@ tbls[[3]]
 
 ---
 
-
-## Evaluation
+## Evaluation (bonus round)
 
 Consider a testing data set:
 $$\mathcal{D}_{\text{test}} = \left\{ (T_i, \delta_i, x_{i}) \right\}_{i=1}^{N_{\text{test}}}.$$
@@ -564,7 +657,7 @@ where $\widehat{G}(\cdot)$ is the Kaplan-Meier estimate of the censoring distrib
 
 ---
 
-## Evaluation
+## Evaluation (bonus round)
 
 As the Brier score is time dependent, integration over time provides a summary measure of performance over a range of plausible prediction horizons. The integrated Brier score is defined as 
 
@@ -577,69 +670,11 @@ In our results
 
 ---
 
-## Evaluation
+## Evaluation (bonus round)
 
 $\mathcal{\widehat{BS}}(t_a, t_b)$, a sum of squared prediction errors, can be scaled to produce a measure of explained residual variation (i.e., an $R^2$ statistic) by computing $$R^2 = 1 - \frac{\mathcal{\widehat{BS}}(t_a, t_b)}{\mathcal{\widehat{BS}}_0(t_a, t_b)}$$ where $\mathcal{\widehat{BS}}_0(t_a, t_b)$ is the integrated Brier score when a Kaplan-Meier estimate for survival based on the training data is used as the survival prediction function $\widehat{S}(t)$. 
 
 _Jargon_: $R^2$ = __index of prediction accuracy__ (IPA) 
 
-_Presentation_: We scale the IPA by 100 to avoid unnecessary leading zero's. 
 
----
-
-## Evaluation
-
-Step 1: Collect IPA values from ten 50/50 train/test splits on each data set for each learner.
-
-Step 2: Fit a hierarchical Bayesian model to analyze posterior expected IPA values for each learner:
-
-$$\text{IPA} = \widehat{\gamma} \cdot \text{model} + (1\,|\, \text{data/run})$$
-
-where `run` refers to the specific train/test split of `data`.
-
-
-
----
-
-```{r bm_pred_viz_ibs, fig.height=9, fig.width=11}
-bm_pred_viz$ibs_scaled
-```
-
----
-
-```{r bm_pred_viz_cstat, fig.height=9, fig.width=11}
-bm_pred_viz$cstat
-```
-
----
-
-```{r bm_pred_model_viz_ibs, fig.height=6.9, fig.width=9}
-bm_pred_model_viz$ibs_scaled
-```
-
----
-
-```{r bm_pred_model_viz_cstat, fig.height=6.9, fig.width=9}
-bm_pred_model_viz$cstat
-```
-
----
-
-```{r bm_pred_time_ridges, fig.height=6.5, fig.width=8}
-bm_pred_time_viz
-```
-
----
-
-## Using the accelerated oblique RSF
-
-```{r out.width='100%'}
-
-knitr::include_url("https://bcjaeger.github.io/aorsf/")
-
-```
-
----
-
-# Thank you!
 
