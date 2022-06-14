@@ -1,6 +1,6 @@
-#' .. content for \description{} (no empty lines) ..
+#' @description Visualize the benchmark of prediction models.
 #'
-#' .. content for \details{} ..
+#' @details Inference on equivalence and superiority.
 #'
 #' @title
 #' @param bm_pred_model
