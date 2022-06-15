@@ -168,9 +168,11 @@ Building on prior research for bagging survival trees \citep{hothorn2004bagging}
 
 \section{Novel techniques for oblique random survival forests}
 
+Consider the usual framework for survival analysis with training data $$\dataset_{\text{train}} = \left\{ (T_i, \delta_i, \bm{x}_{i}) \right\}_{i=1}^{N_{\text{train}}}.$$ Here, $T_i$ is the event time if $\delta_i=1$ and last point of contact if $\delta_i=0$, and $\bm{x}_i$ is a vector of predictors values. Assuming there are no ties, let $t_1 < \, \ldots \, < t_m$ denote the $m$ unique event times in $\dataset_{\text{train}}$.
+
 \subsection{Partial training at non-leaf nodes}
 
-Consider the usual framework for survival analysis with training data $$\dataset_{\text{train}} = \left\{ (T_i, \delta_i, \bm{x}_{i}) \right\}_{i=1}^{N_{\text{train}}}.$$ Here, $T_i$ is the event time if $\delta_i=1$ and last point of contact if $\delta_i=0$, and $\bm{x}_i$ is a vector of predictors values. Assuming there are no ties, let $t_1 < \, \ldots \, < t_m$ denote the $m$ unique event times in $\dataset_{\text{train}}$. We propose to identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model:
+We propose to identify linear combinations of predictor variables in non-leaf nodes by applying Newton Raphson scoring to the partial likelihood function of the Cox regression model:
 \begin{equation}\label{eqn:cox-partial-likelihood}
 L(\bm\beta) = \prod_{i=1}^m \frac{e^{\bm{x}_{j(i)}^T \bm\beta}}{\sum_{j \in R_i} e^{\bm{x}_j^T \bm\beta}},
 \end{equation}
@@ -188,7 +190,7 @@ Negation VI is similar to permutation VI in that it measures how much a model’
 
 \subsubsection{Learners}
 
-In the current study, we consider four classes of learners: RFs, boosting ensembles, regression models, and neural networks (Table \ref{table:learners}). For RF learners, the number of observations required in terminal nodes was fixed at 10, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500. For boosting and regression learners, nested cross-validation was applied to identify the number of boosting steps and the magnitude of penalization, respectively.
+We consider four classes of learners: RFs, boosting ensembles, regression models, and neural networks (Table \ref{table:learners}). For RF learners, the number of observations required in terminal nodes was fixed at 10, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500. For boosting, regression, and neural network learners, nested cross-validation was applied to tune each model, \ie, assess multiple possible values for relevant model parameters and use the values that optimize the model's estimated prediction accuracy. Specifically, tuning for boosting models included identifying the number of steps to complete. For regression models, tuning was used to identify the magnitude of penalization. For neural networks, the number and density of layers was tuned.
 
 \newgeometry{margin=1cm} % modify this if you need even more space
 \begin{landscape}
@@ -201,29 +203,59 @@ In the current study, we consider four classes of learners: RFs, boosting ensemb
  \hline\hline
  \multicolumn{3}{l}{\textit{Random Survival Forests}}\\
  \hline\hline
- Standard & \href{https://www.randomforestsrc.org/index.html}{\texttt{RandomForestSRC}} & \texttt{rfsrc-standard} & Axis based survival trees following Leo Breiman's original random forest algorithm, with cut-points selected to maximize a log-rank statistic.  \\ \hline
- Oblique & \href{https://CRAN.R-project.org/package=obliqueRSF}{\texttt{obliqueRSF}} \newline \href{https://bcjaeger.github.io/aorsf/}{\texttt{aorsf}} &
+
+ Axis based &
+
+ \href{https://www.randomforestsrc.org/index.html}{\texttt{RandomForestSRC}} \newline
+ \href{https://CRAN.R-project.org/package=ranger}{\texttt{ranger}} \newline
+ \href{http://party.r-forge.r-project.org/}{\texttt{party}} \newline
+ \href{https://github.com/whcsu/rotsf}{\texttt{rotsf}} \newline
+ \href{https://github.com/whcsu/rsfse}{\texttt{rsfse}} &
+
+ \texttt{rsf-standard} \newline
+ \texttt{rsf-extratrees} \newline
+ \texttt{cif-standard} \newline
+ \texttt{cif-rotate} \newline
+ \texttt{cif-spacextend} &
+
+ \texttt{rsf-standard} grows survival trees following Leo Breiman's original random forest algorithm with variables and cut-points selected to maximize a log-rank statistic. \texttt{rsf-extratrees} grows survival trees with randomly selected features and cut-points. \texttt{cif-standard} uses the framework of conditional inference to grow survival trees. \texttt{cif-rotate} extends \texttt{cif-standard} by applying principal component analysis to random subsets of data prior to growing each survival tree. \texttt{cif-spacextend} derives new predictors for each tree in the ensemble, separately. \\ \hline
+
+
+ Oblique &
+
+
+ \href{https://CRAN.R-project.org/package=obliqueRSF}{\texttt{obliqueRSF}} \newline
+ \href{https://bcjaeger.github.io/aorsf/}{\texttt{aorsf}} &
+
  \texttt{obliqueRSF-net} \newline
  \texttt{aorsf-net} \newline
- \texttt{aorsf-cph($i=1$)} \newline
- \texttt{aorsf-cph($i \leq 15$)} \newline
+ \texttt{aorsf-fast} \newline
+ \texttt{aorsf-cph} \newline
  \texttt{aorsf-extratrees} &
- Oblique survival trees following Leo Breiman's random forest algorithm. Linear combinations of inputs are derived using \texttt{glmnet} in \texttt{obliqueRSF-net} and \texttt{aorsf-net}, using Newton Raphson scoring for the Cox partial likelihood function in \texttt{aorsf-cph($i=1$)} and \texttt{aorsf-cph($i \leq 15$)}, and chosen randomly from a uniform distribution in \texttt{aorsf-extratrees}. Cut-points are selected to maximize a log-rank statistic. \\ \hline
- Extremely \,Randomized & \href{https://CRAN.R-project.org/package=ranger}{\texttt{ranger}} & \texttt{ranger-extratrees} & Axis-based survival trees grown with randomly selected features and cut-points\\ \hline
- Conditional \,Inference & \href{http://party.r-forge.r-project.org/}{\texttt{party}} & \texttt{party-cif} & Axis based survival trees grown using unbiased recursive partitioning.  \\
+
+
+ Oblique survival trees following Leo Breiman's random forest algorithm. Linear combinations of inputs are derived using \texttt{glmnet} in \texttt{obliqueRSF-net} and \texttt{aorsf-net}, using Newton Raphson scoring for the Cox partial likelihood function in \texttt{aorsf-fast} and \texttt{aorsf-cph}, and chosen randomly from a uniform distribution in \texttt{aorsf-extratrees}. Cut-points are selected to maximize a log-rank statistic. \\
+
  \hline\hline
  \multicolumn{3}{l}{\textit{Boosting ensembles}}\\
  \hline\hline
- Trees & \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} & \texttt{xgboost-cox} &  The Cox partial likelihood function is maximized additively with decision trees. Nested cross validation (5 folds) is applied to tune the number of trees grown.  \\
- Models & \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} & \texttt{xgboost-aft} & The accelerated failure time likelihood function is maximized additively with decision trees. Nested cross validation (5 folds) is applied to tune the number of trees grown.  \\
+
+ Trees &
+
+ \href{https://xgboost.readthedocs.io/en/stable/#}{\texttt{xgboost}} &
+
+ \texttt{xgboost-cox} \newline
+ \texttt{xgboost-aft} &
+
+ \texttt{xgboost-cox} maximizes the Cox partial likelihood function, whereas \texttt{xgboost-aft} maximizes the accelerated failure time likelihood function. Nested cross validation (5 folds) is applied to tune the number of trees grown, the minimum number of observations in a leaf node was 10, the maximum depth of trees was 6, and $\sqrt{p}$ variables were considered randomly for each tree split, where $p$ is the total number of predictors. \\
  \hline\hline
  \multicolumn{3}{l}{\textit{Regression models}}\\
  \hline\hline
- Cox Net & \texttt{glmnet} & \texttt{glmnet-cox} & The Cox model is fit using an elastic net penalty. Nested cross validation (5 folds) is applied to tune penalty terms.\\
+ Cox Net & \texttt{glmnet} & \texttt{glmnet-cox} & The Cox proportional hazards model is fit using an elastic net penalty. Nested cross validation (5 folds) is applied to tune penalty terms.\\
  \hline\hline
  \multicolumn{3}{l}{\textit{Neural networks}}\\
  \hline\hline
- Cox Time & \href{https://raphaels1.github.io/survivalmodels/}{\texttt{survivalmodels}} & \texttt{nn-cox} & A neural network based on the proportional hazards model with time-varying effects  \\
+ Cox Time & \href{https://raphaels1.github.io/survivalmodels/}{\texttt{survivalmodels}} & \texttt{nn-cox} & A neural network based on the proportional hazards model with time-varying effects. Nested cross-validation was applied to select the number of layers (from 1 to 8), the number of nodes in each layer (from $\sqrt{p}$/2 to $\sqrt{p}$), and the number of epochs to complete (up to 500). A drop-out rate of 10\% was applied during training.   \\
  \hline
 \end{tabular}
 \caption{Learning algorithms assessed in numeric studies}

@@ -393,7 +393,9 @@ We identify linear combinations of predictor variables in non-leaf nodes by appl
 
 - $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (i.e., those still at risk at time $t_i$)
 
-- $t_1 < \, \ldots \, < t_m$ are the $m$ unique event times in the training data.
+    + $T_i$ is the event time if an event occurred and last point of contact otherwise.
+
+    + $t_1 < \, \ldots \, < t_m$ are the $m$ unique event times in the training data.
 
 - $j(i)$ is the index of the observation for which an event occurred at time $t_i$.
 
@@ -509,7 +511,7 @@ We measured performance of each learner with:
 
 ## Evaluation
 
-How do we estimate overall performance based on all 23 risk prediction tasks?
+To estimate overall performance differences:
 
 Step 1: Collect IPA and C-statistic values:
 
@@ -518,10 +520,11 @@ Step 1: Collect IPA and C-statistic values:
     + split the corresponding data into a 50/50 train/test split
     + fit each learner to the training set
     + evaluate each learner's predictions in the testing set
+    + repeat 25 times
 
 --
 
-Step 2: Fit a hierarchical Bayesian model to analyze posterior expected performance for each learner:
+Step 2: Fit a hierarchical Bayesian model to analyze posterior expected differences in performance:
 
 $$\text{metric} = \widehat{\gamma} \cdot \text{model} + (1\,|\, \text{data/run})$$
 
