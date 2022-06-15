@@ -264,7 +264,7 @@ bm_pred_model_viz$ibs_scaled
 
 % Acknowledgements should go at the end, before appendices and references
 
-\acks{Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine}
+\acks{Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine. The project described was supported by the National Center for Advancing Translational Sciences (NCATS), National Institutes of Health, through Grant Award Number UL1TR001420. The content is solely the responsibility of the authors and does not necessarily represent the official views of the NIH.}
 
 % Manual newpage inserted to improve layout of sample file - not
 % needed in general before appendices/bibliography.
