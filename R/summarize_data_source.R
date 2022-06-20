@@ -58,7 +58,15 @@ summarize_data_source <- function(analyses_real) {
         "sprint_cvd" = "SPRINT",
         "time_to_million" = "Movies released in 2015-2018",
         "vdv" = "Gene expression",
-        "veteran" = "VA lung cancer trial"
+        "veteran" = "VA lung cancer trial",
+        "mesa_hf" = "MESA",
+        "mesa_chd" = "MESA",
+        "mesa_stroke" = "MESA",
+        "mesa_death" = "MESA",
+        "aric_hf" = "ARIC",
+        "aric_chd" = "ARIC",
+        "aric_stroke" = "ARIC",
+        "aric_death" = "ARIC"
       ),
       rpack = recode(
         data,
@@ -146,7 +154,15 @@ summarize_data_source <- function(analyses_real) {
         "sprint_cvd" = "CVD death",
         "time_to_million" = "gross 1M USD",
         "vdv" = "breast cancer",
-        "veteran" = "death"
+        "veteran" = "death",
+        "mesa_hf" = "heart failure",
+        "mesa_chd" = "coronary heart disease",
+        "mesa_stroke" = "stroke",
+        "mesa_death" = "death",
+        "aric_hf" = "heart failure",
+        "aric_chd" = "coronary heart disease",
+        "aric_stroke" = "stroke",
+        "aric_death" = "death"
       ),
       .before = 2
     )

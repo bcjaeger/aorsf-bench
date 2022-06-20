@@ -34,5 +34,7 @@ library(ggridges)
 library(tidybayes)
 library(rstan)
 library(rstanarm)
+library(fastshap)
+
 
 source("./conflicts.R")

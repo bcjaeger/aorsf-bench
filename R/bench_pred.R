@@ -11,16 +11,14 @@ bench_pred <- function(data_source,
                        model_fit_fun,
                        model_pred_fun,
                        n_obs = NULL,
-                       n_z = NULL,
-                       correlated_x = NULL,
+                       pred_corr_max = NULL,
                        run_seed,
                        test_prop = 1/2) {
 
   set.seed(run_seed)
 
   data_all <- data_load_fun(n_obs = n_obs,
-                            n_z = n_z,
-                            correlated_x = correlated_x)
+                            pred_corr_max = pred_corr_max)
 
 
   if(data_source == 'sim'){
@@ -30,8 +28,7 @@ bench_pred <- function(data_source,
     train <- data_all
 
     test <- sim_surv(n_obs = 5000,
-                     n_z = n_z,
-                     correlated_x = correlated_x) |>
+                     pred_corr_max = pred_corr_max) |>
       getElement('data')
 
   } else {
@@ -143,8 +140,7 @@ bench_pred <- function(data_source,
 
   if(data_source == 'sim'){
     out$n_obs <- n_obs
-    out$n_z <- n_z
-    out$correlated_x <- correlated_x
+    out$pred_corr_max <- pred_corr_max
   }
 
   print(out)

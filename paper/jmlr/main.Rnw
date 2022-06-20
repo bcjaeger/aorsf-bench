@@ -48,6 +48,7 @@
 \newcommand{\ntrain}{N_{\text{train}}}
 \newcommand{\ntest}{N_{\text{test}}}
 
+\newcommand{\secref}[1]{Section \ref{#1}}
 
 % Heading arguments are {volume}{year}{pages}{date submitted}{date published}{paper id}{author-full-names}
 
@@ -104,7 +105,7 @@ library(kableExtra)
 
 knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
-                      dpi = 300)
+                      dpi = 600)
 
 rspec <- round_spec() |>
   round_using_magnitude(digits = c(3, 2, 1, 1),
@@ -114,21 +115,14 @@ names(rspec) <- paste('table.glue', names(rspec), sep = '.')
 
 options(rspec)
 
-tar_load(names = c(bm_pred_comb,
+tar_load(names = c(bm_pred_clean,
                    bm_vi_comb,
                    bm_pred_viz,
                    bm_pred_model_viz,
                    data_key,
                    model_key))
 
-to_omit <- bm_pred_comb |>
-  filter(is.na(cstat) | is.na(ibs_scaled)) |>
-  distinct(data, run) |>
-  as.list() |>
-  map(unique)
-
-bm_pred_comb <- bm_pred_comb |>
-  filter( ! (data %in% to_omit$data & run %in% to_omit$run) )
+bm_pred_comb <- bm_pred_clean
 
 @
 
@@ -166,7 +160,7 @@ Building on prior research for bagging survival trees \citep{hothorn2004bagging}
 
 % Several supervised learning algorithms can develop prediction functions for right-censored time-to-event outcomes, henceforth referred to as survival outcomes. \cite{ishwaran2008random} developed the RF for survival, an extension of the RF for regression and classification developed by \citet{breiman2001random}. Fast algorithms to fit the RF for survival are available in the \texttt{randomForestSRC} R package \citep{randomForestSRC}. A similar implementation of the RF for survival can be found in the \texttt{ranger} R package \citep{ranger}, which is particularly suited for high dimensional data. The RF for survival can also be fit using unbiased recursive partitioning \citep{cif} via the \texttt{party} R package \citep{hothorn2010party}.
 
-\section{Novel techniques for oblique random survival forests}
+\section{The acceleracted oblique random survival forest}
 
 Consider the usual framework for survival analysis with training data $$\dataset_{\text{train}} = \left\{ (T_i, \delta_i, \bm{x}_{i}) \right\}_{i=1}^{N_{\text{train}}}.$$ Here, $T_i$ is the event time if $\delta_i=1$ and last point of contact if $\delta_i=0$, and $\bm{x}_i$ is a vector of predictors values. Assuming there are no ties, let $t_1 < \, \ldots \, < t_m$ denote the $m$ unique event times in $\dataset_{\text{train}}$.
 
@@ -182,13 +176,17 @@ It is vital to cycle through iterations until a convergence threshold is met for
 
 \subsection{Negation variable importance}
 
-Negation VI is similar to permutation VI in that it measures how much a model’s prediction error increases when a variable’s role in the model is de-stabilized. More specifically, negation VI measures the increase in an oblique RF's prediction error after flipping the sign of all coefficients linked to a variable (\ie, negating them). As the magnitude of a coefficient increases, so does the probability that negating it will change the oblique RF's predictions. Since the coefficients in each non-leaf node of an oblique RFs are adjusted for the accompanying predictors, negation VI may provide better estimation of VI in the presence of correlated variables compared to standard VI techniques. Although the current article focuses on oblique RSFs, negation VI can be applied to any oblique RF.
+Negation VI is similar to permutation VI in that it measures how much a model’s prediction error increases when a variable’s role in the model is de-stabilized. More specifically, negation VI measures the increase in an oblique RF's prediction error after flipping the sign of all coefficients linked to a variable (\ie, negating them). As the magnitude of a coefficient increases, so does the probability that negating it will change the oblique RF's predictions. Since the coefficients in each non-leaf node of an oblique RFs are adjusted for the accompanying predictors, negation VI may provide better estimation of VI in the presence of correlated variables compared to standard VI techniques.
+
+For consistency with prior VI techniques for the RSF and for its computational efficiency, we use Harrell's concordance (C)-statistic \citep{harrell1982evaluating} to measure change in prediction error when computing negation VI. We also note that while the current article focuses on oblique RSFs, negation VI can be applied to any oblique RF and can be applied with any applicable error function.
 
 \section{Numeric experiments}
 
 \subsection{Benchmark of prediction accuracy and computational efficiency}
 
-\subsubsection{Learners}
+The aim of this numeric experiment is to evaluate and compare the accelerated oblique RSF with its predecessor (the oblique RSF from the \texttt{obliqueRSF} R package) and with other machine learning algorithms for risk prediction. Inferences drawn from this experiment include equivalence and inferiority tests based on Bayesian hierarchical models.
+
+\subsubsection{Learners} \label{sec:learners}
 
 We consider four classes of learners: RFs, boosting ensembles, regression models, and neural networks (Table \ref{table:learners}). For RF learners, the number of observations required in terminal nodes was fixed at 10, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500. For boosting, regression, and neural network learners, nested cross-validation was applied to tune each model, \ie, assess multiple possible values for relevant model parameters and use the values that optimize the model's estimated prediction accuracy. Specifically, tuning for boosting models included identifying the number of steps to complete. For regression models, tuning was used to identify the magnitude of penalization. For neural networks, the number and density of layers was tuned.
 
@@ -282,8 +280,6 @@ We consider four classes of learners: RFs, boosting ensembles, regression models
 \end{landscape}
 \restoregeometry
 
-\subsubsection{Data sets}
-
 
 
 \subsubsection{Evaluation of prediction accuracy} \label{sec:prediction_accuracy}
@@ -297,25 +293,66 @@ Let $\widehat{S}(t \mid x_i)$ be the predicted probability of survival up to a g
 \bsbar = \frac{1}{t_2 - t_1}\int_{t_1}^{t_2} \widehat{\text{BS}}(t) dt.
 \end{equation} In our results, $t_1$ and $t_2$ are the 25th and 75th percentile of event times, respectively. $\bsbar$, a sum of squared prediction errors, can be scaled to produce a measure of explained residual variation (\ie, an $R^2$ statistic) by computing \begin{equation}
 R^2 = 1 - \frac{\bsbar}{\bskap}
-\end{equation} where $\bskap$ is the integrated Brier score when a Kaplan-Meier estimate for survival based on the training data is used as the survival prediction function $\widehat{S}(t)$. We refer to this $R^2$ statistic as the index of prediction accuracy and we scale its values by 100 to avoid unnecessary leading zero's. For example, we present 25 if $R^2$ is 0.25 and present 10.2 if the difference between two $R^2$ is 0.102.
+\end{equation} where $\bskap$ is the integrated Brier score when a Kaplan-Meier estimate for survival based on the training data is used as the survival prediction function $\widehat{S}(t)$. We refer to this $R^2$ statistic as the index of prediction accuracy \citep{kattan2018index} and we scale its values by 100 to avoid unnecessary leading zero's. For example, we present 25 if $R^2$ is 0.25 and present 10.2 if the difference between two $R^2$ is 0.102.
+
+Our secondary metric for evaluating predicted risk is the time-dependent concordance (C)-statistic. Briefly, we compute the time-dependent C-statistic proposed by \citet{blanche2013estimating}, which is interpreted as the probability that a risk prediction model will assign higher risk to a case (\ie, an observation with $T \leq t$ and $\delta = 1$) versus a non-case (\ie, an observation with $T > t$). Similar to the index of prediction accuracy, observations with $T \leq t$ and $\delta = 0$ only contribute to inverse proportion of censoring weights.
+
+\subsubsection{Data sets}
+
+We use a collection of publicly available data sets to benchmark the prediction accuracy and computational efficiency of the accelerated ORSF and each of the other learners described in \secref{sec:learners}
 
 \subsubsection{Statistical analysis}
 
 \subsubsection{Results}
 
-<<fig.height=10, fig.width=9, dpi=400>>=
+<<fig.height=10, fig.width=9>>=
 bm_pred_viz$ibs_scaled
 @
 
 
-<<fig.height=10, fig.width=9, dpi=400>>=
+<<fig.height=10, fig.width=9>>=
 bm_pred_model_viz$ibs_scaled
 @
 
-\subsection{Benchmark of variable selection}
+\subsection{Benchmark of variable importance}
+
+The aim of this numeric experiment is to compare negation VI to existing methods for VI. We consider methods that are intrinsic to the oblique RF (\eg ANOVA VI), those that are intrinsic to the RF (\eg permutation VI), and those that are model-agnostic (\eg SHAP VI). All methods are evaluated based on their ability to discriminate between variables that are related to a censored outcome versus those that are not related to it.
+
+\subsubsection{Variable importance techniques}
+
+We compute permutation VI using the \texttt{randomForestSRC} package. Although the \texttt{party} package implements the approach to VI developed by \citet{strobl2007bias}, the developers of the \texttt{party} package note that the implementation of this approach for survival outcomes is ``extremely slow and experimental'' as of version 1.3.10. Therefore, it is not incorporated in the current study's numeric experiments. We compute ANOVA VI using the \texttt{aorsf} package, applying a p-value threshold of 0.01 as recommended by \citet{menze2011oblique}. We compute SHAP VI for boosted tree models using the \texttt{xgboost} package and also compute SHAP VI for accelerated oblique RSFs using the \texttt{fastshap} package.
+
+\subsubsection{Variable types}
+
+We considered five classes of predictor variable, with each class characterized by its variables' relationship to a right-censored outcome. Specifically, \begin{itemize}
+\item \textit{junk} variables had no relationship with the outcome.
+\item \textit{main effect} variables were linearly related to the outcome
+\item \textit{non-linear effect} variables had a sinusoidal relationship to the outcome
+\item \textit{combination effect} Latent variables formed by linear combinations of three observed variables. The observed variables have no relationship to the outcome while the latent variable is linearly related to it.
+\item \textit{interaction effect} variables related to the outcome by multiplicative interaction with one other variable.
+\end{itemize}
 
 
+\subsubsection{Simulated data}
 
+We generated each set of simulated data with the following steps. First, a $n \times p$ multivariate normal matrix was generated at random, with each of $p$ columns representing one predictor variable and each of $n$ rows one observation. Each predictor variable had a mean of zero, standard deviation of 1, and correlation with other predictor variables drawn at random between a lower and upper boundary. Second, a time-to-event outcome with roughly 45\% of observations censored is generated using the \texttt{simsurv} package. The full predictor matrix (\ie, including interactions, non-linear mappings, and combinations) is used to generate the outcome. Third, interactions, non-linear mappings, and combinations are dropped from the predictor matrix that learning algorithms will use to estimate VI.
+
+\subsubsection{Parameter specifications}
+
+Parameters that varied in the current simulation study included the number of observations (1000, 3000, and 5000) and the minimum and maximum correlation between predictors (-0.1 to 0.1, -0.3 to 0.3, and -0.5 to 0.5). Parameters that remain fixed throughout the study included the number of predictors in each class (15) and the effect size of each predictor, with an increase of one standard deviation associated with a 64\% increase in relative risk.
+
+\subsubsection{Evaluation of variable importance}
+
+We compared VI techniques based on their discrimination (C-statistic) between relevant and irrelevant variables. Normally a C-statistic assesses if a predicted score discriminates between positive and negative cases of a binary outcome. We use the C-statistic in the current simulation study by treating each variable like a binary outcome (e.g., the outcome is 1 if the variable is relevant, 0 otherwise). In other words, we assess VI as if it were a ‘prediction’ for the status of the variable. The resulting C-statistic measures the probability that a VI technique will rank a relevant variable higher than an irrelevant variable.
+
+\subsubsection{Results}
+
+\section{Discussion}
+
+
+\subsection{Implications of our results}
+
+\subsection{Limitations and next steps}
 
 % Acknowledgements should go at the end, before appendices and references
 
@@ -329,7 +366,7 @@ bm_pred_model_viz$ibs_scaled
 \appendix
 \section*{Appendix A.}
 
-<<fig.height=10, fig.width=9, dpi=400>>=
+<<fig.height=10, fig.width=9>>=
 bm_pred_viz$cstat
 @
 

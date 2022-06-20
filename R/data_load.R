@@ -848,3 +848,123 @@ sprint_ndi_load <- function(outcome) {
 
 }
 
+
+mesa_load <- function(outcome){
+
+  fctrs <- c("Sex", "Race", "Alcohol", "Smoking")
+
+  outcomes_keep <- switch(
+    outcome,
+    'hf' = paste(c("time", "censor"), 'hf', sep = '_'),
+    'chd' = paste(c("time", "censor"), 'chd', sep = '_'),
+    'stroke' = paste(c("time", "censor"), 'stroke', sep = '_'),
+    'death' = paste(c("time", "censor"), 'death', sep = '_')
+  )
+
+  to_drop <- c('ID',
+               'database',
+               'VisitDate',
+               'LAnova',
+               'CV',
+               "QTc",
+               "CV",
+               "LVHcv",
+               "LVHsl",
+               "hxMI",
+               "hxCABG",
+               "CVD",
+               "CHF",
+               "time_hf",
+               "censor_hf",
+               "time_death",
+               "censor_death",
+               "time_chd",
+               "censor_chd",
+               "time_stroke",
+               "censor_stroke") %>%
+    setdiff(outcomes_keep)
+
+  fread("data/mesa_and_aric.csv") %>%
+    .[database == 'mesa'] %>%
+    .[, (fctrs) := lapply(.SD, as.factor), .SDcols = fctrs] %>%
+    .[, (to_drop) := NULL] %>%
+    setnames(old = outcomes_keep, new = c("time", "status")) %>%
+    as.data.frame() %>%
+    drop_na(time, status)
+
+}
+
+
+mesa_hf_load <- function(...){
+  mesa_load(outcome = "hf")
+}
+
+mesa_chd_load <- function(...){
+  mesa_load(outcome = "chd")
+}
+
+mesa_stroke_load <- function(...){
+  mesa_load(outcome = "stroke")
+}
+
+mesa_death_load <- function(...){
+  mesa_load(outcome = "death")
+}
+
+
+aric_load <- function(outcome){
+
+  fctrs <- c("Sex", "Race", "Alcohol", "Smoking")
+
+  outcomes_keep <- switch(
+    outcome,
+    'hf' = paste(c("time", "censor"), 'hf', sep = '_'),
+    'chd' = paste(c("time", "censor"), 'chd', sep = '_'),
+    'stroke' = paste(c("time", "censor"), 'stroke', sep = '_'),
+    'death' = paste(c("time", "censor"), 'death', sep = '_')
+  )
+
+  to_drop <- c('ID',
+               'database',
+               'VisitDate',
+               "LVEF",
+               "LVMi",
+               "hxMI",
+               "hxCABG",
+               "CVD",
+               "CHF",
+               "time_hf",
+               "censor_hf",
+               "time_death",
+               "censor_death",
+               "time_chd",
+               "censor_chd",
+               "time_stroke",
+               "censor_stroke") %>%
+    setdiff(outcomes_keep)
+
+  fread("data/mesa_and_aric.csv") %>%
+    .[database == 'aric'] %>%
+    .[, (fctrs) := lapply(.SD, as.factor), .SDcols = fctrs] %>%
+    .[, (to_drop) := NULL] %>%
+    setnames(old = outcomes_keep, new = c("time", "status")) %>%
+    as.data.frame() %>%
+    drop_na(time, status)
+
+}
+
+aric_hf_load <- function(...){
+  aric_load(outcome = "hf")
+}
+
+aric_chd_load <- function(...){
+  aric_load(outcome = "chd")
+}
+
+aric_stroke_load <- function(...){
+  aric_load(outcome = "stroke")
+}
+
+aric_death_load <- function(...){
+  aric_load(outcome = "death")
+}

@@ -19,11 +19,12 @@ knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
   warning = FALSE,
-  dpi = 600,
+  dpi = 100,
   fig.align='center',
   fig.height=5
 )
 
+library(targets)
 library(tidyverse)
 library(ggforce)
 library(rpart)
@@ -39,6 +40,7 @@ tar_load(
     bm_pred_model_viz,
     bm_pred_time_viz,
     bm_pred_viz,
+    bm_vi_smry,
     data_key
   )
 )
@@ -64,25 +66,13 @@ tar_load(
 
 - Random forests (axis based and oblique)
 
-    + Decision trees
-    
-    + Random survival forests (RSF)
-
 - Accelerating the oblique RSF
 
-    + Newton Raphson scoring
+- Benchmark of prediction accuracy
 
-- Benchmark
+- Benchmark of variable importance
 
-    + Datasets & learners
-    
-    + Evaluation
-    
-    + Results
-    
-- Software
-    
-    + R package & website
+- R package & website
 
 ---
 class: center, middle, inverse
@@ -415,9 +405,21 @@ For identifying linear combination of predictors in the oblique RSF, .mediumer[�
 - `aorsf-cph` iterates until convergence or 15 iterations.
 
 ---
+
+## Negation variable importance (VI)
+
+Negation VI is similar to permutation VI in that it measures how much a model’s prediction error increases when a variable’s role in the model is de-stabilized. 
+
+- Negation VI measures the increase in an oblique RF's prediction error after flipping the sign of all coefficients linked to a variable. 
+
+- As the magnitude of a coefficient increases, so does the probability that negating it will change the oblique RF's predictions. 
+
+- Since the coefficients in each non-leaf node of an oblique RFs are adjusted for the accompanying predictors, negation VI may provide better estimation of VI in the presence of correlated variables compared to standard VI techniques.
+
+---
 class: center, middle, inverse
 
-# .larger[Benchmark]
+# .larger[Prediction Benchmark]
 
 ---
 
@@ -565,8 +567,180 @@ bm_pred_time_viz
 ```
 
 ---
+class: center, middle, inverse
+
+# .larger[Variable Importance Benchmark]
+
+---
+
+## Variable importance techniques
+
+- `randomForestSRC-permutation` - the classic approach proposed by Leo Breiman
+
+- `aorsf-negation` - the new approach I am proposing
+
+- `aorsf-anova` - The only (?) other variable importance technique for oblique random forests
+
+- `aorsf-shap` - SHAP values from an accelerated oblique RSF model
+
+- `xgboost-shap` - SHAP values from an xgboost model (gold standard)
+
+- `xgboost-gain` - Gain importance from an xgboost model (classic)
+
+---
+
+## Simulated data
+
+We simulated five classes of predictor variables:
+
+- __junk__: no relationship with the outcome.
+
+- __main__: linearly related to the outcome
+
+- __non-linear__: sinusoidal relationship to the outcome
+
+- __combination__: latent variables formed from combinations of the combination variables have a linear relationship to the outcome.
+
+- __interactions__: related to the outcome by multiplicative interaction with one other variable.
+
+---
+
+## Simulated data
+
+Start with a multivariate normal draw
+
+- All columns have a mean of zero and standard deviation of 1. 
+
+- Pairwise correlations are selected at random uniformly between a lower and upper boundary. 
+
+- A predictor matrix including interactions, non-linear mappings, and linear combinations is used to generate a time-to-event outcome using the `simsurv` R package
+
+- Transforms are dropped from the matrix after generating the outcome values.
+
+---
+
+## Evaluation
+
+VI techniques are compared based on their discrimination (C-statistic) between relevant and irrelevant variables. 
+
+Normally a C-statistic assesses if a predicted score discriminates between positive and negative cases of a binary outcome. 
+
+We use the C-statistic differently by treating each variable like a binary outcome (e.g., the outcome is 1 if the variable is relevant, 0 otherwise).
+
+In other words, we assess VI as if it were a ‘prediction’ for the status of the variable. (can only do this for simulated data).
+
+The resulting C-statistic measures the probability that a VI technique will rank a relevant variable higher than an irrelevant variable.
+
+---
+
+```{r out.width='100%', fig.align='center'}
+
+library(plotly)
+
+fig_data <- bm_vi_smry %>%
+  ungroup() %>%
+  filter(n_obs == 1000) %>%
+  mutate(
+    model = recode(
+      model, 'randomForestSRC-permutation' = 'rfsrc-permutation'
+    ),
+    model = fct_reorder(model, .x = overall),
+    pred_corr_max = factor(pred_corr_max),
+    text = table_glue(
+      "{model}<br>\\
+          Mean computation time: {as.numeric(time)} seconds<br>\\
+          C-statistic by variable class:<br>\\
+          Main effect: {main}<br>\\
+          Non-linear effect: {nlin}<br>\\
+          Combination effect: {cmbn}<br>\\
+          Interactions:<br>\\
+             w/main effect: {intr_main}<br>\\
+             w/non-linear effect: {intr_hidden_nlin}<br>\\
+             w/combination effect: {intr_hidden_cmbn}"
+    ))
+
+fig <- plot_ly(width = 800, height = 650) %>%
+  add_trace(
+    type = 'bar',
+    x = fig_data$pred_corr_max,
+    y = fig_data$overall,
+    color = fig_data$model,
+    text = table_value(fig_data$overall),
+    textposition = 'outside',
+    hoverinfo = 'text',
+    hovertext = fig_data$text
+  ) %>%
+  plotly::layout(
+    title = list(text = 'Results when N = 1000', x = 0.1),
+    xaxis = list(title = 'Max correlation among predictors'),
+    yaxis = list(title = 'C-statistic'),
+    legend = list(title = list(text = '<b>VI technique</b>'))
+  )
+
+fig
+
+
+```
+
+
+---
+
+
+```{r out.width='100%', fig.align='center'}
+
+library(plotly)
+
+fig_data <- bm_vi_smry %>%
+  ungroup() %>%
+  filter(n_obs == 5000) %>%
+  mutate(
+    model = recode(
+      model, 'randomForestSRC-permutation' = 'rfsrc-permutation'
+    ),
+    model = fct_reorder(model, .x = overall),
+    pred_corr_max = factor(pred_corr_max),
+    text = table_glue(
+      "{model}<br>\\
+          Mean computation time: {as.numeric(time)} seconds<br>\\
+          C-statistic by variable class:<br>\\
+          Main effect: {main}<br>\\
+          Non-linear effect: {nlin}<br>\\
+          Combination effect: {cmbn}<br>\\
+          Interactions:<br>\\
+             w/main effect: {intr_main}<br>\\
+             w/non-linear effect: {intr_hidden_nlin}<br>\\
+             w/combination effect: {intr_hidden_cmbn}"
+    ))
+
+fig <- plot_ly(width = 800, height = 650) %>%
+  add_trace(
+    type = 'bar',
+    x = fig_data$pred_corr_max,
+    y = fig_data$overall,
+    color = fig_data$model,
+    text = table_value(fig_data$overall),
+    textposition = 'outside',
+    hoverinfo = 'text',
+    hovertext = fig_data$text
+  ) %>%
+  plotly::layout(
+    title = list(text = 'Results when N = 5000', x = 0.1),
+    xaxis = list(title = 'Max correlation among predictors'),
+    yaxis = list(title = 'C-statistic'),
+    legend = list(title = list(text = '<b>VI technique</b>'))
+  )
+
+fig
+
+
+```
+
+---
+
 
 ## Using the accelerated oblique RSF
+
+(https://bcjaeger.github.io/aorsf/)
 
 ```{r out.width='100%'}
 

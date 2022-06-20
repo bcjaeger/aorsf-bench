@@ -4,287 +4,274 @@
 #'
 #' @title
 
-sim_surv <- function(n_obs = 2500,
-                     n_z = 20,
-                     n_x = 20,
-                     n_g = 20,
-                     n_w = 20,
-                     n_v = 20,
-                     n_c = 0,
-                     effect_size_by_group = 6,
-                     correlated_x = 0,
+sim_surv <- function(n_obs = 500,
+                     n_pred_junk = 15,
+                     n_pred_main = 15,
+                     n_intr_main = 5,
+                     n_pred_nlin = 15,
+                     n_intr_nlin = 5,
+                     n_pred_cmbn = 45,
+                     n_intr_cmbn = 5,
+                     eff_size_pred_main = 1/2,
+                     eff_size_intr_main = 1/2,
+                     eff_size_pred_nlin = 1/2,
+                     eff_size_intr_nlin = 1/2,
+                     eff_size_pred_cmbn = 1/2,
+                     eff_size_intr_cmbn = 1/2,
+                     pred_corr_min = 0.00,
+                     pred_corr_max = 0.10,
                      pred_horiz = 2.5) {
 
-  stopifnot(n_x >= n_g)
+  stopifnot(n_pred_main >= n_intr_main)
+  stopifnot(n_pred_nlin >= n_intr_nlin)
+  stopifnot(n_pred_cmbn / 2 >= n_intr_cmbn)
+  stopifnot(pred_corr_min <= pred_corr_max)
 
-  # z = junk variables
-  z_names <- paste0('z', seq(n_z))
-  # x = main effect
-  x_names <- paste0('x', seq(n_x))
-  # no main but have interaction with x
-  # x1 interacts with g1, x2 with g2, etc.
-  g_names <- paste0('g', seq(n_g))
+  # no effect
+  junk_names <- paste('junk', seq(n_pred_junk), sep = '_')
+
+  # main effect
+  main_names <- paste('main', seq(n_pred_main), sep = '_')
+
+  # no effect apart from interaction with a main effect
+  intr_main_names <- paste('intr_main', seq(n_intr_main), sep = '_')
+
   # non-linear effect
-  w_names <- paste0('w', seq(n_w))
-  # linear combination effect
-  # v1, v2, v3 have no effect
-  # c1*v1 + c2*v2 + c3*v3 has a big effect
-  v_names <- paste0('v', seq(n_v))
-  # categorical (not used at the moment)
-  c_names <- paste0('c', seq(n_c))
+  nlin_names <- paste('nlin', seq(n_pred_nlin), sep = '_')
+
+  # no effect apart from interaction with a non-linear effect
+  intr_nlin_names <- paste('intr_hidden_nlin', seq(n_intr_nlin), sep = '_')
+
+  # combination linear effect
+  cmbn_names <- paste('cmbn', seq(n_pred_cmbn), sep = '_')
+
+  # no effect apart from interaction with a combination effect
+  intr_cmbn_names <- paste('intr_hidden_cmbn', seq(n_intr_cmbn), sep = '_')
 
   .names <- c()
 
-  if(n_x > 0) .names <- c(.names, x_names)
+  if (n_pred_junk > 0) .names <- c(.names, junk_names)
+  if (n_pred_main > 0) .names <- c(.names, main_names)
+  if (n_pred_nlin > 0) .names <- c(.names, nlin_names)
+  if (n_pred_cmbn > 0) .names <- c(.names, cmbn_names)
+  if (n_intr_main > 0) .names <- c(.names, intr_main_names)
+  if (n_intr_nlin > 0) .names <- c(.names, intr_nlin_names)
+  if (n_intr_cmbn > 0) .names <- c(.names, intr_cmbn_names)
 
-  if(n_z > 0) .names <- c(.names, z_names)
+  n_vars <-
+    n_pred_junk +
+    n_pred_main +
+    n_pred_nlin +
+    n_pred_cmbn +
+    n_intr_main +
+    n_intr_nlin +
+    n_intr_cmbn
 
-  if(n_g > 0) .names <- c(.names, g_names)
+  stopifnot(n_vars > 0)
 
-  if(n_w > 0) .names <- c(.names, w_names)
+  mat_covar <- diag(x = n_vars)
 
-  if(n_v > 0) .names <- c(.names, v_names)
+  colnames(mat_covar) <- rownames(mat_covar) <- .names
 
-  if(n_c > 0) .names <- c(.names, c_names)
+  if(pred_corr_max > 0){
 
-  n_vars <- n_z + n_x + n_g + n_w + n_v + n_c
+    for( i in seq(n_vars) ){
 
-  if(correlated_x > 0){
+      for (j in seq(i, n_vars)){
 
-    mat_covar <- matrix(0, nrow = n_vars, ncol = n_vars)
+        if(j > i){
+          mat_covar[i, j] <-
+            runif(n = 1,
+                  min = pred_corr_min,
+                  max = pred_corr_max) *
+            sample(x = c(-1, 1), size = 1)
 
-    diag(mat_covar) <- 1
+          mat_covar[j, i] <- mat_covar[i, j]
 
-    colnames(mat_covar) <- rownames(mat_covar) <- .names
+        }
 
-    # Make the Z variables correlate with the others
+      }
 
-    mat_covar[z_names, x_names] <-
-      runif(n = n_z * n_x,
-            min = -correlated_x,
-            max = correlated_x)
+    }
 
-    # symmetry
-    mat_covar[upper.tri(mat_covar)] <- t(mat_covar)[upper.tri(mat_covar)]
-
-    mat_covar <- Matrix::nearPD(mat_covar)$mat
-
-    covs <- mvtnorm::rmvnorm(n = n_obs, sigma = as.matrix(mat_covar))
-
-
-  } else {
-
-    covs <- matrix(
-      rnorm(n = n_vars * n_obs),
-      ncol = n_vars,
-      nrow = n_obs
-    )
+  # nearest positive definite matrix (must be invertible for rmvnorm)
+  mat_covar <- Matrix::nearPD(mat_covar)$mat
 
   }
+
+  covs <- mvtnorm::rmvnorm(n = n_obs, sigma = as.matrix(mat_covar))
 
   colnames(covs) <- .names
 
-  covs <- as.data.frame(covs)
-
-  # Interaction variables ----
-
-  vars_interaction <- c()
-
-  if(n_g > 0){
-
-    for( i in seq(n_g) ){
-
-      int_name <- paste0("int_", i)
-      x_name <- paste0('x', i)
-      g_name <- paste0('g', i)
-
-      vars_interaction <- c(vars_interaction, paste(x_name,
-                                                    g_name,
-                                                    sep = '-'))
-
-      covs[[int_name]] <- covs[[x_name]] * covs[[g_name]]
-
-    }
-
-  }
-
-  # Non-linear variables ----
-
-  if(n_w > 0){
-
-    amplitudes <- seq(1/4, 1/2, length.out = n_w)
-
-    for( i in seq(n_w) ){
-
-      nl_name <- paste0("nl_", i)
-      w_name <- paste0("w", i)
-
-      covs[[nl_name]] <- sin(amplitudes[i] * pi * covs[[w_name]])
-
-    }
-
-  }
-
-  # if(n_w > 0){
-  #
-  #   degrees <- round(seq(3, 6, length.out = n_w))
-  #
-  #   for( i in seq(n_w) ){
-  #
-  #     w_name <- paste0("w", i)
-  #     nl_names <- paste('nl', i, seq(degrees[i]), sep = '_')
-  #
-  #     poly_cols <- seq(degrees[i]) |>
-  #       map(~ covs[[w_name]]^.x) |>
-  #       reduce(.f = cbind)
-  #
-  #     colnames(poly_cols) <- nl_names
-  #
-  #     covs <- cbind(covs, poly_cols)
-  #
-  #   }
-  #
-  # }
-
-  # linear combination variables ----
-
-  random_sign <- function(x) {
-
-    rb <- rbinom(n = length(x), size = 1, prob = 1/2)
-
-    out <- x
-
-    if(any(rb == 0)) out[rb == 0] <- out[rb == 0] * (-1)
-
-    out
-
-  }
-
-  n_lc <- 0
-
-  vars_lc <- c()
-  coefs_lc <- list()
-  coefs_counter <- 1
-
-  if(n_v > 0){
-
-    lc_assign <- rep(seq(n_v / 3), times = n_v)
-    lc_assign <- lc_assign[seq(n_v)]
-
-    n_lc <- length(unique(lc_assign))
-
-    for( i in unique(lc_assign) ){
-
-      lc_vars <- v_names[lc_assign == i]
-
-      vars_lc <- c(vars_lc, paste(lc_vars, collapse = '-'))
-
-      lc_coefs <- length(lc_vars) |>
-        runif(min = 1/2, max = 1) |>
-        random_sign()
-
-      coefs_lc[[coefs_counter]] <- lc_coefs
-      coefs_counter <- coefs_counter+1
-
-      lc_value <- as.matrix(covs[, lc_vars]) %*% as.matrix(lc_coefs)
-
-      lc_name <- paste0('lc_', paste(lc_vars, collapse = '_'))
-
-      covs[lc_name] <- lc_value
-
-    }
-
-  }
+  data_covs <- as.data.frame(covs) %>%
+    add_attribute(attr_name = 'key', attr_value = list()) %>%
+    add_nonlinear_effects(n_pred_nlin) %>%
+    add_combination_effects(cmbn_names) %>%
+    add_interactions(n_intr = n_intr_main, type = 'main') %>%
+    add_interactions(n_intr = n_intr_nlin, type = 'hidden_nlin') %>%
+    add_interactions(n_intr = n_intr_cmbn, type = 'hidden_cmbn')
 
   # making effect sizes -----
 
-  betas <- vector(mode = 'numeric', length = ncol(covs))
-  names(betas) <- names(covs)
+  betas <- vector(mode = 'numeric', length = ncol(data_covs))
 
-  if(n_x>0) x_effect   <- effect_size_by_group*1 / n_x else x_effect   <- 0
-  if(n_g>0) int_effect <- effect_size_by_group*2 / n_g else int_effect <- 0
-  if(n_w>0) nl_effect  <- effect_size_by_group*2 / n_w else nl_effect  <- 0
-  if(n_v>0) lc_effect  <- effect_size_by_group*2 / n_v else lc_effect  <- 0
-  if(n_c>0) c_effect   <- effect_size_by_group*1 / n_c else c_effect   <- 0
+  names(betas) <- names(data_covs)
 
-  betas[str_detect(names(betas), '^x')] <- x_effect
 
-  if(n_g > 0)
-    betas[str_detect(names(betas), '^int')] <- int_effect
+  main_indx <- names(betas) %>%
+    str_detect('^main_[0-9]+$')
 
-  if(n_w > 0)
-    betas[str_detect(names(betas), '^nl')] <- nl_effect
+  intr_main_indx <- names(betas) %>%
+    str_detect('^hidden_main_[0-9]+_x_intr_main_[0-9]+$')
 
-  if(n_lc > 0)
-    betas[str_detect(names(betas), '^lc')] <- lc_effect
+  nlin_indx <- names(betas) %>%
+    str_detect('^hidden_nlin_[0-9]+$')
 
-  if(n_c > 0)
-    betas[str_detect(names(betas), '^c')] <- c_effect
+  intr_nlin_indx <- names(betas) %>%
+    str_detect('^hidden_hidden_nlin_[0-9]+_x_intr_hidden_nlin_[0-9]+$')
+
+  cmbn_indx <- names(betas) %>%
+    str_detect('^hidden_cmbn_[0-9]+$')
+
+  intr_cmbn_indx <- names(betas) %>%
+    str_detect('^hidden_hidden_cmbn_[0-9]+_x_intr_hidden_cmbn_[0-9]+$')
+
+  betas[main_indx]      <- eff_size_pred_main
+  betas[intr_main_indx] <- eff_size_intr_main
+  betas[nlin_indx]      <- eff_size_pred_nlin
+  betas[intr_nlin_indx] <- eff_size_intr_nlin
+  betas[cmbn_indx]      <- eff_size_pred_cmbn
+  betas[intr_cmbn_indx] <- eff_size_intr_cmbn
 
   s1 <- simsurv(lambdas = 0.1,
                 gammas = 1.5,
                 betas = betas,
-                x = covs,
+                x = data_covs,
                 maxt = pred_horiz * 2)
 
-  # after generating outcomes using continuous values of c variables,
-  # cut those variables into categories
+  # head(data_covs)
 
-  if(n_c > 0){
-    for(.c in c_names){
-
-      covs[[.c]] <- cut(covs[[.c]],
-                        breaks = c(-Inf, -1/2, 1/2, Inf),
-                        labels = letters[1:3])
-
-    }
-  }
-
-
-
-
-  keep <- grep(pattern = '^z|^x|^g|^w|^v|^c', x = names(covs))
-
-  vars_signal <- names(betas)[grep(pattern = '^x|^g|^w|^v|^c',
-                                   x = names(betas))]
+  drop <- grep(pattern = '^hidden', x = names(data_covs))
 
   list(
-    data = as_tibble(cbind(s1, covs[, keep])) |>
+    data = as_tibble(cbind(s1, data_covs[, -drop])) |>
       rename(time = eventtime) |>
       select(-id),
-    vars_signal = vars_signal,
-    vars_junk = setdiff(names(covs)[keep], vars_signal),
-    vars_interaction = vars_interaction,
-    vars_lc = vars_lc,
-    coefs_lc = coefs_lc,
-    effect_x = x_effect,
-    effect_int = int_effect,
-    effect_nl = nl_effect,
-    effect_lc = lc_effect,
-    effect_c = c_effect
+    cmbn_key = attr(data_covs, 'key'),
+    effects = list(pred_main = eff_size_pred_main,
+                   intr_main = eff_size_intr_main,
+                   pred_nlin = eff_size_pred_nlin,
+                   intr_nlin = eff_size_intr_nlin,
+                   pred_cmbn = eff_size_pred_cmbn,
+                   intr_cmbn = eff_size_intr_cmbn)
   )
 
 
 }
 
+add_interactions <- function(covs, n_intr, type){
+
+  if(n_intr == 0) return(covs)
+
+  for( i in seq(n_intr) ){
+
+    covs <- covs %>%
+      add_interaction(name_v1 = glue('{type}_{i}'),
+                      name_v2 = glue('intr_{type}_{i}'))
+
+  }
+
+  covs
+
+}
+
+add_interaction <- function(covs, name_v1, name_v2){
+
+  iname <- paste('hidden', name_v1, 'x', name_v2, sep = '_')
+
+  covs[[iname]] <- covs[[name_v1]] * covs[[name_v2]]
+
+  covs
+
+}
+
+add_nonlinear_effects <- function(covs, n_pred_nlin){
+
+  if(n_pred_nlin == 0) return(covs)
+
+  amplitudes <- seq(1/8, 1/4, length.out = n_pred_nlin)
+
+  for( i in seq(n_pred_nlin) ){
+
+    covs <- covs %>%
+      add_nonlinear_effect(amplitude = amplitudes[i],
+                           name_v1 = glue("nlin_{i}"))
+
+  }
+
+  covs
+
+}
+
+add_nonlinear_effect <- function(covs, amplitude, name_v1){
+
+    nl_name <- paste('hidden', name_v1, sep = '_')
+
+    covs[[nl_name]] <- sin(amplitude * pi * covs[[name_v1]])
+
+    covs
 
 
-# testing
+}
 
-# sim <- sim_surv(n_obs = 5000,
-#                 n_z = 1,
-#                 n_x = 1,
-#                 n_g = 1,
-#                 n_w = 1)
-#
-# data <- sim$data
-#
-# dd <- datadist(data)
-#
-# options(datadist = dd)
-#
-# m <- cph(Surv(time, status) ~ z1 + x1 * g1 + rcs(w1), data = data)
-#
-# anova(m)
-#
-# ggplot(Predict(m, w1))
+add_combination_effects <- function(covs, cmbn_names, min_size = 3){
+
+  if(length(cmbn_names) == 0) return(covs)
+
+  n_grps <- round(length(cmbn_names) / min_size)
+
+  cmbn_grps <- split(cmbn_names,
+                     f = factor(seq_along(cmbn_names) %%  n_grps))
+
+  for(i in seq_along(cmbn_grps)){
+
+
+    .names <- cmbn_grps[[i]]
+    .coefs <- runif(n = length(.names), min = 1/2, max = 3/4) *
+      random_sign(size = length(.names))
+
+    new_key <- list(
+      x = list(var_names = .names,
+               var_coefs = .coefs)
+    )
+
+    names(new_key) <- glue("hidden_cmbn_{i}")
+
+    attr(covs, 'key') = c( attr(covs, 'key'), new_key)
+
+    covs <- covs %>%
+      add_combination_effect(.names = .names,
+                             .coefs = .coefs,
+                             .hidden_name = glue("hidden_cmbn_{i}"))
+
+  }
+
+  covs
+
+}
+
+add_combination_effect <- function(covs, .names, .coefs, .hidden_name){
+
+  covs[[.hidden_name]] <- as.numeric(
+    as.matrix(covs[, .names]) %*% as.matrix(.coefs, ncol = 1)
+  )
+
+  covs
+
+}
+
+random_sign <- function(size) {
+
+  sample(x = c(-1, 1), size = size, replace = TRUE)
+
+}

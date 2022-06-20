@@ -7,6 +7,14 @@
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <script src="libs/htmlwidgets/htmlwidgets.js"></script>
+    <script src="libs/plotly-binding/plotly.js"></script>
+    <script src="libs/typedarray/typedarray.min.js"></script>
+    <script src="libs/jquery/jquery.min.js"></script>
+    <link href="libs/crosstalk/css/crosstalk.min.css" rel="stylesheet" />
+    <script src="libs/crosstalk/js/crosstalk.min.js"></script>
+    <link href="libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+    <script src="libs/plotly-main/plotly-latest.min.js"></script>
   </head>
   <body>
     <textarea id="source">
@@ -14,7 +22,7 @@ class: center, middle, inverse, title-slide
 
 # Accelerated oblique random survival forests
 ### Byron C. Jaeger
-### Last updated 2022-06-14
+### Last updated 2022-06-20
 
 ---
 
@@ -40,25 +48,13 @@ class: center, middle, inverse, title-slide
 
 - Random forests (axis based and oblique)
 
-    + Decision trees
-    
-    + Random survival forests (RSF)
-
 - Accelerating the oblique RSF
 
-    + Newton Raphson scoring
+- Benchmark of prediction accuracy
 
-- Benchmark
+- Benchmark of variable importance
 
-    + Datasets &amp; learners
-    
-    + Evaluation
-    
-    + Results
-    
-- Software
-    
-    + R package &amp; website
+- R package &amp; website
 
 ---
 class: center, middle, inverse
@@ -215,9 +211,21 @@ For identifying linear combination of predictors in the oblique RSF, .mediumer[�
 - `aorsf-cph` iterates until convergence or 15 iterations.
 
 ---
+
+## Negation variable importance (VI)
+
+Negation VI is similar to permutation VI in that it measures how much a model’s prediction error increases when a variable’s role in the model is de-stabilized. 
+
+- Negation VI measures the increase in an oblique RF's prediction error after flipping the sign of all coefficients linked to a variable. 
+
+- As the magnitude of a coefficient increases, so does the probability that negating it will change the oblique RF's predictions. 
+
+- Since the coefficients in each non-leaf node of an oblique RFs are adjusted for the accompanying predictors, negation VI may provide better estimation of VI in the presence of correlated variables compared to standard VI techniques.
+
+---
 class: center, middle, inverse
 
-# .larger[Benchmark]
+# .larger[Prediction Benchmark]
 
 ---
 
@@ -287,11 +295,11 @@ __Other__:
 
 A total of 23 risk prediction tasks in 16 data sets were analyzed.
 
-- number of observations ranged from 137 to 17549 (median = 1151)
+- number of observations ranged from 137 to 17549 (median = 2231)
 
-- number of predictors ranged from 7 to 1692 (median = 12)
+- number of predictors ranged from 7 to 1692 (median = 28)
 
-- % censored ranged from 5 to 98 (median = 68)
+- % censored ranged from 5 to 98 (median = 78)
 
 (Full table is shown in the bonus slides)
 
@@ -355,8 +363,88 @@ Step 2: Fit a hierarchical Bayesian model to analyze posterior expected differen
 &lt;img src="index_files/figure-html/bm_pred_time_ridges-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
+class: center, middle, inverse
+
+# .larger[Variable Importance Benchmark]
+
+---
+
+## Variable importance techniques
+
+- `randomForestSRC-permutation` - the classic approach proposed by Leo Breiman
+
+- `aorsf-negation` - the new approach I am proposing
+
+- `aorsf-anova` - The only (?) other variable importance technique for oblique random forests
+
+- `aorsf-shap` - SHAP values from an accelerated oblique RSF model
+
+- `xgboost-shap` - SHAP values from an xgboost model (gold standard)
+
+- `xgboost-gain` - Gain importance from an xgboost model (classic)
+
+---
+
+## Simulated data
+
+We simulated five classes of predictor variables:
+
+- __junk__: no relationship with the outcome.
+
+- __main__: linearly related to the outcome
+
+- __non-linear__: sinusoidal relationship to the outcome
+
+- __combination__: latent variables formed from combinations of the combination variables have a linear relationship to the outcome.
+
+- __interactions__: related to the outcome by multiplicative interaction with one other variable.
+
+---
+
+## Simulated data
+
+Start with a multivariate normal draw
+
+- All columns have a mean of zero and standard deviation of 1. 
+
+- Pairwise correlations are selected at random uniformly between a lower and upper boundary. 
+
+- A predictor matrix including interactions, non-linear mappings, and linear combinations is used to generate a time-to-event outcome using the `simsurv` R package
+
+- Transforms are dropped from the matrix after generating the outcome values.
+
+---
+
+## Evaluation
+
+VI techniques are compared based on their discrimination (C-statistic) between relevant and irrelevant variables. 
+
+Normally a C-statistic assesses if a predicted score discriminates between positive and negative cases of a binary outcome. 
+
+We use the C-statistic differently by treating each variable like a binary outcome (e.g., the outcome is 1 if the variable is relevant, 0 otherwise).
+
+In other words, we assess VI as if it were a ‘prediction’ for the status of the variable. (can only do this for simulated data).
+
+The resulting C-statistic measures the probability that a VI technique will rank a relevant variable higher than an irrelevant variable.
+
+---
+
+<div id="htmlwidget-685484a6a662ca784d84" style="width:800px;height:650px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-685484a6a662ca784d84">{"x":{"visdat":{"23ad84c2c2151":["function () ","plotlyVisDat"]},"cur_data":"23ad84c2c2151","attrs":{"23ad84c2c2151":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","x":["0.1","0.1","0.1","0.1","0.1","0.1","0.25","0.25","0.25","0.25","0.25","0.25","0.5","0.5","0.5","0.5","0.5","0.5"],"y":[0.776874074074074,0.749555555555556,0.74637037037037,0.716355555555556,0.682844444444444,0.639466666666667,0.679896296296296,0.662962962962963,0.645837037037037,0.614044444444444,0.612918518518519,0.545362962962963,0.650948148148148,0.628162962962963,0.620177777777778,0.604474074074074,0.587555555555556,0.530281481481481],"color":["aorsf-negation","aorsf-anova","aorsf-shap","xgboost-shap","rfsrc-permutation","xgboost-gain","aorsf-negation","aorsf-anova","aorsf-shap","rfsrc-permutation","xgboost-shap","xgboost-gain","aorsf-negation","aorsf-anova","aorsf-shap","rfsrc-permutation","xgboost-shap","xgboost-gain"],"text":["0.78","0.75","0.75","0.72","0.68","0.64","0.68","0.66","0.65","0.61","0.61","0.55","0.65","0.63","0.62","0.60","0.59","0.53"],"textposition":"outside","hoverinfo":"text","hovertext":["aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.73<br>Combination effect: 0.81<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.55","aorsf-anova<br>Mean computation time: 3.1 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.71<br>Combination effect: 0.77<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.56","aorsf-shap<br>Mean computation time: 410 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.72<br>Combination effect: 0.78<br>Interactions:<br>   w/main effect: 0.52<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.47","xgboost-shap<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.91<br>Non-linear effect: 0.68<br>Combination effect: 0.74<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.45<br>   w/combination effect: 0.48","rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.64<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.53<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.60","xgboost-gain<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.47<br>   w/non-linear effect: 0.34<br>   w/combination effect: 0.39","aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.62<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.59","aorsf-anova<br>Mean computation time: 3.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.61<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.56","aorsf-shap<br>Mean computation time: 420 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.61<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.47","rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.74<br>Non-linear effect: 0.57<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.58","xgboost-shap<br>Mean computation time: 13 seconds<br>C-statistic by variable class:<br>Main effect: 0.76<br>Non-linear effect: 0.58<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.46<br>   w/combination effect: 0.55","xgboost-gain<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.72<br>Non-linear effect: 0.50<br>Combination effect: 0.53<br>Interactions:<br>   w/main effect: 0.47<br>   w/non-linear effect: 0.37<br>   w/combination effect: 0.49","aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.60<br>Combination effect: 0.64<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.59","aorsf-anova<br>Mean computation time: 3.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.59<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.56<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.58","aorsf-shap<br>Mean computation time: 409 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.59<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.49<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.49","rfsrc-permutation<br>Mean computation time: 18 seconds<br>C-statistic by variable class:<br>Main effect: 0.70<br>Non-linear effect: 0.56<br>Combination effect: 0.60<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.59","xgboost-shap<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.73<br>Non-linear effect: 0.56<br>Combination effect: 0.57<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.45<br>   w/combination effect: 0.59","xgboost-gain<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.68<br>Non-linear effect: 0.48<br>Combination effect: 0.51<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.39<br>   w/combination effect: 0.52"],"inherit":true}},"layout":{"width":800,"height":650,"margin":{"b":40,"l":60,"t":25,"r":10},"title":{"text":"Results when N = 1000","x":0.1},"xaxis":{"domain":[0,1],"automargin":true,"title":"Max correlation among predictors","type":"category","categoryorder":"array","categoryarray":["0.1","0.25","0.5"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"C-statistic"},"legend":{"title":{"text":"<b>VI technique<\/b>"}},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.639466666666667,0.545362962962963,0.530281481481481],"text":["0.64","0.55","0.53"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-gain<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.47<br>   w/non-linear effect: 0.34<br>   w/combination effect: 0.39","xgboost-gain<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.72<br>Non-linear effect: 0.50<br>Combination effect: 0.53<br>Interactions:<br>   w/main effect: 0.47<br>   w/non-linear effect: 0.37<br>   w/combination effect: 0.49","xgboost-gain<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.68<br>Non-linear effect: 0.48<br>Combination effect: 0.51<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.39<br>   w/combination effect: 0.52"],"name":"xgboost-gain","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.716355555555556,0.612918518518519,0.587555555555556],"text":["0.72","0.61","0.59"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-shap<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.91<br>Non-linear effect: 0.68<br>Combination effect: 0.74<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.45<br>   w/combination effect: 0.48","xgboost-shap<br>Mean computation time: 13 seconds<br>C-statistic by variable class:<br>Main effect: 0.76<br>Non-linear effect: 0.58<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.46<br>   w/combination effect: 0.55","xgboost-shap<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.73<br>Non-linear effect: 0.56<br>Combination effect: 0.57<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.45<br>   w/combination effect: 0.59"],"name":"xgboost-shap","marker":{"color":"rgba(252,141,98,1)","line":{"color":"rgba(252,141,98,1)"}},"textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.682844444444444,0.614044444444444,0.604474074074074],"text":["0.68","0.61","0.60"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.64<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.53<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.60","rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.74<br>Non-linear effect: 0.57<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.58","rfsrc-permutation<br>Mean computation time: 18 seconds<br>C-statistic by variable class:<br>Main effect: 0.70<br>Non-linear effect: 0.56<br>Combination effect: 0.60<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.59"],"name":"rfsrc-permutation","marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.74637037037037,0.645837037037037,0.620177777777778],"text":["0.75","0.65","0.62"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-shap<br>Mean computation time: 410 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.72<br>Combination effect: 0.78<br>Interactions:<br>   w/main effect: 0.52<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.47","aorsf-shap<br>Mean computation time: 420 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.61<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.47","aorsf-shap<br>Mean computation time: 409 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.59<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.49<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.49"],"name":"aorsf-shap","marker":{"color":"rgba(231,138,195,1)","line":{"color":"rgba(231,138,195,1)"}},"textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.749555555555556,0.662962962962963,0.628162962962963],"text":["0.75","0.66","0.63"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-anova<br>Mean computation time: 3.1 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.71<br>Combination effect: 0.77<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.56","aorsf-anova<br>Mean computation time: 3.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.61<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.56","aorsf-anova<br>Mean computation time: 3.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.59<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.56<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.58"],"name":"aorsf-anova","marker":{"color":"rgba(166,216,84,1)","line":{"color":"rgba(166,216,84,1)"}},"textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.776874074074074,0.679896296296296,0.650948148148148],"text":["0.78","0.68","0.65"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.73<br>Combination effect: 0.81<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.55","aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.62<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.59","aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.60<br>Combination effect: 0.64<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.59"],"name":"aorsf-negation","marker":{"color":"rgba(255,217,47,1)","line":{"color":"rgba(255,217,47,1)"}},"textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+
+
+---
+
+
+<div id="htmlwidget-4468fdaa877507aba462" style="width:800px;height:650px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4468fdaa877507aba462">{"x":{"visdat":{"23ad879106d1b":["function () ","plotlyVisDat"]},"cur_data":"23ad879106d1b","attrs":{"23ad879106d1b":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","x":["0.1","0.1","0.1","0.1","0.1","0.1","0.25","0.25","0.25","0.25","0.25","0.25","0.5","0.5","0.5","0.5","0.5","0.5"],"y":[0.86637037037037,0.846103703703704,0.829659259259259,0.823318518518519,0.805422222222222,0.789925925925926,0.730903703703704,0.723259259259259,0.710903703703704,0.709274074074074,0.689688888888889,0.68642962962963,0.716474074074074,0.703674074074074,0.696088888888889,0.684148148148148,0.65842962962963,0.653392592592593],"color":["aorsf-negation","xgboost-shap","aorsf-anova","xgboost-gain","aorsf-shap","rfsrc-permutation","aorsf-negation","xgboost-shap","aorsf-anova","xgboost-gain","rfsrc-permutation","aorsf-shap","aorsf-negation","xgboost-shap","xgboost-gain","aorsf-anova","rfsrc-permutation","aorsf-shap"],"text":["0.87","0.85","0.83","0.82","0.81","0.79","0.73","0.72","0.71","0.71","0.69","0.69","0.72","0.70","0.70","0.68","0.66","0.65"],"textposition":"outside","hoverinfo":"text","hovertext":["aorsf-negation<br>Mean computation time: 99 seconds<br>C-statistic by variable class:<br>Main effect: 0.99<br>Non-linear effect: 0.82<br>Combination effect: 0.91<br>Interactions:<br>   w/main effect: 0.76<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.75","xgboost-shap<br>Mean computation time: 69 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.80<br>Combination effect: 0.87<br>Interactions:<br>   w/main effect: 0.84<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.74","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.77<br>Combination effect: 0.86<br>Interactions:<br>   w/main effect: 0.73<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.69","xgboost-gain<br>Mean computation time: 67 seconds<br>C-statistic by variable class:<br>Main effect: 0.97<br>Non-linear effect: 0.74<br>Combination effect: 0.84<br>Interactions:<br>   w/main effect: 0.88<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.77","aorsf-shap<br>Mean computation time: 3,408 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.77<br>Combination effect: 0.86<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.48","rfsrc-permutation<br>Mean computation time: 488 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.69<br>Combination effect: 0.81<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.74","aorsf-negation<br>Mean computation time: 103 seconds<br>C-statistic by variable class:<br>Main effect: 0.90<br>Non-linear effect: 0.61<br>Combination effect: 0.74<br>Interactions:<br>   w/main effect: 0.72<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.71","xgboost-shap<br>Mean computation time: 48 seconds<br>C-statistic by variable class:<br>Main effect: 0.86<br>Non-linear effect: 0.64<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.81<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.74","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.88<br>Non-linear effect: 0.61<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.55<br>   w/combination effect: 0.66","xgboost-gain<br>Mean computation time: 49 seconds<br>C-statistic by variable class:<br>Main effect: 0.86<br>Non-linear effect: 0.61<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.84<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.77","rfsrc-permutation<br>Mean computation time: 481 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.61<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.59<br>   w/combination effect: 0.71","aorsf-shap<br>Mean computation time: 3,465 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.51","aorsf-negation<br>Mean computation time: 102 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.80<br>   w/non-linear effect: 0.61<br>   w/combination effect: 0.76","xgboost-shap<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.62<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.83<br>   w/non-linear effect: 0.61<br>   w/combination effect: 0.77","xgboost-gain<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.60<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.89<br>   w/non-linear effect: 0.59<br>   w/combination effect: 0.82","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.58<br>Combination effect: 0.67<br>Interactions:<br>   w/main effect: 0.75<br>   w/non-linear effect: 0.60<br>   w/combination effect: 0.71","rfsrc-permutation<br>Mean computation time: 474 seconds<br>C-statistic by variable class:<br>Main effect: 0.79<br>Non-linear effect: 0.58<br>Combination effect: 0.63<br>Interactions:<br>   w/main effect: 0.74<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.73","aorsf-shap<br>Mean computation time: 3,311 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.57<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.52"],"inherit":true}},"layout":{"width":800,"height":650,"margin":{"b":40,"l":60,"t":25,"r":10},"title":{"text":"Results when N = 5000","x":0.1},"xaxis":{"domain":[0,1],"automargin":true,"title":"Max correlation among predictors","type":"category","categoryorder":"array","categoryarray":["0.1","0.25","0.5"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"C-statistic"},"legend":{"title":{"text":"<b>VI technique<\/b>"}},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.805422222222222,0.68642962962963,0.653392592592593],"text":["0.81","0.69","0.65"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-shap<br>Mean computation time: 3,408 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.77<br>Combination effect: 0.86<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.48","aorsf-shap<br>Mean computation time: 3,465 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.51","aorsf-shap<br>Mean computation time: 3,311 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.57<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.52"],"name":"aorsf-shap","marker":{"color":"rgba(102,194,165,1)","line":{"color":"rgba(102,194,165,1)"}},"textfont":{"color":"rgba(102,194,165,1)"},"error_y":{"color":"rgba(102,194,165,1)"},"error_x":{"color":"rgba(102,194,165,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.789925925925926,0.689688888888889,0.65842962962963],"text":["0.79","0.69","0.66"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["rfsrc-permutation<br>Mean computation time: 488 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.69<br>Combination effect: 0.81<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.74","rfsrc-permutation<br>Mean computation time: 481 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.61<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.59<br>   w/combination effect: 0.71","rfsrc-permutation<br>Mean computation time: 474 seconds<br>C-statistic by variable class:<br>Main effect: 0.79<br>Non-linear effect: 0.58<br>Combination effect: 0.63<br>Interactions:<br>   w/main effect: 0.74<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.73"],"name":"rfsrc-permutation","marker":{"color":"rgba(252,141,98,1)","line":{"color":"rgba(252,141,98,1)"}},"textfont":{"color":"rgba(252,141,98,1)"},"error_y":{"color":"rgba(252,141,98,1)"},"error_x":{"color":"rgba(252,141,98,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.823318518518519,0.709274074074074,0.696088888888889],"text":["0.82","0.71","0.70"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-gain<br>Mean computation time: 67 seconds<br>C-statistic by variable class:<br>Main effect: 0.97<br>Non-linear effect: 0.74<br>Combination effect: 0.84<br>Interactions:<br>   w/main effect: 0.88<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.77","xgboost-gain<br>Mean computation time: 49 seconds<br>C-statistic by variable class:<br>Main effect: 0.86<br>Non-linear effect: 0.61<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.84<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.77","xgboost-gain<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.60<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.89<br>   w/non-linear effect: 0.59<br>   w/combination effect: 0.82"],"name":"xgboost-gain","marker":{"color":"rgba(141,160,203,1)","line":{"color":"rgba(141,160,203,1)"}},"textfont":{"color":"rgba(141,160,203,1)"},"error_y":{"color":"rgba(141,160,203,1)"},"error_x":{"color":"rgba(141,160,203,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.829659259259259,0.710903703703704,0.684148148148148],"text":["0.83","0.71","0.68"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.77<br>Combination effect: 0.86<br>Interactions:<br>   w/main effect: 0.73<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.69","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.88<br>Non-linear effect: 0.61<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.55<br>   w/combination effect: 0.66","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.58<br>Combination effect: 0.67<br>Interactions:<br>   w/main effect: 0.75<br>   w/non-linear effect: 0.60<br>   w/combination effect: 0.71"],"name":"aorsf-anova","marker":{"color":"rgba(231,138,195,1)","line":{"color":"rgba(231,138,195,1)"}},"textfont":{"color":"rgba(231,138,195,1)"},"error_y":{"color":"rgba(231,138,195,1)"},"error_x":{"color":"rgba(231,138,195,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.846103703703704,0.723259259259259,0.703674074074074],"text":["0.85","0.72","0.70"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-shap<br>Mean computation time: 69 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.80<br>Combination effect: 0.87<br>Interactions:<br>   w/main effect: 0.84<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.74","xgboost-shap<br>Mean computation time: 48 seconds<br>C-statistic by variable class:<br>Main effect: 0.86<br>Non-linear effect: 0.64<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.81<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.74","xgboost-shap<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.62<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.83<br>   w/non-linear effect: 0.61<br>   w/combination effect: 0.77"],"name":"xgboost-shap","marker":{"color":"rgba(166,216,84,1)","line":{"color":"rgba(166,216,84,1)"}},"textfont":{"color":"rgba(166,216,84,1)"},"error_y":{"color":"rgba(166,216,84,1)"},"error_x":{"color":"rgba(166,216,84,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.86637037037037,0.730903703703704,0.716474074074074],"text":["0.87","0.73","0.72"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-negation<br>Mean computation time: 99 seconds<br>C-statistic by variable class:<br>Main effect: 0.99<br>Non-linear effect: 0.82<br>Combination effect: 0.91<br>Interactions:<br>   w/main effect: 0.76<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.75","aorsf-negation<br>Mean computation time: 103 seconds<br>C-statistic by variable class:<br>Main effect: 0.90<br>Non-linear effect: 0.61<br>Combination effect: 0.74<br>Interactions:<br>   w/main effect: 0.72<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.71","aorsf-negation<br>Mean computation time: 102 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.80<br>   w/non-linear effect: 0.61<br>   w/combination effect: 0.76"],"name":"aorsf-negation","marker":{"color":"rgba(255,217,47,1)","line":{"color":"rgba(255,217,47,1)"}},"textfont":{"color":"rgba(255,217,47,1)"},"error_y":{"color":"rgba(255,217,47,1)"},"error_x":{"color":"rgba(255,217,47,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+
+---
+
 
 ## Using the accelerated oblique RSF
+
+(https://bcjaeger.github.io/aorsf/)
 
 &lt;iframe src="https://bcjaeger.github.io/aorsf/" width="100%" height="400px" data-external="1"&gt;&lt;/iframe&gt;
 
@@ -377,12 +465,12 @@ A total of 23 risk prediction tasks in 16 data sets were analyzed.
 
 This table is continued on the next 2 slides.
 
-<div id="qyzekowydg" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="iueggckyne" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#qyzekowydg .gt_table {
+#iueggckyne .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -407,7 +495,7 @@ This table is continued on the next 2 slides.
   border-left-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_heading {
+#iueggckyne .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -419,7 +507,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_title {
+#iueggckyne .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -431,7 +519,7 @@ This table is continued on the next 2 slides.
   border-bottom-width: 0;
 }
 
-#qyzekowydg .gt_subtitle {
+#iueggckyne .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -443,13 +531,13 @@ This table is continued on the next 2 slides.
   border-top-width: 0;
 }
 
-#qyzekowydg .gt_bottom_border {
+#iueggckyne .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_col_headings {
+#iueggckyne .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -464,7 +552,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_col_heading {
+#iueggckyne .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -484,7 +572,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#qyzekowydg .gt_column_spanner_outer {
+#iueggckyne .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -496,15 +584,15 @@ This table is continued on the next 2 slides.
   padding-right: 4px;
 }
 
-#qyzekowydg .gt_column_spanner_outer:first-child {
+#iueggckyne .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#qyzekowydg .gt_column_spanner_outer:last-child {
+#iueggckyne .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#qyzekowydg .gt_column_spanner {
+#iueggckyne .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -516,7 +604,7 @@ This table is continued on the next 2 slides.
   width: 100%;
 }
 
-#qyzekowydg .gt_group_heading {
+#iueggckyne .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -541,7 +629,7 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#qyzekowydg .gt_empty_group_heading {
+#iueggckyne .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -556,15 +644,15 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#qyzekowydg .gt_from_md > :first-child {
+#iueggckyne .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#qyzekowydg .gt_from_md > :last-child {
+#iueggckyne .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#qyzekowydg .gt_row {
+#iueggckyne .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -583,7 +671,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#qyzekowydg .gt_stub {
+#iueggckyne .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -596,7 +684,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#qyzekowydg .gt_stub_row_group {
+#iueggckyne .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -610,11 +698,11 @@ This table is continued on the next 2 slides.
   vertical-align: top;
 }
 
-#qyzekowydg .gt_row_group_first td {
+#iueggckyne .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#qyzekowydg .gt_summary_row {
+#iueggckyne .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -624,16 +712,16 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#qyzekowydg .gt_first_summary_row {
+#iueggckyne .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_first_summary_row.thick {
+#iueggckyne .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#qyzekowydg .gt_last_summary_row {
+#iueggckyne .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -643,7 +731,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_grand_summary_row {
+#iueggckyne .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -653,7 +741,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#qyzekowydg .gt_first_grand_summary_row {
+#iueggckyne .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -663,11 +751,11 @@ This table is continued on the next 2 slides.
   border-top-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_striped {
+#iueggckyne .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#qyzekowydg .gt_table_body {
+#iueggckyne .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -676,7 +764,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_footnotes {
+#iueggckyne .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -690,7 +778,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_footnote {
+#iueggckyne .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -699,7 +787,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#qyzekowydg .gt_sourcenotes {
+#iueggckyne .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -713,7 +801,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#qyzekowydg .gt_sourcenote {
+#iueggckyne .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -721,60 +809,60 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#qyzekowydg .gt_left {
+#iueggckyne .gt_left {
   text-align: left;
 }
 
-#qyzekowydg .gt_center {
+#iueggckyne .gt_center {
   text-align: center;
 }
 
-#qyzekowydg .gt_right {
+#iueggckyne .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#qyzekowydg .gt_font_normal {
+#iueggckyne .gt_font_normal {
   font-weight: normal;
 }
 
-#qyzekowydg .gt_font_bold {
+#iueggckyne .gt_font_bold {
   font-weight: bold;
 }
 
-#qyzekowydg .gt_font_italic {
+#iueggckyne .gt_font_italic {
   font-style: italic;
 }
 
-#qyzekowydg .gt_super {
+#iueggckyne .gt_super {
   font-size: 65%;
 }
 
-#qyzekowydg .gt_footnote_marks {
+#iueggckyne .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#qyzekowydg .gt_asterisk {
+#iueggckyne .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#qyzekowydg .gt_slash_mark {
+#iueggckyne .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#qyzekowydg .gt_fraction_numerator {
+#iueggckyne .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#qyzekowydg .gt_fraction_denominator {
+#iueggckyne .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -811,6 +899,38 @@ This table is continued on the next 2 slides.
 <td class="gt_row gt_center">98</td>
 <td class="gt_row gt_center">0.00</td>
 <td class="gt_row gt_center">30</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">ARIC</td>
+<td class="gt_row gt_left">Heart failure</td>
+<td class="gt_row gt_center">13,626</td>
+<td class="gt_row gt_center">31</td>
+<td class="gt_row gt_center">2,982</td>
+<td class="gt_row gt_center">78</td>
+<td class="gt_row gt_center">2.5</td>
+<td class="gt_row gt_center">55</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">ARIC</td>
+<td class="gt_row gt_left">Coronary heart disease</td>
+<td class="gt_row gt_center">13,626</td>
+<td class="gt_row gt_center">31</td>
+<td class="gt_row gt_center">2,284</td>
+<td class="gt_row gt_center">83</td>
+<td class="gt_row gt_center">2.5</td>
+<td class="gt_row gt_center">55</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">ARIC</td>
+<td class="gt_row gt_left">Stroke</td>
+<td class="gt_row gt_center">13,626</td>
+<td class="gt_row gt_center">31</td>
+<td class="gt_row gt_center">1,323</td>
+<td class="gt_row gt_center">90</td>
+<td class="gt_row gt_center">2.5</td>
+<td class="gt_row gt_center">55</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">ARIC</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">13,626</td>
+<td class="gt_row gt_center">31</td>
+<td class="gt_row gt_center">6,664</td>
+<td class="gt_row gt_center">51</td>
+<td class="gt_row gt_center">2.5</td>
+<td class="gt_row gt_center">55</td></tr>
     <tr><td class="gt_row gt_right gt_stub">Colon cancer</td>
 <td class="gt_row gt_left">Recurrence</td>
 <td class="gt_row gt_center">929</td>
@@ -843,14 +963,6 @@ This table is continued on the next 2 slides.
 <td class="gt_row gt_center">86</td>
 <td class="gt_row gt_center">0.00</td>
 <td class="gt_row gt_center">40</td></tr>
-    <tr><td class="gt_row gt_right gt_stub">FCL</td>
-<td class="gt_row gt_left">Relapse</td>
-<td class="gt_row gt_center">541</td>
-<td class="gt_row gt_center">7</td>
-<td class="gt_row gt_center">272</td>
-<td class="gt_row gt_center">50</td>
-<td class="gt_row gt_center">0.00</td>
-<td class="gt_row gt_center">40</td></tr>
   </tbody>
   
   
@@ -860,12 +972,12 @@ This table is continued on the next 2 slides.
 ---
 ## Data sets continued
 
-<div id="vbtywkrvgm" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="eikhvhlecu" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#vbtywkrvgm .gt_table {
+#eikhvhlecu .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -890,7 +1002,7 @@ This table is continued on the next 2 slides.
   border-left-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_heading {
+#eikhvhlecu .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -902,7 +1014,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_title {
+#eikhvhlecu .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -914,7 +1026,7 @@ This table is continued on the next 2 slides.
   border-bottom-width: 0;
 }
 
-#vbtywkrvgm .gt_subtitle {
+#eikhvhlecu .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -926,13 +1038,13 @@ This table is continued on the next 2 slides.
   border-top-width: 0;
 }
 
-#vbtywkrvgm .gt_bottom_border {
+#eikhvhlecu .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_col_headings {
+#eikhvhlecu .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -947,7 +1059,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_col_heading {
+#eikhvhlecu .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -967,7 +1079,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#vbtywkrvgm .gt_column_spanner_outer {
+#eikhvhlecu .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -979,15 +1091,15 @@ This table is continued on the next 2 slides.
   padding-right: 4px;
 }
 
-#vbtywkrvgm .gt_column_spanner_outer:first-child {
+#eikhvhlecu .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#vbtywkrvgm .gt_column_spanner_outer:last-child {
+#eikhvhlecu .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#vbtywkrvgm .gt_column_spanner {
+#eikhvhlecu .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -999,7 +1111,7 @@ This table is continued on the next 2 slides.
   width: 100%;
 }
 
-#vbtywkrvgm .gt_group_heading {
+#eikhvhlecu .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1024,7 +1136,7 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#vbtywkrvgm .gt_empty_group_heading {
+#eikhvhlecu .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1039,15 +1151,15 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#vbtywkrvgm .gt_from_md > :first-child {
+#eikhvhlecu .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#vbtywkrvgm .gt_from_md > :last-child {
+#eikhvhlecu .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#vbtywkrvgm .gt_row {
+#eikhvhlecu .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1066,7 +1178,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#vbtywkrvgm .gt_stub {
+#eikhvhlecu .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1079,7 +1191,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#vbtywkrvgm .gt_stub_row_group {
+#eikhvhlecu .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1093,11 +1205,11 @@ This table is continued on the next 2 slides.
   vertical-align: top;
 }
 
-#vbtywkrvgm .gt_row_group_first td {
+#eikhvhlecu .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#vbtywkrvgm .gt_summary_row {
+#eikhvhlecu .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1107,16 +1219,16 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#vbtywkrvgm .gt_first_summary_row {
+#eikhvhlecu .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_first_summary_row.thick {
+#eikhvhlecu .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#vbtywkrvgm .gt_last_summary_row {
+#eikhvhlecu .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1126,7 +1238,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_grand_summary_row {
+#eikhvhlecu .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1136,7 +1248,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#vbtywkrvgm .gt_first_grand_summary_row {
+#eikhvhlecu .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1146,11 +1258,11 @@ This table is continued on the next 2 slides.
   border-top-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_striped {
+#eikhvhlecu .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#vbtywkrvgm .gt_table_body {
+#eikhvhlecu .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1159,7 +1271,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_footnotes {
+#eikhvhlecu .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1173,7 +1285,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_footnote {
+#eikhvhlecu .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1182,7 +1294,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#vbtywkrvgm .gt_sourcenotes {
+#eikhvhlecu .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1196,7 +1308,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#vbtywkrvgm .gt_sourcenote {
+#eikhvhlecu .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1204,60 +1316,60 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#vbtywkrvgm .gt_left {
+#eikhvhlecu .gt_left {
   text-align: left;
 }
 
-#vbtywkrvgm .gt_center {
+#eikhvhlecu .gt_center {
   text-align: center;
 }
 
-#vbtywkrvgm .gt_right {
+#eikhvhlecu .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#vbtywkrvgm .gt_font_normal {
+#eikhvhlecu .gt_font_normal {
   font-weight: normal;
 }
 
-#vbtywkrvgm .gt_font_bold {
+#eikhvhlecu .gt_font_bold {
   font-weight: bold;
 }
 
-#vbtywkrvgm .gt_font_italic {
+#eikhvhlecu .gt_font_italic {
   font-style: italic;
 }
 
-#vbtywkrvgm .gt_super {
+#eikhvhlecu .gt_super {
   font-size: 65%;
 }
 
-#vbtywkrvgm .gt_footnote_marks {
+#eikhvhlecu .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#vbtywkrvgm .gt_asterisk {
+#eikhvhlecu .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#vbtywkrvgm .gt_slash_mark {
+#eikhvhlecu .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#vbtywkrvgm .gt_fraction_numerator {
+#eikhvhlecu .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#vbtywkrvgm .gt_fraction_denominator {
+#eikhvhlecu .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -1278,6 +1390,14 @@ This table is continued on the next 2 slides.
     </tr>
   </thead>
   <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_right gt_stub">FCL</td>
+<td class="gt_row gt_left">Relapse</td>
+<td class="gt_row gt_center">541</td>
+<td class="gt_row gt_center">7</td>
+<td class="gt_row gt_center">272</td>
+<td class="gt_row gt_center">50</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">40</td></tr>
     <tr><td class="gt_row gt_right gt_stub">GBSG II</td>
 <td class="gt_row gt_left">Recurrence or death</td>
 <td class="gt_row gt_center">686</td>
@@ -1310,6 +1430,38 @@ This table is continued on the next 2 slides.
 <td class="gt_row gt_center">87</td>
 <td class="gt_row gt_center">6.1</td>
 <td class="gt_row gt_center">26</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">MESA</td>
+<td class="gt_row gt_left">Heart failure</td>
+<td class="gt_row gt_center">6,785</td>
+<td class="gt_row gt_center">28</td>
+<td class="gt_row gt_center">339</td>
+<td class="gt_row gt_center">95</td>
+<td class="gt_row gt_center">3.5</td>
+<td class="gt_row gt_center">58</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">MESA</td>
+<td class="gt_row gt_left">Coronary heart disease</td>
+<td class="gt_row gt_center">6,785</td>
+<td class="gt_row gt_center">28</td>
+<td class="gt_row gt_center">439</td>
+<td class="gt_row gt_center">94</td>
+<td class="gt_row gt_center">3.5</td>
+<td class="gt_row gt_center">58</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">MESA</td>
+<td class="gt_row gt_left">Stroke</td>
+<td class="gt_row gt_center">6,783</td>
+<td class="gt_row gt_center">28</td>
+<td class="gt_row gt_center">292</td>
+<td class="gt_row gt_center">96</td>
+<td class="gt_row gt_center">3.5</td>
+<td class="gt_row gt_center">58</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">MESA</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">6,793</td>
+<td class="gt_row gt_center">28</td>
+<td class="gt_row gt_center">1,297</td>
+<td class="gt_row gt_center">81</td>
+<td class="gt_row gt_center">3.5</td>
+<td class="gt_row gt_center">58</td></tr>
     <tr><td class="gt_row gt_right gt_stub">Monoclonal gammopathy</td>
 <td class="gt_row gt_left">Death</td>
 <td class="gt_row gt_center">1,384</td>
@@ -1318,30 +1470,6 @@ This table is continued on the next 2 slides.
 <td class="gt_row gt_center">30</td>
 <td class="gt_row gt_center">0.49</td>
 <td class="gt_row gt_center">83</td></tr>
-    <tr><td class="gt_row gt_right gt_stub">Monoclonal gammopathy</td>
-<td class="gt_row gt_left">Malignancy</td>
-<td class="gt_row gt_center">1,384</td>
-<td class="gt_row gt_center">8</td>
-<td class="gt_row gt_center">115</td>
-<td class="gt_row gt_center">92</td>
-<td class="gt_row gt_center">0.49</td>
-<td class="gt_row gt_center">83</td></tr>
-    <tr><td class="gt_row gt_right gt_stub">Movies released in 2015-2018</td>
-<td class="gt_row gt_left">Gross 1M USD</td>
-<td class="gt_row gt_center">551</td>
-<td class="gt_row gt_center">46</td>
-<td class="gt_row gt_center">522</td>
-<td class="gt_row gt_center">5.3</td>
-<td class="gt_row gt_center">0.00</td>
-<td class="gt_row gt_center">4.5</td></tr>
-    <tr><td class="gt_row gt_right gt_stub">Non-alcohol fatty liver disease</td>
-<td class="gt_row gt_left">Death</td>
-<td class="gt_row gt_center">17,549</td>
-<td class="gt_row gt_center">24</td>
-<td class="gt_row gt_center">1,364</td>
-<td class="gt_row gt_center">92</td>
-<td class="gt_row gt_center">33</td>
-<td class="gt_row gt_center">45</td></tr>
   </tbody>
   
   
@@ -1352,12 +1480,12 @@ This table is continued on the next 2 slides.
 
 ## Data sets continued
 
-<div id="eyipvbcfot" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="qvvhpmsipz" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#eyipvbcfot .gt_table {
+#qvvhpmsipz .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1382,7 +1510,7 @@ This table is continued on the next 2 slides.
   border-left-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_heading {
+#qvvhpmsipz .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1394,7 +1522,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_title {
+#qvvhpmsipz .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1406,7 +1534,7 @@ This table is continued on the next 2 slides.
   border-bottom-width: 0;
 }
 
-#eyipvbcfot .gt_subtitle {
+#qvvhpmsipz .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1418,13 +1546,13 @@ This table is continued on the next 2 slides.
   border-top-width: 0;
 }
 
-#eyipvbcfot .gt_bottom_border {
+#qvvhpmsipz .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_col_headings {
+#qvvhpmsipz .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1439,7 +1567,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_col_heading {
+#qvvhpmsipz .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1459,7 +1587,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#eyipvbcfot .gt_column_spanner_outer {
+#qvvhpmsipz .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1471,15 +1599,15 @@ This table is continued on the next 2 slides.
   padding-right: 4px;
 }
 
-#eyipvbcfot .gt_column_spanner_outer:first-child {
+#qvvhpmsipz .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#eyipvbcfot .gt_column_spanner_outer:last-child {
+#qvvhpmsipz .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#eyipvbcfot .gt_column_spanner {
+#qvvhpmsipz .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1491,7 +1619,7 @@ This table is continued on the next 2 slides.
   width: 100%;
 }
 
-#eyipvbcfot .gt_group_heading {
+#qvvhpmsipz .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1516,7 +1644,7 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#eyipvbcfot .gt_empty_group_heading {
+#qvvhpmsipz .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1531,15 +1659,15 @@ This table is continued on the next 2 slides.
   vertical-align: middle;
 }
 
-#eyipvbcfot .gt_from_md > :first-child {
+#qvvhpmsipz .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#eyipvbcfot .gt_from_md > :last-child {
+#qvvhpmsipz .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#eyipvbcfot .gt_row {
+#qvvhpmsipz .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1558,7 +1686,7 @@ This table is continued on the next 2 slides.
   overflow-x: hidden;
 }
 
-#eyipvbcfot .gt_stub {
+#qvvhpmsipz .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1571,7 +1699,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#eyipvbcfot .gt_stub_row_group {
+#qvvhpmsipz .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1585,11 +1713,11 @@ This table is continued on the next 2 slides.
   vertical-align: top;
 }
 
-#eyipvbcfot .gt_row_group_first td {
+#qvvhpmsipz .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#eyipvbcfot .gt_summary_row {
+#qvvhpmsipz .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1599,16 +1727,16 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#eyipvbcfot .gt_first_summary_row {
+#qvvhpmsipz .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_first_summary_row.thick {
+#qvvhpmsipz .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#eyipvbcfot .gt_last_summary_row {
+#qvvhpmsipz .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1618,7 +1746,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_grand_summary_row {
+#qvvhpmsipz .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1628,7 +1756,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#eyipvbcfot .gt_first_grand_summary_row {
+#qvvhpmsipz .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1638,11 +1766,11 @@ This table is continued on the next 2 slides.
   border-top-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_striped {
+#qvvhpmsipz .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#eyipvbcfot .gt_table_body {
+#qvvhpmsipz .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1651,7 +1779,7 @@ This table is continued on the next 2 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_footnotes {
+#qvvhpmsipz .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1665,7 +1793,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_footnote {
+#qvvhpmsipz .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1674,7 +1802,7 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#eyipvbcfot .gt_sourcenotes {
+#qvvhpmsipz .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1688,7 +1816,7 @@ This table is continued on the next 2 slides.
   border-right-color: #D3D3D3;
 }
 
-#eyipvbcfot .gt_sourcenote {
+#qvvhpmsipz .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1696,60 +1824,60 @@ This table is continued on the next 2 slides.
   padding-right: 5px;
 }
 
-#eyipvbcfot .gt_left {
+#qvvhpmsipz .gt_left {
   text-align: left;
 }
 
-#eyipvbcfot .gt_center {
+#qvvhpmsipz .gt_center {
   text-align: center;
 }
 
-#eyipvbcfot .gt_right {
+#qvvhpmsipz .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#eyipvbcfot .gt_font_normal {
+#qvvhpmsipz .gt_font_normal {
   font-weight: normal;
 }
 
-#eyipvbcfot .gt_font_bold {
+#qvvhpmsipz .gt_font_bold {
   font-weight: bold;
 }
 
-#eyipvbcfot .gt_font_italic {
+#qvvhpmsipz .gt_font_italic {
   font-style: italic;
 }
 
-#eyipvbcfot .gt_super {
+#qvvhpmsipz .gt_super {
   font-size: 65%;
 }
 
-#eyipvbcfot .gt_footnote_marks {
+#qvvhpmsipz .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#eyipvbcfot .gt_asterisk {
+#qvvhpmsipz .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#eyipvbcfot .gt_slash_mark {
+#qvvhpmsipz .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#eyipvbcfot .gt_fraction_numerator {
+#qvvhpmsipz .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#eyipvbcfot .gt_fraction_denominator {
+#qvvhpmsipz .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -1770,6 +1898,30 @@ This table is continued on the next 2 slides.
     </tr>
   </thead>
   <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_right gt_stub">Monoclonal gammopathy</td>
+<td class="gt_row gt_left">Malignancy</td>
+<td class="gt_row gt_center">1,384</td>
+<td class="gt_row gt_center">8</td>
+<td class="gt_row gt_center">115</td>
+<td class="gt_row gt_center">92</td>
+<td class="gt_row gt_center">0.49</td>
+<td class="gt_row gt_center">83</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Movies released in 2015-2018</td>
+<td class="gt_row gt_left">Gross 1M USD</td>
+<td class="gt_row gt_center">551</td>
+<td class="gt_row gt_center">46</td>
+<td class="gt_row gt_center">522</td>
+<td class="gt_row gt_center">5.3</td>
+<td class="gt_row gt_center">0.00</td>
+<td class="gt_row gt_center">4.5</td></tr>
+    <tr><td class="gt_row gt_right gt_stub">Non-alcohol fatty liver disease</td>
+<td class="gt_row gt_left">Death</td>
+<td class="gt_row gt_center">17,549</td>
+<td class="gt_row gt_center">24</td>
+<td class="gt_row gt_center">1,364</td>
+<td class="gt_row gt_center">92</td>
+<td class="gt_row gt_center">33</td>
+<td class="gt_row gt_center">45</td></tr>
     <tr><td class="gt_row gt_right gt_stub">Primary biliary cholangitis</td>
 <td class="gt_row gt_left">Death</td>
 <td class="gt_row gt_center">276</td>

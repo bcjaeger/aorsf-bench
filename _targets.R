@@ -18,20 +18,19 @@ lapply(list.files("./R", full.names = TRUE), base::source)
 
 model_fitters <- c(
   'aorsf_cph_1',
-  # 'aorsf_cph_1_filter',
   'aorsf_cph_15',
   'aorsf_random',
-  'aorsf_net',
+  # 'aorsf_net',
   'rotsf',
   'rsfse',
   'cif',
   'cox_net',
-  'coxtime',
-  'obliqueRSF',
+  # 'coxtime',
+  # 'obliqueRSF',
   'xgb_cox',
   'xgb_aft',
-  'randomForestSRC',
-  'ranger'
+  'randomForestSRC'
+  # 'ranger'
 )
 
 analyses_real <- expand_grid(
@@ -58,10 +57,18 @@ analyses_real <- expand_grid(
     "follic_death",
     "follic_relapse",
     "mgus2_death",
-    "mgus2_pcm"
+    "mgus2_pcm",
+    "mesa_hf",
+    "mesa_chd",
+    "mesa_stroke",
+    "mesa_death",
+    "aric_hf",
+    "aric_chd",
+    "aric_stroke",
+    "aric_death"
   ),
   model_type = model_fitters,
-  run_seed = 1:25
+  run_seed = 1:15
 ) |>
   mutate(
     data_load_fun = syms(glue("{data_source}_load")),
@@ -69,17 +76,20 @@ analyses_real <- expand_grid(
     model_pred_fun = syms(glue("{model_type}_pred"))
   )
 
-analyses_sim <- expand_grid(data_source = 'sim',
-                            n_obs = c(1000),
-                            n_z = c(20),
-                            correlated_x = c(0.3),
-                            run_seed = 1:25,
-                            model_type = model_fitters) |>
+analyses_sim_pred <- expand_grid(data_source = 'sim',
+                                 n_obs = c(1000, 2500, 5000),
+                                 pred_corr_max = c(0.10, 0.25, .50),
+                                 run_seed = 1:25,
+                                 model_type = model_fitters) |>
   mutate(
     data_load_fun = syms("sim_surv"),
     model_fit_fun = syms(glue("{model_type}_fit")),
     model_pred_fun = syms(glue("{model_type}_pred"))
   )
+
+analyses_sim_vi <- analyses_sim_pred %>%
+  select(-starts_with('model'), -starts_with('data')) %>%
+  distinct()
 
 
 tar_plan(
@@ -107,63 +117,57 @@ tar_plan(
     )
   ),
 
-  bm_pred_sim <- tar_map(
-    values = analyses_sim,
-    names = c(model_type,
-              n_obs,
-              n_z,
-              correlated_x,
-              run_seed),
-    tar_target(
-      bm_pred_sim,
-      bench_pred(data_source = data_source,
-                 model_type = model_type,
-                 data_load_fun = data_load_fun,
-                 model_fit_fun = model_fit_fun,
-                 model_pred_fun = model_pred_fun,
-                 n_obs = n_obs,
-                 n_z = n_z,
-                 correlated_x = correlated_x,
-                 run_seed = run_seed),
-      resources = tar_resources(
-        future = tar_resources_future(
-          resources = list(n_cores=2)
-        )
-      ),
-      memory = "transient",
-      garbage_collection = TRUE
-    )
-  ),
-
-  # bm_vi <- tar_map(
-  #   values = analyses_sim,
+  # bm_pred_sim <- tar_map(
+  #   values = analyses_sim_pred,
+  #   names = c(model_type,
+  #             n_obs,
+  #             pred_corr_max,
+  #             run_seed),
   #   tar_target(
-  #     bm_vi,
-  #     bench_vi(data_source = data_source,
-  #              n_obs = n_obs,
-  #              n_z = n_z,
-  #              run_seed = run_seed,
-  #              correlated_x = correlated_x),
+  #     bm_pred_sim,
+  #     bench_pred(data_source = data_source,
+  #                model_type = model_type,
+  #                data_load_fun = data_load_fun,
+  #                model_fit_fun = model_fit_fun,
+  #                model_pred_fun = model_pred_fun,
+  #                n_obs = n_obs,
+  #                pred_corr_max = pred_corr_max,
+  #                run_seed = run_seed),
   #     resources = tar_resources(
   #       future = tar_resources_future(
   #         resources = list(n_cores=2)
   #       )
-  #     )
+  #     ),
+  #     memory = "transient",
+  #     garbage_collection = TRUE
   #   )
-  #
   # ),
+
+  bm_vi <- tar_map(
+    values = analyses_sim_vi,
+    tar_target(
+      bm_vi,
+      bench_vi(n_obs = n_obs,
+               pred_corr_max = pred_corr_max,
+               run_seed = run_seed),
+      resources = tar_resources(
+        future = tar_resources_future(
+          resources = list(n_cores=4)
+        )
+      )
+    )
+
+  ),
 
   tar_target(data_key, summarize_data_source(analyses_real)),
 
   tar_target(model_key, make_model_key()),
 
-  tar_combine(bm_pred_sim_comb, bm_pred_sim[[1]]),
-
   tar_combine(bm_pred_real_comb, bm_pred_real[[1]]),
 
-  tar_target(bm_pred_comb, bind_rows(bm_pred_real_comb, bm_pred_sim_comb)),
+  # tar_combine(bm_pred_sim_comb, bm_pred_sim[[1]]),
 
-  tar_target(bm_pred_clean, clean_bm_pred(bm_pred_comb)),
+  tar_target(bm_pred_clean, clean_bm_pred(bm_pred_real_comb)),
 
   tar_target(bm_pred_viz, bench_pred_visualize(bm_pred_clean,
                                                data_key,
@@ -180,13 +184,17 @@ tar_plan(
   tar_target(bm_pred_time_viz,
              bench_pred_time_visualize(bm_pred_clean, model_key)),
 
-  # tar_combine(bm_vi_comb, bm_vi[[1]]),
+  tar_combine(bm_vi_comb, bm_vi[[1]]),
+
+  tar_target(
+    bm_vi_smry,
+    bench_vi_summarize(bm_vi_comb)
+  ),
+
+  # tar_target(bm_vi_viz, bm_vi_visualize(bm_vi_comb)),
+
   #
   #
-  # tar_target(
-  #   bm_vi_smry,
-  #   bench_vi_summarize(bm_vi_comb)
-  # )
 
   tar_render(slides, "docs/index.Rmd")
 

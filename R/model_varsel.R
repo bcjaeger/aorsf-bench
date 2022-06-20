@@ -13,81 +13,98 @@ model_varsel <- function(model, train) {
 
   start_time <- Sys.time()
 
-  if(model %in% c('aorsf', 'aorsf_menze')){
+  model_fitter <- str_remove(model, '-.*$')
+
+  if(model_fitter == 'aorsf'){
+
     fit <- orsf(Surv(time, status) ~ ., data_train = train,
                 control = orsf_control_cph(iter_max = 10))
+
+  }
+
+  if(model_fitter == 'xgboost'){
+
+    xmat <- train |>
+      as.data.table() |>
+      one_hot() |>
+      select(-time, -status) |>
+      as.matrix()
+
+    ymat <- train$time
+    ymat[train$status == 0] <- ymat[train$status == 0] * (-1)
+
+    fit_cv <- xgb.cv(data = xmat,
+                     params = list(eta = 0.05),
+                     label = ymat, nfold=10,
+                     nrounds = 500,
+                     objective = 'survival:cox',
+                     eval_metric = 'cox-nloglik',
+                     verbose = FALSE,
+                     early_stopping_rounds = 25)
+
+    fit <- xgboost(data = xmat, label = ymat,
+                   params = list(eta = 0.05),
+                   nrounds = fit_cv$best_iteration,
+                   objective = 'survival:cox',
+                   eval_metric = 'cox-nloglik',
+                   verbose = FALSE)
+
   }
 
   switch(
     model,
 
-    'aorsf' = {
+    'aorsf-negation' = {
 
       vi <- orsf_vi_negate(fit)
 
     },
 
-    'aorsf_menze' = {
+    'aorsf-anova' = {
 
       vi <- orsf_vi_anova(fit)
 
     },
 
-    'xgboost' = {
+    'aorsf-shap' = {
 
-      xmat <- train |>
-        as.data.table() |>
-        one_hot() |>
-        select(-time, -status) |>
-        as.matrix()
+      data_shap <- as.data.frame(select(train, -time, -status))
 
-      ymat <- train$time
-      ymat[train$status == 0] <- ymat[train$status == 0] * (-1)
+      # Compute approximate Shapley values using 10 Monte Carlo repetitions
+      shap <- fastshap::explain(fit,
+                                X = data_shap,
+                                newdata = data_shap,
+                                pred_wrapper = pred_wrapper_aorsf,
+                                nsim = 10)
 
-      fit_cv <- xgb.cv(data = xmat,
-                       params = list(eta = 0.05),
-                       label = ymat, nfold=10,
-                       nrounds = 500,
-                       objective = 'survival:cox',
-                       eval_metric = 'cox-nloglik',
-                       verbose = FALSE,
-                       early_stopping_rounds = 25)
+      vi <- apply(shap, 2, function(x) mean(abs(x)))
 
-      fit_final <- xgboost(data = xmat, label = ymat,
-                           params = list(eta = 0.05),
-                           nrounds = fit_cv$best_iteration,
-                           objective = 'survival:cox',
-                           eval_metric = 'cox-nloglik',
-                           verbose = FALSE)
+    },
 
-      fit_shap <-
-        predict(fit_final, newdata = xmat, predcontrib = TRUE) |>
+
+    'xgboost-shap' = {
+
+      vi <-
+        predict(fit, newdata = xmat, predcontrib = TRUE) |>
         apply(MARGIN = 2, function(x) mean(abs(x)))
 
-      vi <- fit_shap[-which(names(fit_shap)=='BIAS')] |>
-        enframe() |>
-        separate(name, into = c('var', 'cat'),
-                 sep = '_',
-                 fill = 'right') |>
-        group_by(var) |>
-        summarize(value = mean(value)) |>
+      vi <- vi[-which(names(vi)=='BIAS')]
+
+
+    },
+
+    'xgboost-gain' = {
+
+      vi <- xgb.importance(model = fit) %>%
+        select(Feature, Gain) %>%
         deframe()
 
-
     },
 
-    'randomForestSRC' = {
+    'randomForestSRC-permutation' = {
+
       fit <- rfsrc(Surv(time, status) ~ ., data = train, importance = TRUE)
       vi <- fit$importance
-
-    },
-    'ranger' = {
-      fit <- ranger(
-        Surv(time, status) ~ ., data = train,
-        importance = 'permutation',
-        splitrule = 'extratrees'
-      )
-      vi <- fit$variable.importance
 
     }
 

@@ -5,29 +5,34 @@
 #' @title
 #' @param data_source
 #' @param run_seed
-bench_vi <- function(data_source,
-                     run_seed,
-                     correlated_x,
-                     n_obs,
-                     n_z) {
+bench_vi <- function(n_obs = 1000,
+                     pred_corr_max = 0.3,
+                     run_seed) {
 
   set.seed(run_seed)
 
-  sim <- sim_surv(n_obs = n_obs, n_z = n_z, correlated_x = correlated_x)
+  sim <- sim_surv(n_obs = n_obs, pred_corr_max = pred_corr_max)
 
   train <- sim$data
-  vars_signal <- sim$vars_signal
-  vars_junk <- sim$vars_junk
+
+  vars_signal <- train %>%
+    select(-time, -status, -starts_with('junk')) %>%
+    names()
+
+  vars_junk <- train %>%
+    select(starts_with('junk')) %>%
+    names()
 
   pred_horizon <- median(train$time)
 
   models <- set_names(
     c(
-      'aorsf',
-      'aorsf_menze',
-      'xgboost',
-      'randomForestSRC'
-      # 'ranger'
+      'aorsf-negation',
+      'aorsf-anova',
+      'aorsf-shap',
+      'xgboost-shap',
+      'xgboost-gain',
+      'randomForestSRC-permutation'
     )
   )
 
@@ -45,43 +50,23 @@ bench_vi <- function(data_source,
     unnest_longer(col = vi) |>
     select(name, vi, vi_id) |>
     left_join(vars_truth) |>
-    mutate(var_type = str_sub(vi_id, start = 0, end = 1)) |>
+    mutate(var_type = str_remove(vi_id, "_[0-9]+$")) |>
     group_by(name)
 
-  roc_x <- vars_data |>
-    filter(var_type %in% c('z', 'x')) |>
-    roc_auc(vi, truth = vi_true, event_level = 'second') |>
-    transmute(model = name,
-              auc = .estimate,
-              var_type = 'x')
-
-  roc_g <- vars_data |>
-    filter(var_type %in% c('z', 'g')) |>
-    roc_auc(vi, truth = vi_true, event_level = 'second') |>
-    transmute(model = name,
-              auc = .estimate,
-              var_type = 'g')
-
-  roc_w <- vars_data |>
-    filter(var_type %in% c('z', 'w')) |>
-    roc_auc(vi, truth = vi_true, event_level = 'second') |>
-    transmute(model = name,
-              auc = .estimate,
-              var_type = 'w')
-
-  roc_v <- vars_data |>
-    filter(var_type %in% c('z', 'v')) |>
-    roc_auc(vi, truth = vi_true, event_level = 'second') |>
-    transmute(model = name,
-              auc = .estimate,
-              var_type = 'v')
-
-  # roc_c <- vars_data |>
-  #   filter(var_type %in% c('z', 'c')) |>
-  #   roc_auc(vi, truth = vi_true, event_level = 'second') |>
-  #   transmute(model = name,
-  #             auc = .estimate,
-  #             var_type = 'c')
+  roc_grps <- map_dfr(
+    .x = c("cmbn",
+           "main",
+           "nlin",
+           "intr_main",
+           "intr_hidden_cmbn",
+           "intr_hidden_nlin"),
+    .f = ~ vars_data |>
+      filter(var_type %in% c('junk', .x)) |>
+      roc_auc(vi, truth = vi_true, event_level = 'second') |>
+      transmute(model = name,
+                auc = .estimate,
+                var_type = .x)
+  )
 
   roc_overall <- vars_data |>
     group_by(name) |>
@@ -92,11 +77,7 @@ bench_vi <- function(data_source,
 
   roc <- bind_rows(
     roc_overall,
-    roc_x,
-    roc_w,
-    roc_g,
-    roc_v
-    # roc_c
+    roc_grps
   ) |>
     pivot_wider(names_from = var_type,
                 values_from = auc)
@@ -111,9 +92,8 @@ bench_vi <- function(data_source,
     left_join(times) |>
     as_tibble() |>
     arrange(desc(overall)) |>
-    mutate(xcorr = correlated_x,
-           n_obs = n_obs,
-           n_z = n_z)
+    mutate(pred_corr_max = pred_corr_max,
+           n_obs = n_obs)
 
   print(score)
 
