@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
   warning = FALSE,
-  dpi = 100,
+  dpi = 600,
   fig.align='center',
   fig.height=5
 )
@@ -487,7 +487,7 @@ __Other__:
 
 ## Data sets
 
-A total of 23 risk prediction tasks in 16 data sets were analyzed.
+A total of 31 risk prediction tasks in 18 data sets were analyzed.
 
 - number of observations ranged from `r min(data_key$nrow)` to `r max(data_key$nrow)` (median = `r median(data_key$nrow)`)
 
@@ -517,7 +517,7 @@ To estimate overall performance differences:
 
 Step 1: Collect IPA and C-statistic values:
 
-- For each of the 23 risk prediction problems,
+- For each of the 31 risk prediction problems,
 
     + split the corresponding data into a 50/50 train/test split
     + fit each learner to the training set
@@ -526,9 +526,9 @@ Step 1: Collect IPA and C-statistic values:
 
 --
 
-Step 2: Fit a hierarchical Bayesian model to analyze posterior expected differences in performance:
+Step 2: Fit a Bayesian linear mixed model to analyze posterior expected differences in performance:
 
-$$\text{metric} = \widehat{\gamma} \cdot \text{model} + (1\,|\, \text{data/run})$$
+$$\text{metric} = \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run})$$
 
 - `run` refers to the specific train/test split of `data` 
 
@@ -665,6 +665,7 @@ fig <- plot_ly(width = 800, height = 650) %>%
     x = fig_data$pred_corr_max,
     y = fig_data$overall,
     color = fig_data$model,
+    colors = "PuRd",
     text = table_value(fig_data$overall),
     textposition = 'outside',
     hoverinfo = 'text',
@@ -673,7 +674,7 @@ fig <- plot_ly(width = 800, height = 650) %>%
   plotly::layout(
     title = list(text = 'Results when N = 1000', x = 0.1),
     xaxis = list(title = 'Max correlation among predictors'),
-    yaxis = list(title = 'C-statistic'),
+    yaxis = list(title = 'C-statistic', range = c(0,1)),
     legend = list(title = list(text = '<b>VI technique</b>'))
   )
 
@@ -718,6 +719,7 @@ fig <- plot_ly(width = 800, height = 650) %>%
     x = fig_data$pred_corr_max,
     y = fig_data$overall,
     color = fig_data$model,
+    colors = "PuRd",
     text = table_value(fig_data$overall),
     textposition = 'outside',
     hoverinfo = 'text',
@@ -726,7 +728,7 @@ fig <- plot_ly(width = 800, height = 650) %>%
   plotly::layout(
     title = list(text = 'Results when N = 5000', x = 0.1),
     xaxis = list(title = 'Max correlation among predictors'),
-    yaxis = list(title = 'C-statistic'),
+    yaxis = list(title = 'C-statistic', range = c(0,1)),
     legend = list(title = list(text = '<b>VI technique</b>'))
   )
 
@@ -761,9 +763,9 @@ class: center, middle
 
 # Data sets
 
-A total of 23 risk prediction tasks in 16 data sets were analyzed.
+A total of 31 risk prediction tasks in 18 data sets were analyzed.
 
-This table is continued on the next 2 slides.
+This table is continued on the next 3 slides.
 
 ```{r}
 
@@ -777,8 +779,9 @@ tbls <- data_key |>
   arrange(label) |> 
   mutate(grp = seq(n()),
          grp = case_when(
-           grp > 2 * n()/3 ~ 3, 
-           grp > 1 * n()/3 ~ 2,
+           grp > 3 * n()/4 ~ 4,
+           grp > 2 * n()/4 ~ 3, 
+           grp > 1 * n()/4 ~ 2,
            TRUE ~ 1
          )) |> 
   group_by(grp) |> 
@@ -818,6 +821,16 @@ tbls[[2]]
 ```{r}
 
 tbls[[3]]
+
+```
+
+---
+
+## Data sets continued
+
+```{r}
+
+tbls[[4]]
 
 ```
 
