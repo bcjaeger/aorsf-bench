@@ -1,6 +1,6 @@
 ---
 title: "Accelerated oblique random survival forests"
-author: "Byron C. Jaeger"
+author: "Byron C. Jaeger & Nicholas Pajewski"
 date: Last updated `r Sys.Date()`
 output:
   xaringan::moon_reader:
@@ -605,31 +605,17 @@ We simulated five classes of predictor variables:
 
 ---
 
-## Simulated data
-
-Start with a multivariate normal draw
-
-- All columns have a mean of zero and standard deviation of 1. 
-
-- Pairwise correlations are selected at random uniformly between a lower and upper boundary. 
-
-- A predictor matrix including interactions, non-linear mappings, and linear combinations is used to generate a time-to-event outcome using the `simsurv` R package
-
-- Transforms are dropped from the matrix after generating the outcome values.
-
----
-
 ## Evaluation
 
-VI techniques are compared based on their discrimination (C-statistic) between relevant and irrelevant variables. 
+We compute a C-statistic for each VI technique based on its discrimination between relevant and irrelevant variables. 
 
-Normally a C-statistic assesses if a predicted score discriminates between positive and negative cases of a binary outcome. 
+- Treat each variable like a binary outcome 
 
-We use the C-statistic differently by treating each variable like a binary outcome (e.g., the outcome is 1 if the variable is relevant, 0 otherwise).
+    + The outcome is 1 if the variable is relevant
+    + The outcome is 0 if the variable is not relevant
 
-In other words, we assess VI as if it were a ‘prediction’ for the status of the variable. (can only do this for simulated data).
+- Treat VI as if it were a ‘prediction’ for the status of the variable. 
 
-The resulting C-statistic measures the probability that a VI technique will rank a relevant variable higher than an irrelevant variable.
 
 ---
 

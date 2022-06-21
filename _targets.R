@@ -25,12 +25,12 @@ model_fitters <- c(
   'rsfse',
   'cif',
   'cox_net',
-  # 'coxtime',
+  'coxtime',
   # 'obliqueRSF',
   'xgb_cox',
   'xgb_aft',
-  'randomForestSRC'
-  # 'ranger'
+  'randomForestSRC',
+  'ranger'
 )
 
 analyses_real <- expand_grid(
@@ -192,11 +192,6 @@ tar_plan(
   ),
 
   # tar_target(bm_vi_viz, bm_vi_visualize(bm_vi_comb)),
-
-  #
-  #
-
-  tar_render(slides, "docs/index.Rmd")
 
 
 ) |>
