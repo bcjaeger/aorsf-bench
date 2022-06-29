@@ -27,9 +27,10 @@ bench_vi <- function(n_obs = 1000,
 
   models <- set_names(
     c(
-      'aorsf-negation',
+      'aorsf-negate',
       'aorsf-anova',
-      'aorsf-shap',
+      # 'aorsf-shap',
+      'aorsf-permute',
       'xgboost-shap',
       'xgboost-gain',
       'randomForestSRC-permutation'

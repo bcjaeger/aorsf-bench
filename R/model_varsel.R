@@ -17,8 +17,14 @@ model_varsel <- function(model, train) {
 
   if(model_fitter == 'aorsf'){
 
-    fit <- orsf(Surv(time, status) ~ ., data_train = train,
-                control = orsf_control_cph(iter_max = 10))
+    method <- str_remove(model, '^.*-')
+
+    fit <- orsf(
+      Surv(time, status) ~ .,
+      data_train = train,
+      control = orsf_control_cph(iter_max = 1),
+      importance = if(method == 'shap') 'none' else method
+    )
 
   }
 
@@ -54,7 +60,7 @@ model_varsel <- function(model, train) {
   switch(
     model,
 
-    'aorsf-negation' = {
+    'aorsf-negate' = {
 
       vi <- orsf_vi_negate(fit)
 
@@ -78,6 +84,12 @@ model_varsel <- function(model, train) {
                                 nsim = 10)
 
       vi <- apply(shap, 2, function(x) mean(abs(x)))
+
+    },
+
+    'aorsf-permute' = {
+
+      vi <- orsf_vi_permute(fit)
 
     },
 

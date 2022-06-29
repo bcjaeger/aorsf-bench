@@ -65,7 +65,7 @@ rsfse_fit <- function(train, node_size = 10, ...){
 
 }
 
-aorsf_cph_1_filter_fit <- function(train, node_size = 10, ...){
+aorsf_fast_filter_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
@@ -123,7 +123,7 @@ aorsf_cph_1_filter_fit <- function(train, node_size = 10, ...){
 
 }
 
-aorsf_cph_1_fit <- function(train, node_size = 10, ...){
+aorsf_fast_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
@@ -140,6 +140,7 @@ aorsf_cph_1_fit <- function(train, node_size = 10, ...){
     split_min_events = split_min_events,
     control = orsf_control_cph(iter_max = 1,
                                do_scale = FALSE),
+    importance = 'none',
     oobag_pred = FALSE
   )
 
@@ -169,7 +170,8 @@ aorsf_random_fit <- function(train, node_size = 10, ...){
     split_min_obs = node_size,
     split_min_events = split_min_events,
     control = orsf_control_custom(beta_fun = beta_fun),
-    oobag_pred = FALSE
+    oobag_pred = FALSE,
+    importance = 'none'
   )
 
   end_time <- Sys.time()
@@ -178,7 +180,7 @@ aorsf_random_fit <- function(train, node_size = 10, ...){
 
 }
 
-aorsf_cph_15_fit <- function(train, node_size = 10, ...){
+aorsf_cph_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
@@ -193,9 +195,10 @@ aorsf_cph_15_fit <- function(train, node_size = 10, ...){
     n_retry = 3,
     split_min_obs = node_size,
     split_min_events = split_min_events,
-    control = orsf_control_cph(iter_max = 15,
+    control = orsf_control_cph(iter_max = 20,
                                do_scale = TRUE),
-    oobag_pred = FALSE
+    oobag_pred = FALSE,
+    importance = 'none'
   )
 
   end_time <- Sys.time()
@@ -236,6 +239,7 @@ randomForestSRC_fit <- function(train, node_size = 10, ...){
   mtry <- round(sqrt(ncol(train)-2))
 
   start_time <- Sys.time()
+
 
   fit <- rfsrc(Surv(time, status) ~ .,
                ntree = 500,

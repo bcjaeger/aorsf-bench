@@ -72,15 +72,15 @@ aorsf_random_pred <- function(object, test, pred_horizon){
   aorsf_pred(object, test, pred_horizon)
 }
 
-aorsf_cph_1_filter_pred <- function(object, test, pred_horizon){
+aorsf_fast_filter_pred <- function(object, test, pred_horizon){
   aorsf_pred(object, test, pred_horizon)
 }
 
-aorsf_cph_15_pred <- function(object, test, pred_horizon){
+aorsf_cph_pred <- function(object, test, pred_horizon){
   aorsf_pred(object, test, pred_horizon)
 }
 
-aorsf_cph_1_pred <- function(object, test, pred_horizon){
+aorsf_fast_pred <- function(object, test, pred_horizon){
   aorsf_pred(object, test, pred_horizon)
 }
 

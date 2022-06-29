@@ -884,8 +884,35 @@ mesa_load <- function(outcome){
                "censor_stroke") %>%
     setdiff(outcomes_keep)
 
+  dres <-
+    fread("data/mesa/Primary/Exam1/Data/mesae1dres06192012.csv") %>%
+    .[, .(
+      ID = as.character(MESAID),
+      hipcm1,
+      agatum1c,
+      volum1c,
+      volsum1c,
+      hrtrate1,
+      cepgfr1c,
+      hcytot1,
+      olvedm1,
+      olvedv1,
+      olvesv1,
+      olvef1,
+      olvsv1,
+      oardis1,
+      oaormn1,
+      oaormx1,
+      aad1c,
+      crdout1c,
+      ncohes1c,
+      nprob1c,
+      nhdtim1c
+    )]
+
   fread("data/mesa_and_aric.csv") %>%
     .[database == 'mesa'] %>%
+    merge(dres, by = 'ID') %>%
     .[, (fctrs) := lapply(.SD, as.factor), .SDcols = fctrs] %>%
     .[, (to_drop) := NULL] %>%
     setnames(old = outcomes_keep, new = c("time", "status")) %>%
@@ -943,11 +970,36 @@ aric_load <- function(outcome){
                "censor_stroke") %>%
     setdiff(outcomes_keep)
 
+  abi <- fread('data/aric/data/Main_Study/v1/CSV/abi04.csv',
+               na.strings = "") %>%
+    .[, .(
+      ID = ID_C,
+      abi = suppressWarnings(as.numeric(ABI04))
+    )]
+
+  hmt <- fread('data/aric/data/Main_Study/v1/CSV/hmta.csv',
+               na.strings = "") %>%
+    .[, .(
+      ID = ID_C,
+      HMTA01 = suppressWarnings(as.numeric(HMTA01)),
+      HMTA02 = suppressWarnings(as.numeric(HMTA02)),
+      HMTA03 = suppressWarnings(as.numeric(HMTA03)),
+      HMTA04 = suppressWarnings(as.numeric(HMTA04)),
+      HMTA05 = suppressWarnings(as.numeric(HMTA05)),
+      HMTA06 = suppressWarnings(as.numeric(HMTA06)),
+      HMTA07 = suppressWarnings(as.numeric(HMTA07)),
+      HMTA08 = suppressWarnings(as.numeric(HMTA08)),
+      HMTA09 = suppressWarnings(as.numeric(HMTA09))
+    )]
+
   fread("data/mesa_and_aric.csv") %>%
     .[database == 'aric'] %>%
+    merge(abi, by = 'ID') %>%
+    merge(hmt, by = 'ID') %>%
     .[, (fctrs) := lapply(.SD, as.factor), .SDcols = fctrs] %>%
     .[, (to_drop) := NULL] %>%
     setnames(old = outcomes_keep, new = c("time", "status")) %>%
+    .[, time := pmax(time, 1/365)] %>%
     as.data.frame() %>%
     drop_na(time, status)
 

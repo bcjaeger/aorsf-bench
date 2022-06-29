@@ -21,14 +21,14 @@ bench_pred_model <- function(bm_pred_clean, data_key, model_key) {
     mutate(
       across(
         .cols = starts_with('cstat'),
-        .fns = ~ .x - cstat..aorsf_cph_1
+        .fns = ~ .x - cstat..aorsf_fast
       ),
       across(
         .cols = starts_with('ibs_scaled'),
-        .fns = ~ .x - ibs_scaled..aorsf_cph_1
+        .fns = ~ .x - ibs_scaled..aorsf_fast
       )
     ) |>
-    select(-ibs_scaled..aorsf_cph_1, -cstat..aorsf_cph_1) |>
+    select(-ibs_scaled..aorsf_fast, -cstat..aorsf_fast) |>
     pivot_longer(cols = matches('^cstat|^ibs_scaled')) |>
     separate(name, into = c("metric", "model"), sep = '\\.\\.') |>
     mutate(across(where(is.character), as.factor))
@@ -60,7 +60,7 @@ bench_pred_model <- function(bm_pred_clean, data_key, model_key) {
       as_tibble() |>
       set_names(newdata$model) |>
       pivot_longer(everything(), names_to = 'model') |>
-      add_row(model = 'aorsf_cph_1', value = Inf) |>
+      add_row(model = 'aorsf_fast', value = Inf) |>
       mutate(model = factor(model),
              model = fct_reorder(model, .x = value, .desc = TRUE))
   )

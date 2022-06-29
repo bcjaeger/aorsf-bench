@@ -11,28 +11,39 @@ bench_pred_time_visualize <- function(bm_pred_clean, model_key) {
     select(model, time_fit, time_pred, data) |>
     drop_na() |>
     mutate(time = as.numeric(time_fit) + as.numeric(time_pred),
-           log_time = log(time),
            model = recode(model, !!!deframe(model_key)),
            model = fct_reorder(model, .x = time, .fun = median))
 
-  # medians <- gg_data |>
-  #   group_by(model) |>
-  #   summarize(median_time = median(time)) |>
-  #   mutate(median_time_ratio = median_time / median_time[model == 'aorsf_cph_1'])
+  medians <- gg_data |>
+    group_by(model) |>
+    summarize(time = median(time)) %>%
+    mutate(
+      color = c(
+        rep("white", floor(n()/2)),
+        rep("black", n() - floor(n()/2))
+      )
+    )
 
 
-  ggplot(gg_data) +
+  fig <- ggplot(gg_data) +
     aes(x = time, y = reorder(model, time, FUN=median),
         fill = model) +
     stat_density_ridges(
       quantile_lines = TRUE,
       quantiles = 0.5,
-      bandwidth = 0.3
+      bandwidth = 0.2
     ) +
     scale_x_log10(
       breaks = c(0.01, 0.1, 1, 10, 100, 1000, 10000),
       labels = c("0.01", "0.1", "1", "10", "100", "1,000", "10,000"),
       expand = c(0,0)
+    ) +
+    geom_text(
+      data = medians,
+      hjust = -1/10,
+      vjust = -2.5,
+      color = medians$color,
+      aes(label = table_glue("median: {time}s"))
     ) +
     scale_fill_viridis_d() +
     theme_minimal() +
@@ -43,6 +54,9 @@ bench_pred_time_visualize <- function(bm_pred_clean, model_key) {
           legend.position = '') +
     labs(x = 'Time to fit a model and compute predictions, seconds',
          y = '')
+
+  list(medians = medians,
+       fig = fig)
 
 
 }

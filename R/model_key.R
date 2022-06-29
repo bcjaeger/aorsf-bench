@@ -8,9 +8,8 @@ make_model_key <- function() {
 
   tibble(
     term = c(
-      "aorsf_cph_1",
-      "aorsf_cph_15",
-      "aorsf_cph_1_filter",
+      "aorsf_fast",
+      "aorsf_cph",
       "aorsf_random",
       "aorsf_net",
       "obliqueRSF",
@@ -27,7 +26,6 @@ make_model_key <- function() {
     label = c(
       "aorsf-fast",
       "aorsf-cph",
-      "aorsf-filter",
       "aorsf-random",
       "aorsf-net",
       "obliqueRSF-net",

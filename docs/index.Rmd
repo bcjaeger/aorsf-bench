@@ -625,7 +625,7 @@ library(plotly)
 
 fig_data <- bm_vi_smry %>%
   ungroup() %>%
-  filter(n_obs == 1000) %>%
+  filter(n_obs == 5000) %>%
   mutate(
     model = recode(
       model, 'randomForestSRC-permutation' = 'rfsrc-permutation'
@@ -679,7 +679,7 @@ library(plotly)
 
 fig_data <- bm_vi_smry %>%
   ungroup() %>%
-  filter(n_obs == 5000) %>%
+  filter(n_obs == 1000) %>%
   mutate(
     model = recode(
       model, 'randomForestSRC-permutation' = 'rfsrc-permutation'

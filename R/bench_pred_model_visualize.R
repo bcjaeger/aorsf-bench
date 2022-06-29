@@ -38,6 +38,10 @@ bench_pred_model_visualize <- function(bm_pred_model,
       ),
       across(
         starts_with("prob"),
+        ~ str_replace(.x, '1.00', '>.999')
+      ),
+      across(
+        starts_with("prob"),
         ~ if_else(model == 'aorsf-fast', '---', .x)
       ),
       metric = factor(metric,
@@ -156,6 +160,16 @@ bench_pred_model_visualize <- function(bm_pred_model,
     )
 
 
-  plts
+  list(fig = plts,
+       data = gg_data %>%
+         mutate(
+           metric = recode(
+             metric,
+             "Scaled integrated Brier score" = 'ibs_scaled',
+             "Time-dependent C-statistic" = 'cstat'
+           )
+         )
+  )
+
 
 }

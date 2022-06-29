@@ -17,16 +17,16 @@ tar_option_set(memory = "transient",
 lapply(list.files("./R", full.names = TRUE), base::source)
 
 model_fitters <- c(
-  'aorsf_cph_1',
-  'aorsf_cph_15',
+  'aorsf_fast',
+  'aorsf_cph',
   'aorsf_random',
-  # 'aorsf_net',
+  'aorsf_net',
   'rotsf',
   'rsfse',
   'cif',
   'cox_net',
   'coxtime',
-  # 'obliqueRSF',
+  'obliqueRSF',
   'xgb_cox',
   'xgb_aft',
   'randomForestSRC',
@@ -68,7 +68,7 @@ analyses_real <- expand_grid(
     "aric_death"
   ),
   model_type = model_fitters,
-  run_seed = 1:15
+  run_seed = 1:12
 ) |>
   mutate(
     data_load_fun = syms(glue("{data_source}_load")),
@@ -77,8 +77,8 @@ analyses_real <- expand_grid(
   )
 
 analyses_sim_pred <- expand_grid(data_source = 'sim',
-                                 n_obs = c(1000, 2500, 5000),
-                                 pred_corr_max = c(0.10, 0.25, .50),
+                                 n_obs = c(500, 1000, 2500),
+                                 pred_corr_max = c(0, 0.15, .30, 0.45),
                                  run_seed = 1:25,
                                  model_type = model_fitters) |>
   mutate(
@@ -109,7 +109,7 @@ tar_plan(
                  run_seed = run_seed),
       resources = tar_resources(
         future = tar_resources_future(
-          resources = list(n_cores=2)
+          resources = list(n_cores=4)
         )
       ),
       memory = "transient",
@@ -191,7 +191,7 @@ tar_plan(
     bench_vi_summarize(bm_vi_comb)
   ),
 
-  # tar_target(bm_vi_viz, bm_vi_visualize(bm_vi_comb)),
+  tar_target(bm_vi_viz, bm_vi_visualize(bm_vi_comb)),
 
 
 ) |>

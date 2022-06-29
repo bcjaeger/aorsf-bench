@@ -71,6 +71,11 @@ bench_pred <- function(data_source,
 
   if(is_empty(pred_horizon)) return(NULL)
 
+  if(length(pred_horizon) > 30){
+    pred_horizon <-
+      pred_horizon[floor(seq(1, length(pred_horizon), length.out=30))]
+  }
+
   # Don't pipe here - it can mess up the measurement
   # of time during model fitting and model predictions.
 
@@ -96,7 +101,6 @@ bench_pred <- function(data_source,
     ),
     silent = TRUE
   )
-
 
   score <- tibble(model = model_type,
                   cstat = NA_real_,
