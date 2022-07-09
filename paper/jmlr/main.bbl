@@ -1,0 +1,248 @@
+\begin{thebibliography}{36}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Benavoli et~al.(2017)Benavoli, Corani, Dem{\v{s}}ar, and
+  Zaffalon]{benavoli2017time}
+Alessio Benavoli, Giorgio Corani, Janez Dem{\v{s}}ar, and Marco Zaffalon.
+\newblock Time for a change: a tutorial for comparing multiple classifiers
+  through bayesian analysis.
+\newblock \emph{The Journal of Machine Learning Research}, 18\penalty0
+  (1):\penalty0 2653--2688, 2017.
+
+\bibitem[Blanche et~al.(2013)Blanche, Dartigues, and
+  Jacqmin-Gadda]{blanche2013estimating}
+Paul Blanche, Jean-Fran{\c{c}}ois Dartigues, and H{\'e}l{\`e}ne Jacqmin-Gadda.
+\newblock Estimating and comparing time-dependent areas under receiver
+  operating characteristic curves for censored event times with competing
+  risks.
+\newblock \emph{Statistics in medicine}, 32\penalty0 (30):\penalty0 5381--5397,
+  2013.
+
+\bibitem[Breiman(2001)]{breiman2001random}
+Leo Breiman.
+\newblock Random forests.
+\newblock \emph{Machine Learning}, 45\penalty0 (1):\penalty0 5--32, 2001.
+
+\bibitem[Breiman et~al.(2017)Breiman, Friedman, Olshen, and
+  Stone]{breiman2017classification}
+Leo Breiman, Jerome~H Friedman, Richard~A Olshen, and Charles~J Stone.
+\newblock \emph{Classification and regression trees}.
+\newblock Routledge, 2017.
+
+\bibitem[Cui et~al.(2017)Cui, Zhu, Zhou, and Kosorok]{cui2017consistency}
+Yifan Cui, Ruoqing Zhu, Mai Zhou, and Michael Kosorok.
+\newblock Consistency of survival tree and forest models: splitting bias and
+  correction.
+\newblock \emph{arXiv preprint arXiv:1707.09631}, 2017.
+
+\bibitem[Goodrich et~al.(2022)Goodrich, Gabry, Ali, and Brilleman]{rstanarm}
+Ben Goodrich, Jonah Gabry, Imad Ali, and Sam Brilleman.
+\newblock rstanarm: {Bayesian} applied regression modeling via {Stan}., 2022.
+\newblock URL \url{https://mc-stan.org/rstanarm/}.
+\newblock R package version 2.21.3.
+
+\bibitem[Graf et~al.(1999)Graf, Schmoor, Sauerbrei, and
+  Schumacher]{graf1999assessment}
+Erika Graf, Claudia Schmoor, Willi Sauerbrei, and Martin Schumacher.
+\newblock Assessment and comparison of prognostic classification schemes for
+  survival data.
+\newblock \emph{Statistics in Medicine}, 18\penalty0 (17-18):\penalty0
+  2529--2545, 1999.
+\newblock URL
+  \url{https://doi.org/10.1002/(SICI)1097-0258(19990915/30)18:17/18%3C2529::AID-SIM274%3E3.0.CO;2-5}.
+
+\bibitem[Harrell et~al.(1982)Harrell, Califf, Pryor, Lee, and
+  Rosati]{harrell1982evaluating}
+Frank~E. Harrell, Robert~M. Califf, David~B. Pryor, Kerry~L. Lee, and Robert~A.
+  Rosati.
+\newblock {Evaluating the Yield of Medical Tests}.
+\newblock \emph{JAMA}, 247\penalty0 (18):\penalty0 2543--2546, 05 1982.
+\newblock ISSN 0098-7484.
+\newblock \doi{10.1001/jama.1982.03320430047030}.
+\newblock URL \url{https://doi.org/10.1001/jama.1982.03320430047030}.
+
+\bibitem[Heath et~al.(1993)Heath, Kasif, and Salzberg]{heath1993induction}
+David Heath, Simon Kasif, and Steven Salzberg.
+\newblock Induction of oblique decision trees.
+\newblock In \emph{IJCAI}, volume 1993, pages 1002--1007. Citeseer, 1993.
+
+\bibitem[Hothorn et~al.(2004)Hothorn, Lausen, Benner, and
+  Radespiel-Tr{\"o}ger]{hothorn2004bagging}
+Torsten Hothorn, Berthold Lausen, Axel Benner, and Martin Radespiel-Tr{\"o}ger.
+\newblock Bagging survival trees.
+\newblock \emph{Statistics in medicine}, 23\penalty0 (1):\penalty0 77--91,
+  2004.
+
+\bibitem[Hothorn et~al.(2006)Hothorn, Hornik, and Zeileis]{hothorn2006unbiased}
+Torsten Hothorn, Kurt Hornik, and Achim Zeileis.
+\newblock Unbiased recursive partitioning: A conditional inference framework.
+\newblock \emph{Journal of Computational and Graphical statistics}, 15\penalty0
+  (3):\penalty0 651--674, 2006.
+
+\bibitem[Ishwaran and Kogalur(2010)]{ishwaran2010consistency}
+Hemant Ishwaran and Udaya~B Kogalur.
+\newblock Consistency of random survival forests.
+\newblock \emph{Statistics \& probability letters}, 80\penalty0
+  (13-14):\penalty0 1056--1064, 2010.
+
+\bibitem[Ishwaran and Lu(2019)]{ishwaran2019standard}
+Hemant Ishwaran and Min Lu.
+\newblock Standard errors and confidence intervals for variable importance in
+  random forest regression, classification, and survival.
+\newblock \emph{Statistics in medicine}, 38\penalty0 (4):\penalty0 558--582,
+  2019.
+
+\bibitem[Ishwaran et~al.(2008)Ishwaran, Kogalur, Blackstone, and
+  Lauer]{ishwaran2008random}
+Hemant Ishwaran, Udaya~B Kogalur, Eugene~H Blackstone, and Michael~S Lauer.
+\newblock Random survival forests.
+\newblock \emph{The Annals of Applied Statistics}, pages 841--860, 2008.
+
+\bibitem[Jaeger et~al.(2019)Jaeger, Long, Long, Sims, Szychowski, Min, Mcclure,
+  Howard, and Simon]{jaeger2019oblique}
+Byron~C Jaeger, D~Leann Long, Dustin~M Long, Mario Sims, Jeff~M Szychowski,
+  Yuan-I Min, Leslie~A Mcclure, George Howard, and Noah Simon.
+\newblock Oblique random survival forests.
+\newblock \emph{The Annals of Applied Statistics}, 13\penalty0 (3):\penalty0
+  1847--1883, 2019.
+
+\bibitem[Kattan and Gerds(2018)]{kattan2018index}
+Michael~W Kattan and Thomas~A Gerds.
+\newblock The index of prediction accuracy: an intuitive measure useful for
+  evaluating risk prediction models.
+\newblock \emph{Diagnostic and prognostic research}, 2\penalty0 (1):\penalty0
+  1--7, 2018.
+
+\bibitem[Katuwal et~al.(2020)Katuwal, Suganthan, and
+  Zhang]{katuwal2020heterogeneous}
+Rakesh Katuwal, Ponnuthurai~Nagaratnam Suganthan, and Le~Zhang.
+\newblock Heterogeneous oblique random forest.
+\newblock \emph{Pattern Recognition}, 99:\penalty0 107078, 2020.
+
+\bibitem[Kuhn and Wickham(2020)]{tidymodels}
+Max Kuhn and Hadley Wickham.
+\newblock \emph{Tidymodels: a collection of packages for modeling and machine
+  learning using tidyverse principles.}, 2020.
+\newblock URL \url{https://www.tidymodels.org}.
+
+\bibitem[Lundberg and Lee(2017)]{lundberg2017unified}
+Scott Lundberg and Su-In Lee.
+\newblock A unified approach to interpreting model predictions, 2017.
+
+\bibitem[Lundberg et~al.(2018)Lundberg, Erion, and Lee]{lundberg2018consistent}
+Scott~M Lundberg, Gabriel~G Erion, and Su-In Lee.
+\newblock Consistent individualized feature attribution for tree ensembles.
+\newblock \emph{arXiv preprint arXiv:1802.03888}, 2018.
+
+\bibitem[Menze et~al.(2011)Menze, Kelm, Splitthoff, Koethe, and
+  Hamprecht]{menze2011oblique}
+Bjoern~H Menze, B~Michael Kelm, Daniel~N Splitthoff, Ullrich Koethe, and Fred~A
+  Hamprecht.
+\newblock On oblique random forests.
+\newblock In \emph{Joint European Conference on Machine Learning and Knowledge
+  Discovery in Databases}, pages 453--469. Springer, 2011.
+
+\bibitem[Moons et~al.(2012{\natexlab{a}})Moons, Kengne, Grobbee, Royston,
+  Vergouwe, Altman, and Woodward]{moons2012riskII}
+Karel~GM Moons, Andre~Pascal Kengne, Diederick~E Grobbee, Patrick Royston,
+  Yvonne Vergouwe, Douglas~G Altman, and Mark Woodward.
+\newblock Risk prediction models: {II}. external validation, model updating,
+  and impact assessment.
+\newblock \emph{Heart}, 98\penalty0 (9):\penalty0 691--698, 2012{\natexlab{a}}.
+
+\bibitem[Moons et~al.(2012{\natexlab{b}})Moons, Kengne, Woodward, Royston,
+  Vergouwe, Altman, and Grobbee]{moons2012riskI}
+Karel~GM Moons, Andre~Pascal Kengne, Mark Woodward, Patrick Royston, Yvonne
+  Vergouwe, Douglas~G Altman, and Diederick~E Grobbee.
+\newblock Risk prediction models: {I}. development, internal validation, and
+  assessing the incremental value of a new (bio) marker.
+\newblock \emph{Heart}, 98\penalty0 (9):\penalty0 683--690, 2012{\natexlab{b}}.
+
+\bibitem[Murthy et~al.(1994)Murthy, Kasif, and Salzberg]{murthy1994system}
+Sreerama~K Murthy, Simon Kasif, and Steven Salzberg.
+\newblock A system for induction of oblique decision trees.
+\newblock \emph{Journal of Artificial Intelligence Research}, 2:\penalty0
+  1--32, 1994.
+
+\bibitem[Poona et~al.(2016)Poona, Van~Niekerk, and
+  Ismail]{poona2016investigating}
+Nitesh Poona, Adriaan Van~Niekerk, and Riyad Ismail.
+\newblock Investigating the utility of oblique tree-based ensembles for the
+  classification of hyperspectral data.
+\newblock \emph{Sensors}, 16\penalty0 (11):\penalty0 1918, 2016.
+
+\bibitem[Qiu et~al.(2017)Qiu, Zhang, Suganthan, and Amaratunga]{qiu2017oblique}
+Xueheng Qiu, Le~Zhang, Ponnuthurai~Nagaratnam Suganthan, and Gehan~AJ
+  Amaratunga.
+\newblock Oblique random forest ensemble via least square estimation for time
+  series forecasting.
+\newblock \emph{Information Sciences}, 420:\penalty0 249--262, 2017.
+
+\bibitem[Rainforth and Wood(2015)]{rainforth2015canonical}
+Tom Rainforth and Frank Wood.
+\newblock Canonical correlation forests.
+\newblock \emph{arXiv preprint arXiv:1507.05444}, 2015.
+
+\bibitem[Strobl et~al.(2007)Strobl, Boulesteix, Zeileis, and
+  Hothorn]{strobl2007bias}
+Carolin Strobl, Anne-Laure Boulesteix, Achim Zeileis, and Torsten Hothorn.
+\newblock Bias in random forest variable importance measures: Illustrations,
+  sources and a solution.
+\newblock \emph{BMC bioinformatics}, 8\penalty0 (1):\penalty0 25, 2007.
+
+\bibitem[Therneau(2022)]{therneau_survival_2022}
+Terry Therneau.
+\newblock Survival package source code documentation, April 2022.
+\newblock URL
+  \url{https://github.com/therneau/survival/blob/5440691d44abea537b08aeb60153a31654d66a9b/noweb}.
+\newblock original-date: 2016-04-28.
+
+\bibitem[Tomita et~al.(2020)Tomita, Browne, Shen, Chung, Patsolic, Falk,
+  Priebe, Yim, Burns, Maggioni, et~al.]{tomita2020sparse}
+Tyler~M Tomita, James Browne, Cencheng Shen, Jaewon Chung, Jesse~L Patsolic,
+  Benjamin Falk, Carey~E Priebe, Jason Yim, Randal Burns, Mauro Maggioni,
+  et~al.
+\newblock Sparse projection oblique randomer forests.
+\newblock \emph{Journal of machine learning research}, 21\penalty0 (104), 2020.
+
+\bibitem[Wang and Li(2017)]{wang2017selective}
+Hong Wang and Gang Li.
+\newblock A selective review on random survival forests for high dimensional
+  data.
+\newblock \emph{Quantitative bio-science}, 36\penalty0 (2):\penalty0 85, 2017.
+
+\bibitem[Wang and Zhou(2017)]{wang2017random}
+Hong Wang and Lifeng Zhou.
+\newblock Random survival forest with space extensions for censored data.
+\newblock \emph{Artificial intelligence in medicine}, 79:\penalty0 52--61,
+  2017.
+
+\bibitem[Zhang and Suganthan(2014)]{zhang2014oblique}
+Le~Zhang and Ponnuthurai~N Suganthan.
+\newblock Oblique decision tree ensemble via multisurface proximal support
+  vector machine.
+\newblock \emph{IEEE transactions on cybernetics}, 45\penalty0 (10):\penalty0
+  2165--2176, 2014.
+
+\bibitem[Zhou et~al.(2016)Zhou, Wang, and Xu]{zhou2016random}
+Lifeng Zhou, Hong Wang, and Qingsong Xu.
+\newblock Random rotation survival forest for high dimensional censored data.
+\newblock \emph{SpringerPlus}, 5\penalty0 (1):\penalty0 1--10, 2016.
+
+\bibitem[Zhu(2013)]{zhu2013tree}
+Ruoqing Zhu.
+\newblock \emph{Tree-based Methods for Survival Analysis and High-dimensional
+  Data}.
+\newblock PhD thesis, The University of North Carolina at Chapel Hill, 2013.
+
+\bibitem[Zhu et~al.(2015)Zhu, Zeng, and Kosorok]{zhu2015reinforcement}
+Ruoqing Zhu, Donglin Zeng, and Michael~R Kosorok.
+\newblock Reinforcement learning trees.
+\newblock \emph{Journal of the American Statistical Association}, 110\penalty0
+  (512):\penalty0 1770--1784, 2015.
+
+\end{thebibliography}

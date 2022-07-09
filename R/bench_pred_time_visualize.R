@@ -21,8 +21,12 @@ bench_pred_time_visualize <- function(bm_pred_clean, model_key) {
       color = c(
         rep("white", floor(n()/2)),
         rep("black", n() - floor(n()/2))
-      )
+      ),
+      hjust = if_else(model == 'cif-standard',
+                      -1.5,
+                      -1/10)
     )
+
 
 
   fig <- ggplot(gg_data) +
@@ -40,10 +44,10 @@ bench_pred_time_visualize <- function(bm_pred_clean, model_key) {
     ) +
     geom_text(
       data = medians,
-      hjust = -1/10,
-      vjust = -2.5,
+      hjust = medians$hjust,
+      vjust = -.25,
       color = medians$color,
-      aes(label = table_glue("median: {time}s"))
+      aes(label = table_glue("{time}s"))
     ) +
     scale_fill_viridis_d() +
     theme_minimal() +

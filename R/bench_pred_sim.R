@@ -1,53 +1,33 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param data_source
-#' @param run_seed
-bench_pred <- function(data_source,
-                       model_type,
-                       data_load_fun,
-                       model_fit_fun,
-                       model_pred_fun,
-                       n_obs = NULL,
-                       pred_corr_max = NULL,
-                       run_seed,
-                       test_prop = 1/2) {
+
+
+bench_pred_sim <- function(data_source,
+                           model_type,
+                           data_load_fun,
+                           model_fit_fun,
+                           model_pred_fun,
+                           n_obs = NULL,
+                           pred_corr_max = NULL,
+                           run_seed) {
 
   set.seed(run_seed)
 
   data_all <- data_load_fun(n_obs = n_obs,
-                            pred_corr_max = pred_corr_max)
+                            pred_corr_max = pred_corr_max,
+                            n_pred_junk = 0,
+                            eff_size_pred_main = 1/3,
+                            eff_size_intr_main = 1/3,
+                            eff_size_pred_nlin = 1/3,
+                            eff_size_intr_nlin = 1/3,
+                            eff_size_pred_cmbn = 1/3,
+                            eff_size_intr_cmbn = 1/3)
 
+  data_all <- data_all$data
 
-  if(data_source == 'sim'){
+  train <- data_all
 
-    data_all <- data_all$data
-
-    train <- data_all
-
-    test <- sim_surv(n_obs = 5000,
-                     pred_corr_max = pred_corr_max) |>
-      getElement('data')
-
-  } else {
-
-    # Some R packages (not aorsf) have trouble
-    # with factors that have special characters
-    data_all <-  data_all |>
-      mutate(across(where(is.character), as.factor),
-             across(where(is.factor), simplify_levels))
-
-    test_index <- sample(x = seq(nrow(data_all)),
-                         size = round(nrow(data_all) * test_prop),
-                         replace = FALSE)
-
-    train <- data_all[-test_index, ]
-    test <- data_all[test_index, ]
-
-
-  }
+  test <- sim_surv(n_obs = 5000,
+                   pred_corr_max = pred_corr_max) |>
+    getElement('data')
 
   imputer <- recipe(x = train, time + status ~ .) |>
     step_impute_mean(all_numeric_predictors()) |>
@@ -142,14 +122,11 @@ bench_pred <- function(data_source,
     out$time_pred <- predictions$time
   }
 
-  if(data_source == 'sim'){
-    out$n_obs <- n_obs
-    out$pred_corr_max <- pred_corr_max
-  }
+  out$n_obs <- n_obs
+  out$pred_corr_max <- pred_corr_max
 
   print(out)
+
   out
 
 }
-
-

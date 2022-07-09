@@ -4,11 +4,9 @@
 #'
 #' @title
 #' @param bm_vi_comb
-bm_vi_visualize <- function(bm_vi_comb) {
+bench_vi_visualize <- function(bm_vi_comb) {
 
   bm_vi_smry <- bm_vi_comb %>%
-    filter(pred_corr_max != .45) %>%
-    arrange(n_obs, pred_corr_max) %>%
     mutate(
       intr = (intr_main+intr_hidden_cmbn+intr_hidden_nlin)/3,
     ) %>%
@@ -25,19 +23,24 @@ bm_vi_visualize <- function(bm_vi_comb) {
     summarize(value = mean(overall)) %>%
     mutate(variable = 'Overall')
 
+  bm_vi_by_variable <- bm_vi_smry %>%
+    group_by(model, variable) %>%
+    summarize(value = mean(value)) %>%
+    mutate(n_obs = 0, pred_corr_max = 1)
+
   slide_in <- bm_vi_smry$variable %>%
     unique() %>%
     enframe(value = 'variable', name = NULL) %>%
     split(.$variable)
 
   data_smry_split <-
-    bind_rows(bm_vi_overall, bm_vi_smry) %>%
+    bind_rows(bm_vi_overall, bm_vi_smry, bm_vi_by_variable) %>%
     mutate(variable = factor(variable, levels = c('Overall',
                                                   'main',
                                                   'cmbn',
                                                   'nlin',
                                                   'intr'))) %>%
-    arrange(variable, n_obs, pred_corr_max, desc(value)) %>%
+    arrange(variable, desc(pred_corr_max), n_obs, desc(value)) %>%
     split(.$variable)
 
   slide_in
@@ -81,8 +84,9 @@ bm_vi_visualize <- function(bm_vi_comb) {
 
   y_col_1 = 0.15
   y_col_2 = 0.30
+  y_col_3 = 0.75
 
-  xmax <- max(ceiling(data_smry$x))
+  xmax <- max(ceiling(data_smry_pre$x))
 
   # gg_text_header <- tibble(
   #   x = c(xmax + 3/4, xmax + 3/4),
@@ -93,7 +97,7 @@ bm_vi_visualize <- function(bm_vi_comb) {
 
   gg_text_data <- data_smry_pre %>%
     mutate(x = round(x)) %>%
-    group_by(variable, n_obs, pred_corr_max, data, x) %>%
+    group_by(variable, pred_corr_max, n_obs, data, x) %>%
     summarize(x = median(x)) %>%
     mutate(
       value_1 = y_col_1,
@@ -110,42 +114,61 @@ bm_vi_visualize <- function(bm_vi_comb) {
         variable,
         as.character(
           if_else(
-            pred_corr_max > 0,
+            n_obs > 500,
             " ",
-            table_value(n_obs)
+            table_glue("  {pred_corr_max * 100}%")
           )
         )
       ),
+      label_1 = recode(label_1, "  100%" = "  Overall"),
       label_2 = if_else(
-        is.na(n_obs),
+        is.na(pred_corr_max),
         "",
-        as.character(pred_corr_max * 100)
-      )
+        as.character(n_obs)
+      ),
+      label_2 = recode(label_2, "0" = ""),
     ) %>%
+    mutate(label_1 = str_replace(label_1, '0.00%', '0%'),
+           hjust = 0) %>%
     ungroup() %>%
     add_row(x = xmax + 1,
+            hjust = 0,
             value_2 = y_col_2,
+            label_2 = 'No. observations', .before = 1) %>%
+    add_row(x = xmax + 1,
+            hjust = 0,
+            value_2 = y_col_1,
             label_2 = 'Max correlation', .before = 1) %>%
     add_row(x = xmax + 1,
-            value_2 = y_col_1,
-            label_2 = 'No. observations', .before = 1)
+            hjust = 1/2,
+            value_2 = y_col_3,
+            label_2 = 'Probability of higher importance for relevant variables')
 
-  data_aorsf <- data_smry |>
+  data_aorsf <- data_smry_pre %>%
     filter(model == 'aorsf-negate')
 
-  rankings <- data_smry |>
-    arrange(variable, n_obs, pred_corr_max, desc(value)) |>
+  rankings <- data_smry_pre %>%
+    # filter(n_obs > 0, pred_corr_max < 1) %>%
+    arrange(variable, desc(pred_corr_max), n_obs, desc(value)) %>%
     mutate(rank = seq(n())) %>%
     mutate(data = paste(variable, n_obs, pred_corr_max, sep = '_'))
 
-  aorsf_wins <- rankings |>
-    filter(rank == 1 & model == 'aorsf-negate') |>
+  avg_ranking <- rankings %>%
+    filter(data != 'Overall_NA_NA', n_obs > 0, pred_corr_max < 1) %>%
+    drop_na(model) %>%
+    group_by(model) %>%
+    summarize(rank_median = median(rank),
+              rank_mean = mean(rank),
+              n_wins = sum(rank == 1))
+
+  aorsf_wins <- rankings %>%
+    filter(rank == 1 & model == 'aorsf-negate') %>%
     pull(data)
 
-  gg_text_diffs <- rankings |>
+  gg_text_diffs <- rankings %>%
     filter(data %in% aorsf_wins, rank <= 2) %>%
     group_by(data) %>%
-    group_split() |>
+    group_split() %>%
     map_dfr(
       .f = ~{
 
@@ -154,13 +177,13 @@ bm_vi_visualize <- function(bm_vi_comb) {
                adiff = diff(rev(.x$value)))
 
       }
-    ) |>
-    left_join(gg_text_data) |>
+    ) %>%
+    left_join(gg_text_data) %>%
     mutate(
       value = map_dbl(
         data,
-        ~data_aorsf |>
-          filter(data == .x) |>
+        ~data_aorsf %>%
+          filter(data == .x) %>%
           pull(value)
       ),
       label = table_glue("+{100*adiff} ({pdiff}%)")
@@ -190,6 +213,21 @@ bm_vi_visualize <- function(bm_vi_comb) {
   oranges <- brewer.pal(n = length(model_levels), "Oranges")
   standout <- "purple"
 
+  gg_legend <- get_legend(
+    data_smry %>%
+      bind_rows(data_aorsf) %>%
+      mutate(model = factor(model,
+                            levels = c(model_levels, 'aorsf-negate'))) %>%
+      ggplot(aes(x=x, y=value, col=model)) +
+      geom_point() +
+      scale_color_manual(values = c(oranges, standout)) +
+      theme_bw() +
+      theme(legend.position = 'top') +
+      labs(color = '') +
+      guides(colour = guide_legend(nrow = 1,
+                                   override.aes = list(size=8)))
+  )
+
   gg_fig <- ggplot(data_smry) +
     aes(x = x, y = value) +
     geom_point(shape = 21,
@@ -201,10 +239,11 @@ bm_vi_visualize <- function(bm_vi_comb) {
                fill = standout) +
     geom_text(data = gg_text_data,
               aes(y = value_1, label = label_1),
-              hjust = 0) +
+              hjust = gg_text_data$hjust,
+              vjust = 1/2) +
     geom_text(data = gg_text_data,
               aes(y = value_2, label = label_2),
-              hjust = 0) +
+              hjust = gg_text_data$hjust) +
     geom_text(data = gg_text_diffs,
               aes(label = label),
               hjust = -0.2,
@@ -217,40 +256,35 @@ bm_vi_visualize <- function(bm_vi_comb) {
                   ymax = ymax),
               fill = 'black',
               alpha = 1/6) +
-    geom_vline(xintercept = seq(1/2, xmax-1/2, by = 1)) +
+    geom_vline(xintercept = seq(3/2, xmax-1/2, by = 1)) +
     coord_flip() +
     theme_bw() +
     theme(panel.grid = element_blank(),
           panel.border = element_blank(),
           axis.ticks.y = element_blank(),
           axis.text.y = element_blank(),
-          legend.position = 'top') +
+          legend.position = '') +
     scale_fill_manual(values = oranges) +
-    labs(x = '', y = '')
-
-  gg_fig
-
-
-
-  +
-    scale_fill_manual(values = oranges) +
-    scale_y_continuous(limits = c(y_col_1, max(data_fig$eval)*1.15),
-                       expand = c(0, 0),
-                       breaks = y_breaks,
-                       labels = function(x) x * 100) +
+    scale_y_continuous(limits = c(0.1475, 1.15),
+                       expand = c(0,0),
+                       breaks = c(0.50, 0.75, 1.00)) +
     scale_x_continuous(limits = c(0, xmax + 2),
                        expand = c(0, 0)) +
     geom_segment(x = 0, xend = 0,
-                 y = 0, yend = max(y_breaks)) +
-    geom_rect(data = gg_rect,
-              inherit.aes = FALSE,
-              aes(xmin = xmin,
-                  xmax = xmax,
-                  ymin = ymin,
-                  ymax = ymax),
-              fill = 'grey',
-              alpha = 1/6) +
+                 y = 0.5, yend = 1) +
     labs(x = '', y = '')
+
+  fig <- cowplot::plot_grid(
+    gg_legend,
+    gg_fig,
+    nrow = 2,
+    rel_heights = c(0.075, 0.935)
+  )
+
+  list(smry = bind_rows(data_aorsf, data_smry),
+       diffs = gg_text_diffs,
+       rankings = avg_ranking,
+       fig = fig)
 
 
 }

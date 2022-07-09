@@ -4,7 +4,19 @@
 #'
 #' @title
 #' @param bm_pred_comb
-clean_bm_pred <- function(bm_pred_comb) {
+clean_bm_pred <- function(bm_pred_real_comb,
+                          bm_pred_sim_comb = NULL) {
+
+  bm_pred_comb <- bm_pred_real_comb
+
+  if(!is.null(bm_pred_sim_comb)){
+
+    bm_pred_sim_comb <- bm_pred_sim_comb %>%
+      mutate(data = paste(data, n_obs, pred_corr_max*100, sep = '_'))
+
+    bm_pred_comb <- bind_rows(bm_pred_comb, bm_pred_sim_comb)
+
+  }
 
   to_omit <- bm_pred_comb |>
     filter(is.na(cstat) | is.na(ibs_scaled)) |>

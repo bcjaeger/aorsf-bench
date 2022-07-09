@@ -176,7 +176,7 @@ bench_pred_visualize_ <- function(
       theme_bw() +
       theme(legend.position = 'top') +
       labs(color = '') +
-      guides(colour = guide_legend(nrow = 1,
+      guides(colour = guide_legend(nrow = 2,
                                    override.aes = list(size=8)))
   )
 
