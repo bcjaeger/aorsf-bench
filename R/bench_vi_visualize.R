@@ -7,6 +7,9 @@
 bench_vi_visualize <- function(bm_vi_comb) {
 
   bm_vi_smry <- bm_vi_comb %>%
+    filter(name == 'score') %>%
+    unnest(value) %>%
+    select(-name) %>%
     mutate(
       intr = (intr_main+intr_hidden_cmbn+intr_hidden_nlin)/3,
     ) %>%
@@ -18,7 +21,17 @@ bench_vi_visualize <- function(bm_vi_comb) {
     group_by(variable, n_obs, pred_corr_max, model) %>%
     summarize(value = mean(value, na.rm = TRUE))
 
+  bm_vi_time <- bm_vi_comb %>%
+    filter(name == 'score') %>%
+    unnest(value) %>%
+    select(-name) %>%
+    group_by(model) %>%
+    summarize(time = median(time))
+
   bm_vi_overall <- bm_vi_comb %>%
+    filter(name == 'score') %>%
+    unnest(value) %>%
+    select(-name) %>%
     group_by(model) %>%
     summarize(value = mean(overall)) %>%
     mutate(variable = 'Overall')
@@ -284,6 +297,7 @@ bench_vi_visualize <- function(bm_vi_comb) {
   list(smry = bind_rows(data_aorsf, data_smry),
        diffs = gg_text_diffs,
        rankings = avg_ranking,
+       times = bm_vi_time,
        fig = fig)
 
 

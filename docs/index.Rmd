@@ -41,6 +41,7 @@ tar_load(
     bm_pred_time_viz,
     bm_pred_viz,
     bm_vi_smry,
+    bm_vi_viz,
     data_key
   )
 )
@@ -539,31 +540,31 @@ $$\text{metric} = \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run
 ---
 
 ```{r bm_pred_viz_ibs, fig.height=9, fig.width=11}
-bm_pred_viz$ibs_scaled
+bm_pred_viz$ibs_scaled$fig
 ```
 
 ---
 
 ```{r bm_pred_viz_cstat, fig.height=9, fig.width=11}
-bm_pred_viz$cstat
+bm_pred_viz$cstat$fig
 ```
 
 ---
 
 ```{r bm_pred_model_viz_ibs, fig.height=6.9, fig.width=9}
-bm_pred_model_viz$ibs_scaled
+bm_pred_model_viz$fig$ibs_scaled
 ```
 
 ---
 
 ```{r bm_pred_model_viz_cstat, fig.height=6.9, fig.width=9}
-bm_pred_model_viz$cstat
+bm_pred_model_viz$fig$cstat
 ```
 
 ---
 
 ```{r bm_pred_time_ridges, fig.height=6.5, fig.width=8}
-bm_pred_time_viz
+bm_pred_time_viz$fig
 ```
 
 ---
@@ -625,7 +626,7 @@ library(plotly)
 
 fig_data <- bm_vi_smry %>%
   ungroup() %>%
-  filter(n_obs == 5000) %>%
+  filter(n_obs == 1000) %>%
   mutate(
     model = recode(
       model, 'randomForestSRC-permutation' = 'rfsrc-permutation'
@@ -679,7 +680,7 @@ library(plotly)
 
 fig_data <- bm_vi_smry %>%
   ungroup() %>%
-  filter(n_obs == 1000) %>%
+  filter(n_obs == 2500) %>%
   mutate(
     model = recode(
       model, 'randomForestSRC-permutation' = 'rfsrc-permutation'
@@ -712,7 +713,7 @@ fig <- plot_ly(width = 800, height = 650) %>%
     hovertext = fig_data$text
   ) %>%
   plotly::layout(
-    title = list(text = 'Results when N = 5000', x = 0.1),
+    title = list(text = 'Results when N = 2500', x = 0.1),
     xaxis = list(title = 'Max correlation among predictors'),
     yaxis = list(title = 'C-statistic', range = c(0,1)),
     legend = list(title = list(text = '<b>VI technique</b>'))

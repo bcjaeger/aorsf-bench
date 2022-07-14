@@ -54,6 +54,16 @@ bench_vi <- function(n_obs = 1000,
     mutate(var_type = str_remove(vi_id, "_[0-9]+$")) |>
     group_by(name)
 
+  vars_means <- vars_data %>%
+    group_by(name) %>%
+    mutate(vi = rescale(vi, to = c(0,1))) %>%
+    group_by(name, var_type) %>%
+    summarize(vi = mean(vi)) %>%
+    pivot_wider(names_from = var_type, values_from = vi) %>%
+    rename(model = name) %>%
+    mutate(pred_corr_max = pred_corr_max,
+           n_obs = n_obs)
+
   roc_grps <- map_dfr(
     .x = c("cmbn",
            "main",
@@ -96,8 +106,7 @@ bench_vi <- function(n_obs = 1000,
     mutate(pred_corr_max = pred_corr_max,
            n_obs = n_obs)
 
-  print(score)
+  enframe(list(score = score, means = vars_means))
 
-  score
 
 }

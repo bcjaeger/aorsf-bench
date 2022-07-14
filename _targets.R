@@ -6,7 +6,7 @@ library(future)
 library(future.callr)
 plan(callr)
 
-tar_config_set(reporter_make = 'verbose')
+tar_config_set(reporter_make = 'summary')
 
 tar_option_set(memory = "transient",
                garbage_collection = TRUE)
@@ -68,7 +68,7 @@ analyses_real <- expand_grid(
     "aric_death"
   ),
   model_type = model_fitters,
-  run_seed = 1:5
+  run_seed = 1:22
 ) |>
   mutate(
     data_load_fun = syms(glue("{data_source}_load")),
@@ -78,8 +78,8 @@ analyses_real <- expand_grid(
 
 analyses_sim_pred <- expand_grid(data_source = 'sim',
                                  n_obs = c(500, 1000, 2500),
-                                 pred_corr_max = c(0, 0.15, 0.45),
-                                 run_seed = 1:5,
+                                 pred_corr_max = c(0, 0.15, 0.30),
+                                 run_seed = 1:150,
                                  model_type = model_fitters) |>
   mutate(
     data_load_fun = syms("sim_surv"),
@@ -187,6 +187,10 @@ tar_plan(
   tar_combine(bm_vi_comb, bm_vi[[1]]),
 
   tar_target(bm_vi_viz, bench_vi_visualize(bm_vi_comb)),
+
+  tar_target(bm_vi_smry, bench_vi_summarize(bm_vi_comb)),
+
+  tar_target(bm_vi_viz_mean, bench_vi_mean_visualize(bm_vi_comb))
 
 
 ) |>

@@ -22,7 +22,7 @@ class: center, middle, inverse, title-slide
 
 # Accelerated oblique random survival forests
 ### Byron C. Jaeger &amp; Nicholas Pajewski
-### Last updated 2022-06-25
+### Last updated 2022-07-14
 
 ---
 
@@ -344,145 +344,21 @@ Step 2: Fit a Bayesian linear mixed model to analyze posterior expected differen
 
 ---
 
-
-```
-## $smry
-## # A tibble: 192 x 4
-## # Groups:   data [32]
-##    model           data                x     eval
-##    &lt;chr&gt;           &lt;fct&gt;           &lt;dbl&gt;    &lt;dbl&gt;
-##  1 aorsf_cph_1     Overall          31.7  0.134  
-##  2 aorsf_cph_15    Overall          31.8  0.133  
-##  3 randomForestSRC Overall          31.9  0.122  
-##  4 cox_net         Overall          32.1  0.117  
-##  5 aorsf_random    Overall          32.2  0.0945 
-##  6 xgb_cox         Overall          32.3  0.0735 
-##  7 aorsf_cph_1     ACTG 320; death  30.7  0.0132 
-##  8 aorsf_cph_15    ACTG 320; death  30.8  0.0122 
-##  9 aorsf_random    ACTG 320; death  30.9  0.00849
-## 10 xgb_cox         ACTG 320; death  31.1 -0.00390
-## # ... with 182 more rows
-## 
-## $diffs
-## # A tibble: 22 x 6
-##    data                                       pdiff    adiff     x   eval label 
-##    &lt;fct&gt;                                      &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt; 
-##  1 Overall                                    9.85  0.0120      32 0.134  +1.2 ~
-##  2 ACTG 320; death                           55.8   0.00474     31 0.0132 +0.47~
-##  3 MESA; stroke                               0.784 0.000192    28 0.0247 +0.02~
-##  4 Early breast cancer; recurrence or death 114.    0.0322      26 0.0604 +3.2 ~
-##  5 Heart Transplant; graft-loss or death      2.71  0.00139     25 0.0525 +0.14~
-##  6 MESA; coronary heart disease              13.6   0.00760     24 0.0636 +0.76~
-##  7 GUIDE-IT; CVD death                        3.88  0.00286     23 0.0766 +0.29~
-##  8 GUIDE-IT; HF hospitalization              24.7   0.0164      22 0.0827 +1.6 ~
-##  9 ARIC; stroke                               2.36  0.00215     20 0.0929 +0.21~
-## 10 Colon cancer; recurrence                  14.4   0.0122      19 0.0969 +1.2 ~
-## # ... with 12 more rows
-## 
-## $rankings
-## # A tibble: 5 x 4
-##   model           rank_median rank_mean n_wins
-##   &lt;chr&gt;                 &lt;int&gt;     &lt;dbl&gt;  &lt;int&gt;
-## 1 aorsf_cph_1               1      1.45     21
-## 2 aorsf_random              4      3.58      1
-## 3 cox_net                   3      2.77      7
-## 4 randomForestSRC           3      2.74      2
-## 5 xgb_cox                   5      4.45      0
-## 
-## $fig
-```
-
 &lt;img src="index_files/figure-html/bm_pred_viz_ibs-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
-
-
-```
-## $smry
-## # A tibble: 192 x 4
-## # Groups:   data [32]
-##    model           data             x  eval
-##    &lt;chr&gt;           &lt;fct&gt;        &lt;dbl&gt; &lt;dbl&gt;
-##  1 aorsf_cph_1     Overall       31.7 0.775
-##  2 aorsf_cph_15    Overall       31.8 0.774
-##  3 cox_net         Overall       31.9 0.763
-##  4 randomForestSRC Overall       32.1 0.761
-##  5 xgb_cox         Overall       32.2 0.758
-##  6 aorsf_random    Overall       32.3 0.743
-##  7 cox_net         FCL; relapse  30.7 0.625
-##  8 xgb_cox         FCL; relapse  30.8 0.610
-##  9 aorsf_random    FCL; relapse  30.9 0.601
-## 10 aorsf_cph_15    FCL; relapse  31.1 0.600
-## # ... with 182 more rows
-## 
-## $diffs
-## # A tibble: 17 x 6
-##    data                                      pdiff    adiff     x  eval label   
-##    &lt;fct&gt;                                     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   
-##  1 Overall                                  1.62   0.0124      32 0.775 +1.2 (1~
-##  2 Colon cancer; recurrence                 1.75   0.0123      29 0.714 +1.2 (1~
-##  3 GUIDE-IT; HF hospitalization             2.69   0.0190      28 0.724 +1.9 (2~
-##  4 Colon cancer; death                      0.319  0.00229     27 0.719 +0.23 (~
-##  5 Heart Transplant; graft-loss or death    0.635  0.00462     26 0.733 +0.46 (~
-##  6 Early breast cancer; recurrence or death 0.579  0.00426     25 0.741 +0.43 (~
-##  7 Rotterdam tumor bank; recurrence         0.256  0.00187     24 0.734 +0.19 (~
-##  8 GUIDE-IT; CVD death                      0.498  0.00370     22 0.746 +0.37 (~
-##  9 Monoclonal gammopathy; death             0.787  0.00578     21 0.741 +0.58 (~
-## 10 Rotterdam tumor bank; death              0.192  0.00145     18 0.756 +0.14 (~
-## 11 VA lung cancer trial; death              0.140  0.00111     14 0.792 +0.11 (~
-## 12 MESA; death                              0.0721 0.000570    13 0.791 +0.06 (~
-## 13 ARIC; stroke                             0.230  0.00182     12 0.794 +0.18 (~
-## 14 MESA; coronary heart disease             0.471  0.00379      9 0.807 +0.38 (~
-## 15 ACTG 320; death                          4.48   0.0363       8 0.847 +3.6 (4~
-## 16 Serum free light chain; death            0.236  0.00195      6 0.826 +0.19 (~
-## 17 Primary biliary cholangitis; death       1.56   0.0140       2 0.909 +1.4 (1~
-## 
-## $rankings
-## # A tibble: 5 x 4
-##   model           rank_median rank_mean n_wins
-##   &lt;chr&gt;                 &lt;int&gt;     &lt;dbl&gt;  &lt;int&gt;
-## 1 aorsf_cph_1               1      1.81     16
-## 2 aorsf_random              5      4.13      0
-## 3 cox_net                   3      3.03      6
-## 4 randomForestSRC           3      3.45      1
-## 5 xgb_cox                   2      2.58      8
-## 
-## $fig
-```
 
 &lt;img src="index_files/figure-html/bm_pred_viz_cstat-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
-
-```
-## NULL
-```
+&lt;img src="index_files/figure-html/bm_pred_model_viz_ibs-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
-
-```
-## NULL
-```
+&lt;img src="index_files/figure-html/bm_pred_model_viz_cstat-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
-
-
-```
-## $medians
-## # A tibble: 6 x 3
-##   model         time color
-##   &lt;fct&gt;        &lt;dbl&gt; &lt;chr&gt;
-## 1 glmnet-cox   0.549 white
-## 2 aorsf-fast   1.09  white
-## 3 aorsf-cph    2.50  white
-## 4 rsf-standard 2.50  black
-## 5 aorsf-random 3.25  black
-## 6 xgboost-cox  5.39  black
-## 
-## $fig
-```
 
 &lt;img src="index_files/figure-html/bm_pred_time_ridges-1.png" style="display: block; margin: auto;" /&gt;
 
@@ -539,15 +415,15 @@ We compute a C-statistic for each VI technique based on its discrimination betwe
 
 ---
 
-<div id="htmlwidget-94ece8c0cfbc3349ca56" style="width:800px;height:650px;" class="plotly html-widget"></div>
-<script type="application/json" data-for="htmlwidget-94ece8c0cfbc3349ca56">{"x":{"visdat":{"24238722734d3":["function () ","plotlyVisDat"]},"cur_data":"24238722734d3","attrs":{"24238722734d3":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","x":["0.1","0.1","0.1","0.1","0.1","0.1","0.25","0.25","0.25","0.25","0.25","0.25","0.5","0.5","0.5","0.5","0.5","0.5"],"y":[0.776874074074074,0.749555555555556,0.74637037037037,0.716355555555556,0.682844444444444,0.639466666666667,0.679896296296296,0.662962962962963,0.645837037037037,0.614044444444444,0.612918518518519,0.545362962962963,0.650948148148148,0.628162962962963,0.620177777777778,0.604474074074074,0.587555555555556,0.530281481481481],"color":["aorsf-negation","aorsf-anova","aorsf-shap","xgboost-shap","rfsrc-permutation","xgboost-gain","aorsf-negation","aorsf-anova","aorsf-shap","rfsrc-permutation","xgboost-shap","xgboost-gain","aorsf-negation","aorsf-anova","aorsf-shap","rfsrc-permutation","xgboost-shap","xgboost-gain"],"colors":"PuRd","text":["0.78","0.75","0.75","0.72","0.68","0.64","0.68","0.66","0.65","0.61","0.61","0.55","0.65","0.63","0.62","0.60","0.59","0.53"],"textposition":"outside","hoverinfo":"text","hovertext":["aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.73<br>Combination effect: 0.81<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.55","aorsf-anova<br>Mean computation time: 3.1 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.71<br>Combination effect: 0.77<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.56","aorsf-shap<br>Mean computation time: 410 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.72<br>Combination effect: 0.78<br>Interactions:<br>   w/main effect: 0.52<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.47","xgboost-shap<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.91<br>Non-linear effect: 0.68<br>Combination effect: 0.74<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.45<br>   w/combination effect: 0.48","rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.64<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.53<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.60","xgboost-gain<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.47<br>   w/non-linear effect: 0.34<br>   w/combination effect: 0.39","aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.62<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.59","aorsf-anova<br>Mean computation time: 3.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.61<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.56","aorsf-shap<br>Mean computation time: 420 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.61<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.47","rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.74<br>Non-linear effect: 0.57<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.58","xgboost-shap<br>Mean computation time: 13 seconds<br>C-statistic by variable class:<br>Main effect: 0.76<br>Non-linear effect: 0.58<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.46<br>   w/combination effect: 0.55","xgboost-gain<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.72<br>Non-linear effect: 0.50<br>Combination effect: 0.53<br>Interactions:<br>   w/main effect: 0.47<br>   w/non-linear effect: 0.37<br>   w/combination effect: 0.49","aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.60<br>Combination effect: 0.64<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.59","aorsf-anova<br>Mean computation time: 3.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.59<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.56<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.58","aorsf-shap<br>Mean computation time: 409 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.59<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.49<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.49","rfsrc-permutation<br>Mean computation time: 18 seconds<br>C-statistic by variable class:<br>Main effect: 0.70<br>Non-linear effect: 0.56<br>Combination effect: 0.60<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.59","xgboost-shap<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.73<br>Non-linear effect: 0.56<br>Combination effect: 0.57<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.45<br>   w/combination effect: 0.59","xgboost-gain<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.68<br>Non-linear effect: 0.48<br>Combination effect: 0.51<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.39<br>   w/combination effect: 0.52"],"inherit":true}},"layout":{"width":800,"height":650,"margin":{"b":40,"l":60,"t":25,"r":10},"title":{"text":"Results when N = 1000","x":0.1},"xaxis":{"domain":[0,1],"automargin":true,"title":"Max correlation among predictors","type":"category","categoryorder":"array","categoryarray":["0.1","0.25","0.5"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"C-statistic","range":[0,1]},"legend":{"title":{"text":"<b>VI technique<\/b>"}},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.639466666666667,0.545362962962963,0.530281481481481],"text":["0.64","0.55","0.53"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-gain<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.47<br>   w/non-linear effect: 0.34<br>   w/combination effect: 0.39","xgboost-gain<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.72<br>Non-linear effect: 0.50<br>Combination effect: 0.53<br>Interactions:<br>   w/main effect: 0.47<br>   w/non-linear effect: 0.37<br>   w/combination effect: 0.49","xgboost-gain<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.68<br>Non-linear effect: 0.48<br>Combination effect: 0.51<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.39<br>   w/combination effect: 0.52"],"name":"xgboost-gain","marker":{"color":"rgba(241,238,246,1)","line":{"color":"rgba(241,238,246,1)"}},"textfont":{"color":"rgba(241,238,246,1)"},"error_y":{"color":"rgba(241,238,246,1)"},"error_x":{"color":"rgba(241,238,246,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.716355555555556,0.612918518518519,0.587555555555556],"text":["0.72","0.61","0.59"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-shap<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.91<br>Non-linear effect: 0.68<br>Combination effect: 0.74<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.45<br>   w/combination effect: 0.48","xgboost-shap<br>Mean computation time: 13 seconds<br>C-statistic by variable class:<br>Main effect: 0.76<br>Non-linear effect: 0.58<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.46<br>   w/combination effect: 0.55","xgboost-shap<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.73<br>Non-linear effect: 0.56<br>Combination effect: 0.57<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.45<br>   w/combination effect: 0.59"],"name":"xgboost-shap","marker":{"color":"rgba(212,185,218,1)","line":{"color":"rgba(212,185,218,1)"}},"textfont":{"color":"rgba(212,185,218,1)"},"error_y":{"color":"rgba(212,185,218,1)"},"error_x":{"color":"rgba(212,185,218,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.682844444444444,0.614044444444444,0.604474074074074],"text":["0.68","0.61","0.60"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.64<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.53<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.60","rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.74<br>Non-linear effect: 0.57<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.58","rfsrc-permutation<br>Mean computation time: 18 seconds<br>C-statistic by variable class:<br>Main effect: 0.70<br>Non-linear effect: 0.56<br>Combination effect: 0.60<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.59"],"name":"rfsrc-permutation","marker":{"color":"rgba(201,148,199,1)","line":{"color":"rgba(201,148,199,1)"}},"textfont":{"color":"rgba(201,148,199,1)"},"error_y":{"color":"rgba(201,148,199,1)"},"error_x":{"color":"rgba(201,148,199,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.74637037037037,0.645837037037037,0.620177777777778],"text":["0.75","0.65","0.62"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-shap<br>Mean computation time: 410 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.72<br>Combination effect: 0.78<br>Interactions:<br>   w/main effect: 0.52<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.47","aorsf-shap<br>Mean computation time: 420 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.61<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.47","aorsf-shap<br>Mean computation time: 409 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.59<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.49<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.49"],"name":"aorsf-shap","marker":{"color":"rgba(223,101,176,1)","line":{"color":"rgba(223,101,176,1)"}},"textfont":{"color":"rgba(223,101,176,1)"},"error_y":{"color":"rgba(223,101,176,1)"},"error_x":{"color":"rgba(223,101,176,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.749555555555556,0.662962962962963,0.628162962962963],"text":["0.75","0.66","0.63"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-anova<br>Mean computation time: 3.1 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.71<br>Combination effect: 0.77<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.56","aorsf-anova<br>Mean computation time: 3.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.61<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.56","aorsf-anova<br>Mean computation time: 3.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.59<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.56<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.58"],"name":"aorsf-anova","marker":{"color":"rgba(221,28,119,1)","line":{"color":"rgba(221,28,119,1)"}},"textfont":{"color":"rgba(221,28,119,1)"},"error_y":{"color":"rgba(221,28,119,1)"},"error_x":{"color":"rgba(221,28,119,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.776874074074074,0.679896296296296,0.650948148148148],"text":["0.78","0.68","0.65"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.73<br>Combination effect: 0.81<br>Interactions:<br>   w/main effect: 0.55<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.55","aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.62<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.59","aorsf-negation<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.60<br>Combination effect: 0.64<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.59"],"name":"aorsf-negation","marker":{"color":"rgba(152,0,67,1)","line":{"color":"rgba(152,0,67,1)"}},"textfont":{"color":"rgba(152,0,67,1)"},"error_y":{"color":"rgba(152,0,67,1)"},"error_x":{"color":"rgba(152,0,67,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-0333b5a011cb0ccae108" style="width:800px;height:650px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0333b5a011cb0ccae108">{"x":{"visdat":{"513864623683":["function () ","plotlyVisDat"]},"cur_data":"513864623683","attrs":{"513864623683":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","x":["0","0","0","0","0","0","0.15","0.15","0.15","0.15","0.15","0.15","0.3","0.3","0.3","0.3","0.3","0.3"],"y":[0.889781481481482,0.867022222222222,0.842333333333333,0.830811111111111,0.743807407407407,0.743214814814815,0.741511111111111,0.711262962962963,0.704244444444444,0.665148148148148,0.645577777777778,0.599733333333333,0.676914814814815,0.658433333333333,0.656959259259259,0.62217037037037,0.613777777777778,0.570214814814815],"color":["aorsf-negate","aorsf-anova","xgboost-shap","aorsf-permute","rfsrc-permutation","xgboost-gain","aorsf-negate","aorsf-permute","aorsf-anova","xgboost-shap","rfsrc-permutation","xgboost-gain","aorsf-negate","aorsf-anova","aorsf-permute","xgboost-shap","rfsrc-permutation","xgboost-gain"],"colors":"PuRd","text":["0.89","0.87","0.84","0.83","0.74","0.74","0.74","0.71","0.70","0.67","0.65","0.60","0.68","0.66","0.66","0.62","0.61","0.57"],"textposition":"outside","hoverinfo":"text","hovertext":["aorsf-negate<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.89<br>Combination effect: 0.96<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.54<br>   w/combination effect: 0.58","aorsf-anova<br>Mean computation time: 1.3 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.84<br>Combination effect: 0.92<br>Interactions:<br>   w/main effect: 0.61<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.62","xgboost-shap<br>Mean computation time: 30 seconds<br>C-statistic by variable class:<br>Main effect: 0.99<br>Non-linear effect: 0.83<br>Combination effect: 0.90<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.46<br>   w/combination effect: 0.54","aorsf-permute<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.99<br>Non-linear effect: 0.78<br>Combination effect: 0.89<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.57","rfsrc-permutation<br>Mean computation time: 20 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.68<br>Combination effect: 0.76<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.58","xgboost-gain<br>Mean computation time: 29 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.70<br>Combination effect: 0.79<br>Interactions:<br>   w/main effect: 0.51<br>   w/non-linear effect: 0.35<br>   w/combination effect: 0.43","aorsf-negate<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.91<br>Non-linear effect: 0.70<br>Combination effect: 0.76<br>Interactions:<br>   w/main effect: 0.61<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.60","aorsf-permute<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.88<br>Non-linear effect: 0.66<br>Combination effect: 0.72<br>Interactions:<br>   w/main effect: 0.60<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.58","aorsf-anova<br>Mean computation time: 1.3 seconds<br>C-statistic by variable class:<br>Main effect: 0.88<br>Non-linear effect: 0.66<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.57","xgboost-shap<br>Mean computation time: 24 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.64<br>Combination effect: 0.67<br>Interactions:<br>   w/main effect: 0.56<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.51","rfsrc-permutation<br>Mean computation time: 20 seconds<br>C-statistic by variable class:<br>Main effect: 0.80<br>Non-linear effect: 0.59<br>Combination effect: 0.64<br>Interactions:<br>   w/main effect: 0.57<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.58","xgboost-gain<br>Mean computation time: 24 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.56<br>Combination effect: 0.60<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.39<br>   w/combination effect: 0.45","aorsf-negate<br>Mean computation time: 11 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.62<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.59","aorsf-anova<br>Mean computation time: 1.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.61<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.58","aorsf-permute<br>Mean computation time: 13 seconds<br>C-statistic by variable class:<br>Main effect: 0.80<br>Non-linear effect: 0.60<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.61<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.61","xgboost-shap<br>Mean computation time: 20 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.58<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.56<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.55","rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.74<br>Non-linear effect: 0.56<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.59","xgboost-gain<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.74<br>Non-linear effect: 0.53<br>Combination effect: 0.56<br>Interactions:<br>   w/main effect: 0.52<br>   w/non-linear effect: 0.42<br>   w/combination effect: 0.51"],"inherit":true}},"layout":{"width":800,"height":650,"margin":{"b":40,"l":60,"t":25,"r":10},"title":{"text":"Results when N = 1000","x":0.1},"xaxis":{"domain":[0,1],"automargin":true,"title":"Max correlation among predictors","type":"category","categoryorder":"array","categoryarray":["0","0.15","0.3"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"C-statistic","range":[0,1]},"legend":{"title":{"text":"<b>VI technique<\/b>"}},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"type":"bar","x":["0","0.15","0.3"],"y":[0.743214814814815,0.599733333333333,0.570214814814815],"text":["0.74","0.60","0.57"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-gain<br>Mean computation time: 29 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.70<br>Combination effect: 0.79<br>Interactions:<br>   w/main effect: 0.51<br>   w/non-linear effect: 0.35<br>   w/combination effect: 0.43","xgboost-gain<br>Mean computation time: 24 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.56<br>Combination effect: 0.60<br>Interactions:<br>   w/main effect: 0.50<br>   w/non-linear effect: 0.39<br>   w/combination effect: 0.45","xgboost-gain<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.74<br>Non-linear effect: 0.53<br>Combination effect: 0.56<br>Interactions:<br>   w/main effect: 0.52<br>   w/non-linear effect: 0.42<br>   w/combination effect: 0.51"],"name":"xgboost-gain","marker":{"color":"rgba(241,238,246,1)","line":{"color":"rgba(241,238,246,1)"}},"textfont":{"color":"rgba(241,238,246,1)"},"error_y":{"color":"rgba(241,238,246,1)"},"error_x":{"color":"rgba(241,238,246,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.743807407407407,0.645577777777778,0.613777777777778],"text":["0.74","0.65","0.61"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["rfsrc-permutation<br>Mean computation time: 20 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.68<br>Combination effect: 0.76<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.58","rfsrc-permutation<br>Mean computation time: 20 seconds<br>C-statistic by variable class:<br>Main effect: 0.80<br>Non-linear effect: 0.59<br>Combination effect: 0.64<br>Interactions:<br>   w/main effect: 0.57<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.58","rfsrc-permutation<br>Mean computation time: 19 seconds<br>C-statistic by variable class:<br>Main effect: 0.74<br>Non-linear effect: 0.56<br>Combination effect: 0.61<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.49<br>   w/combination effect: 0.59"],"name":"rfsrc-permutation","marker":{"color":"rgba(212,185,218,1)","line":{"color":"rgba(212,185,218,1)"}},"textfont":{"color":"rgba(212,185,218,1)"},"error_y":{"color":"rgba(212,185,218,1)"},"error_x":{"color":"rgba(212,185,218,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.842333333333333,0.665148148148148,0.62217037037037],"text":["0.84","0.67","0.62"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-shap<br>Mean computation time: 30 seconds<br>C-statistic by variable class:<br>Main effect: 0.99<br>Non-linear effect: 0.83<br>Combination effect: 0.90<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.46<br>   w/combination effect: 0.54","xgboost-shap<br>Mean computation time: 24 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.64<br>Combination effect: 0.67<br>Interactions:<br>   w/main effect: 0.56<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.51","xgboost-shap<br>Mean computation time: 20 seconds<br>C-statistic by variable class:<br>Main effect: 0.77<br>Non-linear effect: 0.58<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.56<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.55"],"name":"xgboost-shap","marker":{"color":"rgba(201,148,199,1)","line":{"color":"rgba(201,148,199,1)"}},"textfont":{"color":"rgba(201,148,199,1)"},"error_y":{"color":"rgba(201,148,199,1)"},"error_x":{"color":"rgba(201,148,199,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.867022222222222,0.704244444444444,0.658433333333333],"text":["0.87","0.70","0.66"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-anova<br>Mean computation time: 1.3 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.84<br>Combination effect: 0.92<br>Interactions:<br>   w/main effect: 0.61<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.62","aorsf-anova<br>Mean computation time: 1.3 seconds<br>C-statistic by variable class:<br>Main effect: 0.88<br>Non-linear effect: 0.66<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.57","aorsf-anova<br>Mean computation time: 1.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.61<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.58"],"name":"aorsf-anova","marker":{"color":"rgba(223,101,176,1)","line":{"color":"rgba(223,101,176,1)"}},"textfont":{"color":"rgba(223,101,176,1)"},"error_y":{"color":"rgba(223,101,176,1)"},"error_x":{"color":"rgba(223,101,176,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.830811111111111,0.711262962962963,0.656959259259259],"text":["0.83","0.71","0.66"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-permute<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.99<br>Non-linear effect: 0.78<br>Combination effect: 0.89<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.57","aorsf-permute<br>Mean computation time: 14 seconds<br>C-statistic by variable class:<br>Main effect: 0.88<br>Non-linear effect: 0.66<br>Combination effect: 0.72<br>Interactions:<br>   w/main effect: 0.60<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.58","aorsf-permute<br>Mean computation time: 13 seconds<br>C-statistic by variable class:<br>Main effect: 0.80<br>Non-linear effect: 0.60<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.61<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.61"],"name":"aorsf-permute","marker":{"color":"rgba(221,28,119,1)","line":{"color":"rgba(221,28,119,1)"}},"textfont":{"color":"rgba(221,28,119,1)"},"error_y":{"color":"rgba(221,28,119,1)"},"error_x":{"color":"rgba(221,28,119,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.889781481481482,0.741511111111111,0.676914814814815],"text":["0.89","0.74","0.68"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-negate<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.89<br>Combination effect: 0.96<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.54<br>   w/combination effect: 0.58","aorsf-negate<br>Mean computation time: 12 seconds<br>C-statistic by variable class:<br>Main effect: 0.91<br>Non-linear effect: 0.70<br>Combination effect: 0.76<br>Interactions:<br>   w/main effect: 0.61<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.60","aorsf-negate<br>Mean computation time: 11 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.62<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.59"],"name":"aorsf-negate","marker":{"color":"rgba(152,0,67,1)","line":{"color":"rgba(152,0,67,1)"}},"textfont":{"color":"rgba(152,0,67,1)"},"error_y":{"color":"rgba(152,0,67,1)"},"error_x":{"color":"rgba(152,0,67,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 
 
 ---
 
 
-<div id="htmlwidget-1307c60179a1a2b9d753" style="width:800px;height:650px;" class="plotly html-widget"></div>
-<script type="application/json" data-for="htmlwidget-1307c60179a1a2b9d753">{"x":{"visdat":{"24238388d1157":["function () ","plotlyVisDat"]},"cur_data":"24238388d1157","attrs":{"24238388d1157":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","x":["0.1","0.1","0.1","0.1","0.1","0.1","0.25","0.25","0.25","0.25","0.25","0.25","0.5","0.5","0.5","0.5","0.5","0.5"],"y":[0.86637037037037,0.846103703703704,0.829659259259259,0.823318518518519,0.805422222222222,0.789925925925926,0.730903703703704,0.723259259259259,0.710903703703704,0.709274074074074,0.689688888888889,0.68642962962963,0.716474074074074,0.703674074074074,0.696088888888889,0.684148148148148,0.65842962962963,0.653392592592593],"color":["aorsf-negation","xgboost-shap","aorsf-anova","xgboost-gain","aorsf-shap","rfsrc-permutation","aorsf-negation","xgboost-shap","aorsf-anova","xgboost-gain","rfsrc-permutation","aorsf-shap","aorsf-negation","xgboost-shap","xgboost-gain","aorsf-anova","rfsrc-permutation","aorsf-shap"],"colors":"PuRd","text":["0.87","0.85","0.83","0.82","0.81","0.79","0.73","0.72","0.71","0.71","0.69","0.69","0.72","0.70","0.70","0.68","0.66","0.65"],"textposition":"outside","hoverinfo":"text","hovertext":["aorsf-negation<br>Mean computation time: 99 seconds<br>C-statistic by variable class:<br>Main effect: 0.99<br>Non-linear effect: 0.82<br>Combination effect: 0.91<br>Interactions:<br>   w/main effect: 0.76<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.75","xgboost-shap<br>Mean computation time: 69 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.80<br>Combination effect: 0.87<br>Interactions:<br>   w/main effect: 0.84<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.74","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.77<br>Combination effect: 0.86<br>Interactions:<br>   w/main effect: 0.73<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.69","xgboost-gain<br>Mean computation time: 67 seconds<br>C-statistic by variable class:<br>Main effect: 0.97<br>Non-linear effect: 0.74<br>Combination effect: 0.84<br>Interactions:<br>   w/main effect: 0.88<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.77","aorsf-shap<br>Mean computation time: 3,408 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.77<br>Combination effect: 0.86<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.48","rfsrc-permutation<br>Mean computation time: 488 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.69<br>Combination effect: 0.81<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.74","aorsf-negation<br>Mean computation time: 103 seconds<br>C-statistic by variable class:<br>Main effect: 0.90<br>Non-linear effect: 0.61<br>Combination effect: 0.74<br>Interactions:<br>   w/main effect: 0.72<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.71","xgboost-shap<br>Mean computation time: 48 seconds<br>C-statistic by variable class:<br>Main effect: 0.86<br>Non-linear effect: 0.64<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.81<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.74","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.88<br>Non-linear effect: 0.61<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.55<br>   w/combination effect: 0.66","xgboost-gain<br>Mean computation time: 49 seconds<br>C-statistic by variable class:<br>Main effect: 0.86<br>Non-linear effect: 0.61<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.84<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.77","rfsrc-permutation<br>Mean computation time: 481 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.61<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.59<br>   w/combination effect: 0.71","aorsf-shap<br>Mean computation time: 3,465 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.51","aorsf-negation<br>Mean computation time: 102 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.80<br>   w/non-linear effect: 0.61<br>   w/combination effect: 0.76","xgboost-shap<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.62<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.83<br>   w/non-linear effect: 0.61<br>   w/combination effect: 0.77","xgboost-gain<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.60<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.89<br>   w/non-linear effect: 0.59<br>   w/combination effect: 0.82","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.58<br>Combination effect: 0.67<br>Interactions:<br>   w/main effect: 0.75<br>   w/non-linear effect: 0.60<br>   w/combination effect: 0.71","rfsrc-permutation<br>Mean computation time: 474 seconds<br>C-statistic by variable class:<br>Main effect: 0.79<br>Non-linear effect: 0.58<br>Combination effect: 0.63<br>Interactions:<br>   w/main effect: 0.74<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.73","aorsf-shap<br>Mean computation time: 3,311 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.57<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.52"],"inherit":true}},"layout":{"width":800,"height":650,"margin":{"b":40,"l":60,"t":25,"r":10},"title":{"text":"Results when N = 5000","x":0.1},"xaxis":{"domain":[0,1],"automargin":true,"title":"Max correlation among predictors","type":"category","categoryorder":"array","categoryarray":["0.1","0.25","0.5"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"C-statistic","range":[0,1]},"legend":{"title":{"text":"<b>VI technique<\/b>"}},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.805422222222222,0.68642962962963,0.653392592592593],"text":["0.81","0.69","0.65"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-shap<br>Mean computation time: 3,408 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.77<br>Combination effect: 0.86<br>Interactions:<br>   w/main effect: 0.54<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.48","aorsf-shap<br>Mean computation time: 3,465 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.58<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.51","aorsf-shap<br>Mean computation time: 3,311 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.57<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.59<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.52"],"name":"aorsf-shap","marker":{"color":"rgba(241,238,246,1)","line":{"color":"rgba(241,238,246,1)"}},"textfont":{"color":"rgba(241,238,246,1)"},"error_y":{"color":"rgba(241,238,246,1)"},"error_x":{"color":"rgba(241,238,246,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.789925925925926,0.689688888888889,0.65842962962963],"text":["0.79","0.69","0.66"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["rfsrc-permutation<br>Mean computation time: 488 seconds<br>C-statistic by variable class:<br>Main effect: 0.95<br>Non-linear effect: 0.69<br>Combination effect: 0.81<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.74","rfsrc-permutation<br>Mean computation time: 481 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.61<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.59<br>   w/combination effect: 0.71","rfsrc-permutation<br>Mean computation time: 474 seconds<br>C-statistic by variable class:<br>Main effect: 0.79<br>Non-linear effect: 0.58<br>Combination effect: 0.63<br>Interactions:<br>   w/main effect: 0.74<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.73"],"name":"rfsrc-permutation","marker":{"color":"rgba(212,185,218,1)","line":{"color":"rgba(212,185,218,1)"}},"textfont":{"color":"rgba(212,185,218,1)"},"error_y":{"color":"rgba(212,185,218,1)"},"error_x":{"color":"rgba(212,185,218,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.823318518518519,0.709274074074074,0.696088888888889],"text":["0.82","0.71","0.70"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-gain<br>Mean computation time: 67 seconds<br>C-statistic by variable class:<br>Main effect: 0.97<br>Non-linear effect: 0.74<br>Combination effect: 0.84<br>Interactions:<br>   w/main effect: 0.88<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.77","xgboost-gain<br>Mean computation time: 49 seconds<br>C-statistic by variable class:<br>Main effect: 0.86<br>Non-linear effect: 0.61<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.84<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.77","xgboost-gain<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.60<br>Combination effect: 0.66<br>Interactions:<br>   w/main effect: 0.89<br>   w/non-linear effect: 0.59<br>   w/combination effect: 0.82"],"name":"xgboost-gain","marker":{"color":"rgba(201,148,199,1)","line":{"color":"rgba(201,148,199,1)"}},"textfont":{"color":"rgba(201,148,199,1)"},"error_y":{"color":"rgba(201,148,199,1)"},"error_x":{"color":"rgba(201,148,199,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.829659259259259,0.710903703703704,0.684148148148148],"text":["0.83","0.71","0.68"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.77<br>Combination effect: 0.86<br>Interactions:<br>   w/main effect: 0.73<br>   w/non-linear effect: 0.50<br>   w/combination effect: 0.69","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.88<br>Non-linear effect: 0.61<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.55<br>   w/combination effect: 0.66","aorsf-anova<br>Mean computation time: 21 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.58<br>Combination effect: 0.67<br>Interactions:<br>   w/main effect: 0.75<br>   w/non-linear effect: 0.60<br>   w/combination effect: 0.71"],"name":"aorsf-anova","marker":{"color":"rgba(223,101,176,1)","line":{"color":"rgba(223,101,176,1)"}},"textfont":{"color":"rgba(223,101,176,1)"},"error_y":{"color":"rgba(223,101,176,1)"},"error_x":{"color":"rgba(223,101,176,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.846103703703704,0.723259259259259,0.703674074074074],"text":["0.85","0.72","0.70"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-shap<br>Mean computation time: 69 seconds<br>C-statistic by variable class:<br>Main effect: 0.98<br>Non-linear effect: 0.80<br>Combination effect: 0.87<br>Interactions:<br>   w/main effect: 0.84<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.74","xgboost-shap<br>Mean computation time: 48 seconds<br>C-statistic by variable class:<br>Main effect: 0.86<br>Non-linear effect: 0.64<br>Combination effect: 0.71<br>Interactions:<br>   w/main effect: 0.81<br>   w/non-linear effect: 0.58<br>   w/combination effect: 0.74","xgboost-shap<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.83<br>Non-linear effect: 0.62<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.83<br>   w/non-linear effect: 0.61<br>   w/combination effect: 0.77"],"name":"xgboost-shap","marker":{"color":"rgba(221,28,119,1)","line":{"color":"rgba(221,28,119,1)"}},"textfont":{"color":"rgba(221,28,119,1)"},"error_y":{"color":"rgba(221,28,119,1)"},"error_x":{"color":"rgba(221,28,119,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0.1","0.25","0.5"],"y":[0.86637037037037,0.730903703703704,0.716474074074074],"text":["0.87","0.73","0.72"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-negation<br>Mean computation time: 99 seconds<br>C-statistic by variable class:<br>Main effect: 0.99<br>Non-linear effect: 0.82<br>Combination effect: 0.91<br>Interactions:<br>   w/main effect: 0.76<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.75","aorsf-negation<br>Mean computation time: 103 seconds<br>C-statistic by variable class:<br>Main effect: 0.90<br>Non-linear effect: 0.61<br>Combination effect: 0.74<br>Interactions:<br>   w/main effect: 0.72<br>   w/non-linear effect: 0.56<br>   w/combination effect: 0.71","aorsf-negation<br>Mean computation time: 102 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.60<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.80<br>   w/non-linear effect: 0.61<br>   w/combination effect: 0.76"],"name":"aorsf-negation","marker":{"color":"rgba(152,0,67,1)","line":{"color":"rgba(152,0,67,1)"}},"textfont":{"color":"rgba(152,0,67,1)"},"error_y":{"color":"rgba(152,0,67,1)"},"error_x":{"color":"rgba(152,0,67,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-976c38e536b21a3858a2" style="width:800px;height:650px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-976c38e536b21a3858a2">{"x":{"visdat":{"513860451182":["function () ","plotlyVisDat"]},"cur_data":"513860451182","attrs":{"513860451182":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","x":["0","0","0","0","0","0","0.15","0.15","0.15","0.15","0.15","0.15","0.3","0.3","0.3","0.3","0.3","0.3"],"y":[0.945385185185185,0.941640740740741,0.9382,0.915237037037037,0.910059259259259,0.84642962962963,0.774503703703704,0.756662962962963,0.735985185185185,0.730325925925926,0.704192592592593,0.697488888888889,0.696614814814815,0.691203703703704,0.671185185185185,0.667451851851852,0.6498,0.639592592592593],"color":["xgboost-shap","aorsf-negate","aorsf-anova","aorsf-permute","xgboost-gain","rfsrc-permutation","aorsf-negate","aorsf-permute","aorsf-anova","xgboost-shap","rfsrc-permutation","xgboost-gain","aorsf-negate","aorsf-permute","aorsf-anova","xgboost-shap","rfsrc-permutation","xgboost-gain"],"colors":"PuRd","text":["0.95","0.94","0.94","0.92","0.91","0.85","0.77","0.76","0.74","0.73","0.70","0.70","0.70","0.69","0.67","0.67","0.65","0.64"],"textposition":"outside","hoverinfo":"text","hovertext":["xgboost-shap<br>Mean computation time: 67 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.98<br>Combination effect: 1.0<br>Interactions:<br>   w/main effect: 0.92<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.72","aorsf-negate<br>Mean computation time: 41 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.98<br>Combination effect: 1.0<br>Interactions:<br>   w/main effect: 0.78<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.73","aorsf-anova<br>Mean computation time: 4.4 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.96<br>Combination effect: 0.99<br>Interactions:<br>   w/main effect: 0.78<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.75","aorsf-permute<br>Mean computation time: 43 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.91<br>Combination effect: 0.98<br>Interactions:<br>   w/main effect: 0.72<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.68","xgboost-gain<br>Mean computation time: 66 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.91<br>Combination effect: 0.98<br>Interactions:<br>   w/main effect: 0.87<br>   w/non-linear effect: 0.34<br>   w/combination effect: 0.64","rfsrc-permutation<br>Mean computation time: 128 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.79<br>Combination effect: 0.89<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.64","aorsf-negate<br>Mean computation time: 36 seconds<br>C-statistic by variable class:<br>Main effect: 0.94<br>Non-linear effect: 0.71<br>Combination effect: 0.79<br>Interactions:<br>   w/main effect: 0.67<br>   w/non-linear effect: 0.54<br>   w/combination effect: 0.66","aorsf-permute<br>Mean computation time: 40 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.68<br>Combination effect: 0.77<br>Interactions:<br>   w/main effect: 0.69<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.67","aorsf-anova<br>Mean computation time: 4.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.92<br>Non-linear effect: 0.67<br>Combination effect: 0.75<br>Interactions:<br>   w/main effect: 0.63<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.62","xgboost-shap<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.90<br>Non-linear effect: 0.67<br>Combination effect: 0.73<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.62","rfsrc-permutation<br>Mean computation time: 121 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.64<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.66<br>   w/non-linear effect: 0.54<br>   w/combination effect: 0.65","xgboost-gain<br>Mean computation time: 47 seconds<br>C-statistic by variable class:<br>Main effect: 0.89<br>Non-linear effect: 0.63<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.70<br>   w/non-linear effect: 0.46<br>   w/combination effect: 0.62","aorsf-negate<br>Mean computation time: 37 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.62<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.65<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.67","aorsf-permute<br>Mean computation time: 40 seconds<br>C-statistic by variable class:<br>Main effect: 0.85<br>Non-linear effect: 0.61<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.70<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.69","aorsf-anova<br>Mean computation time: 4.3 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.60<br>Combination effect: 0.67<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.62","xgboost-shap<br>Mean computation time: 32 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.60<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.69<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.64","rfsrc-permutation<br>Mean computation time: 120 seconds<br>C-statistic by variable class:<br>Main effect: 0.79<br>Non-linear effect: 0.58<br>Combination effect: 0.64<br>Interactions:<br>   w/main effect: 0.64<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.64","xgboost-gain<br>Mean computation time: 32 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.56<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.69<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.66"],"inherit":true}},"layout":{"width":800,"height":650,"margin":{"b":40,"l":60,"t":25,"r":10},"title":{"text":"Results when N = 2500","x":0.1},"xaxis":{"domain":[0,1],"automargin":true,"title":"Max correlation among predictors","type":"category","categoryorder":"array","categoryarray":["0","0.15","0.3"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"C-statistic","range":[0,1]},"legend":{"title":{"text":"<b>VI technique<\/b>"}},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"type":"bar","x":["0","0.15","0.3"],"y":[0.910059259259259,0.697488888888889,0.639592592592593],"text":["0.91","0.70","0.64"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-gain<br>Mean computation time: 66 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.91<br>Combination effect: 0.98<br>Interactions:<br>   w/main effect: 0.87<br>   w/non-linear effect: 0.34<br>   w/combination effect: 0.64","xgboost-gain<br>Mean computation time: 47 seconds<br>C-statistic by variable class:<br>Main effect: 0.89<br>Non-linear effect: 0.63<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.70<br>   w/non-linear effect: 0.46<br>   w/combination effect: 0.62","xgboost-gain<br>Mean computation time: 32 seconds<br>C-statistic by variable class:<br>Main effect: 0.81<br>Non-linear effect: 0.56<br>Combination effect: 0.62<br>Interactions:<br>   w/main effect: 0.69<br>   w/non-linear effect: 0.47<br>   w/combination effect: 0.66"],"name":"xgboost-gain","marker":{"color":"rgba(241,238,246,1)","line":{"color":"rgba(241,238,246,1)"}},"textfont":{"color":"rgba(241,238,246,1)"},"error_y":{"color":"rgba(241,238,246,1)"},"error_x":{"color":"rgba(241,238,246,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.84642962962963,0.704192592592593,0.6498],"text":["0.85","0.70","0.65"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["rfsrc-permutation<br>Mean computation time: 128 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.79<br>Combination effect: 0.89<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.64","rfsrc-permutation<br>Mean computation time: 121 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.64<br>Combination effect: 0.70<br>Interactions:<br>   w/main effect: 0.66<br>   w/non-linear effect: 0.54<br>   w/combination effect: 0.65","rfsrc-permutation<br>Mean computation time: 120 seconds<br>C-statistic by variable class:<br>Main effect: 0.79<br>Non-linear effect: 0.58<br>Combination effect: 0.64<br>Interactions:<br>   w/main effect: 0.64<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.64"],"name":"rfsrc-permutation","marker":{"color":"rgba(212,185,218,1)","line":{"color":"rgba(212,185,218,1)"}},"textfont":{"color":"rgba(212,185,218,1)"},"error_y":{"color":"rgba(212,185,218,1)"},"error_x":{"color":"rgba(212,185,218,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.945385185185185,0.730325925925926,0.667451851851852],"text":["0.95","0.73","0.67"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["xgboost-shap<br>Mean computation time: 67 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.98<br>Combination effect: 1.0<br>Interactions:<br>   w/main effect: 0.92<br>   w/non-linear effect: 0.48<br>   w/combination effect: 0.72","xgboost-shap<br>Mean computation time: 45 seconds<br>C-statistic by variable class:<br>Main effect: 0.90<br>Non-linear effect: 0.67<br>Combination effect: 0.73<br>Interactions:<br>   w/main effect: 0.71<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.62","xgboost-shap<br>Mean computation time: 32 seconds<br>C-statistic by variable class:<br>Main effect: 0.82<br>Non-linear effect: 0.60<br>Combination effect: 0.65<br>Interactions:<br>   w/main effect: 0.69<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.64"],"name":"xgboost-shap","marker":{"color":"rgba(201,148,199,1)","line":{"color":"rgba(201,148,199,1)"}},"textfont":{"color":"rgba(201,148,199,1)"},"error_y":{"color":"rgba(201,148,199,1)"},"error_x":{"color":"rgba(201,148,199,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.9382,0.735985185185185,0.671185185185185],"text":["0.94","0.74","0.67"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-anova<br>Mean computation time: 4.4 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.96<br>Combination effect: 0.99<br>Interactions:<br>   w/main effect: 0.78<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.75","aorsf-anova<br>Mean computation time: 4.2 seconds<br>C-statistic by variable class:<br>Main effect: 0.92<br>Non-linear effect: 0.67<br>Combination effect: 0.75<br>Interactions:<br>   w/main effect: 0.63<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.62","aorsf-anova<br>Mean computation time: 4.3 seconds<br>C-statistic by variable class:<br>Main effect: 0.84<br>Non-linear effect: 0.60<br>Combination effect: 0.67<br>Interactions:<br>   w/main effect: 0.62<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.62"],"name":"aorsf-anova","marker":{"color":"rgba(223,101,176,1)","line":{"color":"rgba(223,101,176,1)"}},"textfont":{"color":"rgba(223,101,176,1)"},"error_y":{"color":"rgba(223,101,176,1)"},"error_x":{"color":"rgba(223,101,176,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.915237037037037,0.756662962962963,0.691203703703704],"text":["0.92","0.76","0.69"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-permute<br>Mean computation time: 43 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.91<br>Combination effect: 0.98<br>Interactions:<br>   w/main effect: 0.72<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.68","aorsf-permute<br>Mean computation time: 40 seconds<br>C-statistic by variable class:<br>Main effect: 0.93<br>Non-linear effect: 0.68<br>Combination effect: 0.77<br>Interactions:<br>   w/main effect: 0.69<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.67","aorsf-permute<br>Mean computation time: 40 seconds<br>C-statistic by variable class:<br>Main effect: 0.85<br>Non-linear effect: 0.61<br>Combination effect: 0.68<br>Interactions:<br>   w/main effect: 0.70<br>   w/non-linear effect: 0.52<br>   w/combination effect: 0.69"],"name":"aorsf-permute","marker":{"color":"rgba(221,28,119,1)","line":{"color":"rgba(221,28,119,1)"}},"textfont":{"color":"rgba(221,28,119,1)"},"error_y":{"color":"rgba(221,28,119,1)"},"error_x":{"color":"rgba(221,28,119,1)"},"xaxis":"x","yaxis":"y","frame":null},{"type":"bar","x":["0","0.15","0.3"],"y":[0.941640740740741,0.774503703703704,0.696614814814815],"text":["0.94","0.77","0.70"],"textposition":["outside","outside","outside"],"hoverinfo":["text","text","text"],"hovertext":["aorsf-negate<br>Mean computation time: 41 seconds<br>C-statistic by variable class:<br>Main effect: 1.0<br>Non-linear effect: 0.98<br>Combination effect: 1.0<br>Interactions:<br>   w/main effect: 0.78<br>   w/non-linear effect: 0.51<br>   w/combination effect: 0.73","aorsf-negate<br>Mean computation time: 36 seconds<br>C-statistic by variable class:<br>Main effect: 0.94<br>Non-linear effect: 0.71<br>Combination effect: 0.79<br>Interactions:<br>   w/main effect: 0.67<br>   w/non-linear effect: 0.54<br>   w/combination effect: 0.66","aorsf-negate<br>Mean computation time: 37 seconds<br>C-statistic by variable class:<br>Main effect: 0.87<br>Non-linear effect: 0.62<br>Combination effect: 0.69<br>Interactions:<br>   w/main effect: 0.65<br>   w/non-linear effect: 0.53<br>   w/combination effect: 0.67"],"name":"aorsf-negate","marker":{"color":"rgba(152,0,67,1)","line":{"color":"rgba(152,0,67,1)"}},"textfont":{"color":"rgba(152,0,67,1)"},"error_y":{"color":"rgba(152,0,67,1)"},"error_x":{"color":"rgba(152,0,67,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 
 ---
 
@@ -575,12 +451,12 @@ A total of 31 risk prediction tasks in 18 data sets were analyzed.
 
 This table is continued on the next 3 slides.
 
-<div id="umiaptjkwt" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="dtvarlmkbi" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#umiaptjkwt .gt_table {
+#dtvarlmkbi .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -605,7 +481,7 @@ This table is continued on the next 3 slides.
   border-left-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_heading {
+#dtvarlmkbi .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -617,7 +493,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_title {
+#dtvarlmkbi .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -629,7 +505,7 @@ This table is continued on the next 3 slides.
   border-bottom-width: 0;
 }
 
-#umiaptjkwt .gt_subtitle {
+#dtvarlmkbi .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -641,13 +517,13 @@ This table is continued on the next 3 slides.
   border-top-width: 0;
 }
 
-#umiaptjkwt .gt_bottom_border {
+#dtvarlmkbi .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_col_headings {
+#dtvarlmkbi .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -662,7 +538,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_col_heading {
+#dtvarlmkbi .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -682,7 +558,7 @@ This table is continued on the next 3 slides.
   overflow-x: hidden;
 }
 
-#umiaptjkwt .gt_column_spanner_outer {
+#dtvarlmkbi .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -694,15 +570,15 @@ This table is continued on the next 3 slides.
   padding-right: 4px;
 }
 
-#umiaptjkwt .gt_column_spanner_outer:first-child {
+#dtvarlmkbi .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#umiaptjkwt .gt_column_spanner_outer:last-child {
+#dtvarlmkbi .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#umiaptjkwt .gt_column_spanner {
+#dtvarlmkbi .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -714,7 +590,7 @@ This table is continued on the next 3 slides.
   width: 100%;
 }
 
-#umiaptjkwt .gt_group_heading {
+#dtvarlmkbi .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -739,7 +615,7 @@ This table is continued on the next 3 slides.
   vertical-align: middle;
 }
 
-#umiaptjkwt .gt_empty_group_heading {
+#dtvarlmkbi .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -754,15 +630,15 @@ This table is continued on the next 3 slides.
   vertical-align: middle;
 }
 
-#umiaptjkwt .gt_from_md > :first-child {
+#dtvarlmkbi .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#umiaptjkwt .gt_from_md > :last-child {
+#dtvarlmkbi .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#umiaptjkwt .gt_row {
+#dtvarlmkbi .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -781,7 +657,7 @@ This table is continued on the next 3 slides.
   overflow-x: hidden;
 }
 
-#umiaptjkwt .gt_stub {
+#dtvarlmkbi .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -794,7 +670,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#umiaptjkwt .gt_stub_row_group {
+#dtvarlmkbi .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -808,11 +684,11 @@ This table is continued on the next 3 slides.
   vertical-align: top;
 }
 
-#umiaptjkwt .gt_row_group_first td {
+#dtvarlmkbi .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#umiaptjkwt .gt_summary_row {
+#dtvarlmkbi .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -822,16 +698,16 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#umiaptjkwt .gt_first_summary_row {
+#dtvarlmkbi .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_first_summary_row.thick {
+#dtvarlmkbi .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#umiaptjkwt .gt_last_summary_row {
+#dtvarlmkbi .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -841,7 +717,7 @@ This table is continued on the next 3 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_grand_summary_row {
+#dtvarlmkbi .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -851,7 +727,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#umiaptjkwt .gt_first_grand_summary_row {
+#dtvarlmkbi .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -861,11 +737,11 @@ This table is continued on the next 3 slides.
   border-top-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_striped {
+#dtvarlmkbi .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#umiaptjkwt .gt_table_body {
+#dtvarlmkbi .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -874,7 +750,7 @@ This table is continued on the next 3 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_footnotes {
+#dtvarlmkbi .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -888,7 +764,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_footnote {
+#dtvarlmkbi .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -897,7 +773,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#umiaptjkwt .gt_sourcenotes {
+#dtvarlmkbi .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -911,7 +787,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#umiaptjkwt .gt_sourcenote {
+#dtvarlmkbi .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -919,60 +795,60 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#umiaptjkwt .gt_left {
+#dtvarlmkbi .gt_left {
   text-align: left;
 }
 
-#umiaptjkwt .gt_center {
+#dtvarlmkbi .gt_center {
   text-align: center;
 }
 
-#umiaptjkwt .gt_right {
+#dtvarlmkbi .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#umiaptjkwt .gt_font_normal {
+#dtvarlmkbi .gt_font_normal {
   font-weight: normal;
 }
 
-#umiaptjkwt .gt_font_bold {
+#dtvarlmkbi .gt_font_bold {
   font-weight: bold;
 }
 
-#umiaptjkwt .gt_font_italic {
+#dtvarlmkbi .gt_font_italic {
   font-style: italic;
 }
 
-#umiaptjkwt .gt_super {
+#dtvarlmkbi .gt_super {
   font-size: 65%;
 }
 
-#umiaptjkwt .gt_footnote_marks {
+#dtvarlmkbi .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#umiaptjkwt .gt_asterisk {
+#dtvarlmkbi .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#umiaptjkwt .gt_slash_mark {
+#dtvarlmkbi .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#umiaptjkwt .gt_fraction_numerator {
+#dtvarlmkbi .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#umiaptjkwt .gt_fraction_denominator {
+#dtvarlmkbi .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -1058,12 +934,12 @@ This table is continued on the next 3 slides.
 ---
 ## Data sets continued
 
-<div id="hgbzbczxtc" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="xmyfwsyycl" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#hgbzbczxtc .gt_table {
+#xmyfwsyycl .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1088,7 +964,7 @@ This table is continued on the next 3 slides.
   border-left-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_heading {
+#xmyfwsyycl .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1100,7 +976,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_title {
+#xmyfwsyycl .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1112,7 +988,7 @@ This table is continued on the next 3 slides.
   border-bottom-width: 0;
 }
 
-#hgbzbczxtc .gt_subtitle {
+#xmyfwsyycl .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1124,13 +1000,13 @@ This table is continued on the next 3 slides.
   border-top-width: 0;
 }
 
-#hgbzbczxtc .gt_bottom_border {
+#xmyfwsyycl .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_col_headings {
+#xmyfwsyycl .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1145,7 +1021,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_col_heading {
+#xmyfwsyycl .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1165,7 +1041,7 @@ This table is continued on the next 3 slides.
   overflow-x: hidden;
 }
 
-#hgbzbczxtc .gt_column_spanner_outer {
+#xmyfwsyycl .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1177,15 +1053,15 @@ This table is continued on the next 3 slides.
   padding-right: 4px;
 }
 
-#hgbzbczxtc .gt_column_spanner_outer:first-child {
+#xmyfwsyycl .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#hgbzbczxtc .gt_column_spanner_outer:last-child {
+#xmyfwsyycl .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#hgbzbczxtc .gt_column_spanner {
+#xmyfwsyycl .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1197,7 +1073,7 @@ This table is continued on the next 3 slides.
   width: 100%;
 }
 
-#hgbzbczxtc .gt_group_heading {
+#xmyfwsyycl .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1222,7 +1098,7 @@ This table is continued on the next 3 slides.
   vertical-align: middle;
 }
 
-#hgbzbczxtc .gt_empty_group_heading {
+#xmyfwsyycl .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1237,15 +1113,15 @@ This table is continued on the next 3 slides.
   vertical-align: middle;
 }
 
-#hgbzbczxtc .gt_from_md > :first-child {
+#xmyfwsyycl .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#hgbzbczxtc .gt_from_md > :last-child {
+#xmyfwsyycl .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#hgbzbczxtc .gt_row {
+#xmyfwsyycl .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1264,7 +1140,7 @@ This table is continued on the next 3 slides.
   overflow-x: hidden;
 }
 
-#hgbzbczxtc .gt_stub {
+#xmyfwsyycl .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1277,7 +1153,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#hgbzbczxtc .gt_stub_row_group {
+#xmyfwsyycl .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1291,11 +1167,11 @@ This table is continued on the next 3 slides.
   vertical-align: top;
 }
 
-#hgbzbczxtc .gt_row_group_first td {
+#xmyfwsyycl .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#hgbzbczxtc .gt_summary_row {
+#xmyfwsyycl .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1305,16 +1181,16 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#hgbzbczxtc .gt_first_summary_row {
+#xmyfwsyycl .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_first_summary_row.thick {
+#xmyfwsyycl .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#hgbzbczxtc .gt_last_summary_row {
+#xmyfwsyycl .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1324,7 +1200,7 @@ This table is continued on the next 3 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_grand_summary_row {
+#xmyfwsyycl .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1334,7 +1210,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#hgbzbczxtc .gt_first_grand_summary_row {
+#xmyfwsyycl .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1344,11 +1220,11 @@ This table is continued on the next 3 slides.
   border-top-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_striped {
+#xmyfwsyycl .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#hgbzbczxtc .gt_table_body {
+#xmyfwsyycl .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1357,7 +1233,7 @@ This table is continued on the next 3 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_footnotes {
+#xmyfwsyycl .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1371,7 +1247,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_footnote {
+#xmyfwsyycl .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1380,7 +1256,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#hgbzbczxtc .gt_sourcenotes {
+#xmyfwsyycl .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1394,7 +1270,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#hgbzbczxtc .gt_sourcenote {
+#xmyfwsyycl .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1402,60 +1278,60 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#hgbzbczxtc .gt_left {
+#xmyfwsyycl .gt_left {
   text-align: left;
 }
 
-#hgbzbczxtc .gt_center {
+#xmyfwsyycl .gt_center {
   text-align: center;
 }
 
-#hgbzbczxtc .gt_right {
+#xmyfwsyycl .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#hgbzbczxtc .gt_font_normal {
+#xmyfwsyycl .gt_font_normal {
   font-weight: normal;
 }
 
-#hgbzbczxtc .gt_font_bold {
+#xmyfwsyycl .gt_font_bold {
   font-weight: bold;
 }
 
-#hgbzbczxtc .gt_font_italic {
+#xmyfwsyycl .gt_font_italic {
   font-style: italic;
 }
 
-#hgbzbczxtc .gt_super {
+#xmyfwsyycl .gt_super {
   font-size: 65%;
 }
 
-#hgbzbczxtc .gt_footnote_marks {
+#xmyfwsyycl .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#hgbzbczxtc .gt_asterisk {
+#xmyfwsyycl .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#hgbzbczxtc .gt_slash_mark {
+#xmyfwsyycl .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#hgbzbczxtc .gt_fraction_numerator {
+#xmyfwsyycl .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#hgbzbczxtc .gt_fraction_denominator {
+#xmyfwsyycl .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -1550,12 +1426,12 @@ This table is continued on the next 3 slides.
 
 ## Data sets continued
 
-<div id="ydizyfgnfk" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="iaocgevate" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#ydizyfgnfk .gt_table {
+#iaocgevate .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1580,7 +1456,7 @@ This table is continued on the next 3 slides.
   border-left-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_heading {
+#iaocgevate .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1592,7 +1468,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_title {
+#iaocgevate .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1604,7 +1480,7 @@ This table is continued on the next 3 slides.
   border-bottom-width: 0;
 }
 
-#ydizyfgnfk .gt_subtitle {
+#iaocgevate .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1616,13 +1492,13 @@ This table is continued on the next 3 slides.
   border-top-width: 0;
 }
 
-#ydizyfgnfk .gt_bottom_border {
+#iaocgevate .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_col_headings {
+#iaocgevate .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1637,7 +1513,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_col_heading {
+#iaocgevate .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1657,7 +1533,7 @@ This table is continued on the next 3 slides.
   overflow-x: hidden;
 }
 
-#ydizyfgnfk .gt_column_spanner_outer {
+#iaocgevate .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1669,15 +1545,15 @@ This table is continued on the next 3 slides.
   padding-right: 4px;
 }
 
-#ydizyfgnfk .gt_column_spanner_outer:first-child {
+#iaocgevate .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#ydizyfgnfk .gt_column_spanner_outer:last-child {
+#iaocgevate .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#ydizyfgnfk .gt_column_spanner {
+#iaocgevate .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1689,7 +1565,7 @@ This table is continued on the next 3 slides.
   width: 100%;
 }
 
-#ydizyfgnfk .gt_group_heading {
+#iaocgevate .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1714,7 +1590,7 @@ This table is continued on the next 3 slides.
   vertical-align: middle;
 }
 
-#ydizyfgnfk .gt_empty_group_heading {
+#iaocgevate .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1729,15 +1605,15 @@ This table is continued on the next 3 slides.
   vertical-align: middle;
 }
 
-#ydizyfgnfk .gt_from_md > :first-child {
+#iaocgevate .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#ydizyfgnfk .gt_from_md > :last-child {
+#iaocgevate .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#ydizyfgnfk .gt_row {
+#iaocgevate .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1756,7 +1632,7 @@ This table is continued on the next 3 slides.
   overflow-x: hidden;
 }
 
-#ydizyfgnfk .gt_stub {
+#iaocgevate .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1769,7 +1645,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#ydizyfgnfk .gt_stub_row_group {
+#iaocgevate .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1783,11 +1659,11 @@ This table is continued on the next 3 slides.
   vertical-align: top;
 }
 
-#ydizyfgnfk .gt_row_group_first td {
+#iaocgevate .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#ydizyfgnfk .gt_summary_row {
+#iaocgevate .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1797,16 +1673,16 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#ydizyfgnfk .gt_first_summary_row {
+#iaocgevate .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_first_summary_row.thick {
+#iaocgevate .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#ydizyfgnfk .gt_last_summary_row {
+#iaocgevate .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1816,7 +1692,7 @@ This table is continued on the next 3 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_grand_summary_row {
+#iaocgevate .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1826,7 +1702,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#ydizyfgnfk .gt_first_grand_summary_row {
+#iaocgevate .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1836,11 +1712,11 @@ This table is continued on the next 3 slides.
   border-top-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_striped {
+#iaocgevate .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#ydizyfgnfk .gt_table_body {
+#iaocgevate .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1849,7 +1725,7 @@ This table is continued on the next 3 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_footnotes {
+#iaocgevate .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1863,7 +1739,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_footnote {
+#iaocgevate .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1872,7 +1748,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#ydizyfgnfk .gt_sourcenotes {
+#iaocgevate .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1886,7 +1762,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#ydizyfgnfk .gt_sourcenote {
+#iaocgevate .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1894,60 +1770,60 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#ydizyfgnfk .gt_left {
+#iaocgevate .gt_left {
   text-align: left;
 }
 
-#ydizyfgnfk .gt_center {
+#iaocgevate .gt_center {
   text-align: center;
 }
 
-#ydizyfgnfk .gt_right {
+#iaocgevate .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#ydizyfgnfk .gt_font_normal {
+#iaocgevate .gt_font_normal {
   font-weight: normal;
 }
 
-#ydizyfgnfk .gt_font_bold {
+#iaocgevate .gt_font_bold {
   font-weight: bold;
 }
 
-#ydizyfgnfk .gt_font_italic {
+#iaocgevate .gt_font_italic {
   font-style: italic;
 }
 
-#ydizyfgnfk .gt_super {
+#iaocgevate .gt_super {
   font-size: 65%;
 }
 
-#ydizyfgnfk .gt_footnote_marks {
+#iaocgevate .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#ydizyfgnfk .gt_asterisk {
+#iaocgevate .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#ydizyfgnfk .gt_slash_mark {
+#iaocgevate .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#ydizyfgnfk .gt_fraction_numerator {
+#iaocgevate .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#ydizyfgnfk .gt_fraction_denominator {
+#iaocgevate .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -2042,12 +1918,12 @@ This table is continued on the next 3 slides.
 
 ## Data sets continued
 
-<div id="vrwvnqotbe" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="vwjjwpxtsc" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#vrwvnqotbe .gt_table {
+#vwjjwpxtsc .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -2072,7 +1948,7 @@ This table is continued on the next 3 slides.
   border-left-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_heading {
+#vwjjwpxtsc .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -2084,7 +1960,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_title {
+#vwjjwpxtsc .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2096,7 +1972,7 @@ This table is continued on the next 3 slides.
   border-bottom-width: 0;
 }
 
-#vrwvnqotbe .gt_subtitle {
+#vwjjwpxtsc .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2108,13 +1984,13 @@ This table is continued on the next 3 slides.
   border-top-width: 0;
 }
 
-#vrwvnqotbe .gt_bottom_border {
+#vwjjwpxtsc .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_col_headings {
+#vwjjwpxtsc .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2129,7 +2005,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_col_heading {
+#vwjjwpxtsc .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2149,7 +2025,7 @@ This table is continued on the next 3 slides.
   overflow-x: hidden;
 }
 
-#vrwvnqotbe .gt_column_spanner_outer {
+#vwjjwpxtsc .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2161,15 +2037,15 @@ This table is continued on the next 3 slides.
   padding-right: 4px;
 }
 
-#vrwvnqotbe .gt_column_spanner_outer:first-child {
+#vwjjwpxtsc .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#vrwvnqotbe .gt_column_spanner_outer:last-child {
+#vwjjwpxtsc .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#vrwvnqotbe .gt_column_spanner {
+#vwjjwpxtsc .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2181,7 +2057,7 @@ This table is continued on the next 3 slides.
   width: 100%;
 }
 
-#vrwvnqotbe .gt_group_heading {
+#vwjjwpxtsc .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2206,7 +2082,7 @@ This table is continued on the next 3 slides.
   vertical-align: middle;
 }
 
-#vrwvnqotbe .gt_empty_group_heading {
+#vwjjwpxtsc .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2221,15 +2097,15 @@ This table is continued on the next 3 slides.
   vertical-align: middle;
 }
 
-#vrwvnqotbe .gt_from_md > :first-child {
+#vwjjwpxtsc .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#vrwvnqotbe .gt_from_md > :last-child {
+#vwjjwpxtsc .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#vrwvnqotbe .gt_row {
+#vwjjwpxtsc .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2248,7 +2124,7 @@ This table is continued on the next 3 slides.
   overflow-x: hidden;
 }
 
-#vrwvnqotbe .gt_stub {
+#vwjjwpxtsc .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2261,7 +2137,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#vrwvnqotbe .gt_stub_row_group {
+#vwjjwpxtsc .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2275,11 +2151,11 @@ This table is continued on the next 3 slides.
   vertical-align: top;
 }
 
-#vrwvnqotbe .gt_row_group_first td {
+#vwjjwpxtsc .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#vrwvnqotbe .gt_summary_row {
+#vwjjwpxtsc .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2289,16 +2165,16 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#vrwvnqotbe .gt_first_summary_row {
+#vwjjwpxtsc .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_first_summary_row.thick {
+#vwjjwpxtsc .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#vrwvnqotbe .gt_last_summary_row {
+#vwjjwpxtsc .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2308,7 +2184,7 @@ This table is continued on the next 3 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_grand_summary_row {
+#vwjjwpxtsc .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2318,7 +2194,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#vrwvnqotbe .gt_first_grand_summary_row {
+#vwjjwpxtsc .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2328,11 +2204,11 @@ This table is continued on the next 3 slides.
   border-top-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_striped {
+#vwjjwpxtsc .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#vrwvnqotbe .gt_table_body {
+#vwjjwpxtsc .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2341,7 +2217,7 @@ This table is continued on the next 3 slides.
   border-bottom-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_footnotes {
+#vwjjwpxtsc .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2355,7 +2231,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_footnote {
+#vwjjwpxtsc .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -2364,7 +2240,7 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#vrwvnqotbe .gt_sourcenotes {
+#vwjjwpxtsc .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2378,7 +2254,7 @@ This table is continued on the next 3 slides.
   border-right-color: #D3D3D3;
 }
 
-#vrwvnqotbe .gt_sourcenote {
+#vwjjwpxtsc .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2386,60 +2262,60 @@ This table is continued on the next 3 slides.
   padding-right: 5px;
 }
 
-#vrwvnqotbe .gt_left {
+#vwjjwpxtsc .gt_left {
   text-align: left;
 }
 
-#vrwvnqotbe .gt_center {
+#vwjjwpxtsc .gt_center {
   text-align: center;
 }
 
-#vrwvnqotbe .gt_right {
+#vwjjwpxtsc .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#vrwvnqotbe .gt_font_normal {
+#vwjjwpxtsc .gt_font_normal {
   font-weight: normal;
 }
 
-#vrwvnqotbe .gt_font_bold {
+#vwjjwpxtsc .gt_font_bold {
   font-weight: bold;
 }
 
-#vrwvnqotbe .gt_font_italic {
+#vwjjwpxtsc .gt_font_italic {
   font-style: italic;
 }
 
-#vrwvnqotbe .gt_super {
+#vwjjwpxtsc .gt_super {
   font-size: 65%;
 }
 
-#vrwvnqotbe .gt_footnote_marks {
+#vwjjwpxtsc .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#vrwvnqotbe .gt_asterisk {
+#vwjjwpxtsc .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#vrwvnqotbe .gt_slash_mark {
+#vwjjwpxtsc .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#vrwvnqotbe .gt_fraction_numerator {
+#vwjjwpxtsc .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#vrwvnqotbe .gt_fraction_denominator {
+#vwjjwpxtsc .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
