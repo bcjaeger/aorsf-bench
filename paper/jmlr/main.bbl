@@ -1,4 +1,4 @@
-\begin{thebibliography}{36}
+\begin{thebibliography}{38}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -38,6 +38,11 @@ Yifan Cui, Ruoqing Zhu, Mai Zhou, and Michael Kosorok.
 \newblock Consistency of survival tree and forest models: splitting bias and
   correction.
 \newblock \emph{arXiv preprint arXiv:1707.09631}, 2017.
+
+\bibitem[Geurts et~al.(2006)Geurts, Ernst, and Wehenkel]{geurts2006extremely}
+Pierre Geurts, Damien Ernst, and Louis Wehenkel.
+\newblock Extremely randomized trees.
+\newblock \emph{Machine Learning}, 63\penalty0 (1):\penalty0 3--42, 2006.
 
 \bibitem[Goodrich et~al.(2022)Goodrich, Gabry, Ali, and Brilleman]{rstanarm}
 Ben Goodrich, Jonah Gabry, Imad Ali, and Sam Brilleman.
@@ -220,6 +225,16 @@ Hong Wang and Lifeng Zhou.
 \newblock Random survival forest with space extensions for censored data.
 \newblock \emph{Artificial intelligence in medicine}, 79:\penalty0 52--61,
   2017.
+
+\bibitem[Wright and Ziegler(2017)]{ranger}
+Marvin~N. Wright and Andreas Ziegler.
+\newblock ranger: A fast implementation of random forests for high dimensional
+  data in c++ and r.
+\newblock \emph{Journal of Statistical Software}, 77\penalty0 (1):\penalty0
+  1--17, 2017.
+\newblock \doi{10.18637/jss.v077.i01}.
+\newblock URL
+  \url{https://www.jstatsoft.org/index.php/jss/article/view/v077i01}.
 
 \bibitem[Zhang and Suganthan(2014)]{zhang2014oblique}
 Le~Zhang and Ponnuthurai~N Suganthan.

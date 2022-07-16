@@ -8,8 +8,6 @@
 #' @param model_key
 bench_pred_model <- function(bm_pred_clean, data_key, model_key) {
 
-  bm_pred_clean <- filter(bm_pred_clean, model != 'xgb_aft')
-
   # fit <- stan_glmer(data = bm_pred_clean,
   #                   formula = ibs_scaled ~ model + (1|data/run))
 
@@ -36,7 +34,7 @@ bench_pred_model <- function(bm_pred_clean, data_key, model_key) {
   mdl <- list(
 
     ibs_scaled = stan_glmer(
-      data = bm_pred_mdat,
+      data = filter(bm_pred_mdat, model != 'xgb_aft'),
       formula = value ~ -1 + model + (1 | data/run),
       subset = metric == 'ibs_scaled'
     ),
@@ -49,16 +47,20 @@ bench_pred_model <- function(bm_pred_clean, data_key, model_key) {
 
   )
 
-  newdata <- distinct(bm_pred_mdat, model)
+  newdata_cstat <- distinct(bm_pred_mdat, model)
 
-  data_infer <- map_dfr(
+  newdata_ibs_scaled <- newdata_cstat %>%
+    filter(model != 'xgb_aft') %>%
+    droplevels()
+
+  data_infer <- map2_dfr(
     .x = mdl,
+    .y = list(newdata_ibs_scaled,
+              newdata_cstat),
     .id = 'metric',
-    .f = ~ posterior_epred(.x,
-                           newdata = newdata,
-                           re.form = ~0) |>
+    .f = ~ posterior_epred(.x, newdata = .y,  re.form = ~0) |>
       as_tibble() |>
-      set_names(newdata$model) |>
+      set_names(.y$model) |>
       pivot_longer(everything(), names_to = 'model') |>
       add_row(model = 'aorsf_fast', value = Inf) |>
       mutate(model = factor(model),
