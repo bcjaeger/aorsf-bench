@@ -19,8 +19,13 @@ clean_bm_pred <- function(bm_pred_real_comb,
   }
 
   to_omit <- bm_pred_comb |>
-    filter(is.na(cstat) | is.na(ibs_scaled)) |>
-    distinct(data, run) |>
+    filter(
+      is.na(cstat) |
+        is.na(ibs_scaled) |
+        is.infinite(ibs_scaled) |
+        is.infinite(cstat)
+    ) |>
+    distinct(model, data, run) |>
     group_by(data) |>
     group_split() |>
     map(as.list)
@@ -35,10 +40,17 @@ clean_bm_pred <- function(bm_pred_real_comb,
 
   # bm_pred_comb$IPA[bm_pred_comb$model == 'xgb_aft'] <- NA_real_
 
-  bm_pred_comb |>
+  data_omit <- map_dfr(to_omit, as_tibble)
+
+  data_out <- bm_pred_comb |>
     mutate(
       across(starts_with("time_"),
              as.numeric)
     )
+
+  list(data = data_out,
+       omit = data_omit)
+
+
 
 }

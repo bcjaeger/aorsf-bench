@@ -21,7 +21,7 @@ model_varsel <- function(model, train) {
 
     fit <- orsf(
       Surv(time, status) ~ .,
-      data_train = train,
+      data = train,
       control = orsf_control_cph(iter_max = 1),
       importance = if(method == 'shap') 'none' else method
     )

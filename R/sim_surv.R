@@ -149,21 +149,36 @@ sim_surv <- function(n_obs = 500,
                 x = data_covs,
                 maxt = pred_horiz * 2)
 
-  # head(data_covs)
-
   drop <- grep(pattern = '^hidden', x = names(data_covs))
 
+  data <- as_tibble(cbind(s1, data_covs[, -drop])) |>
+    rename(time = eventtime) |>
+    select(-id)
+
+  mdl_formula <- paste(
+    paste(main_names, "*", intr_main_names, collapse = ' + '),
+    paste0("splines::bs(", nlin_names,  ") * ", intr_nlin_names, collapse = ' + '),
+    paste(cmbn_names, "*", intr_cmbn_names, collapse = ' + '),
+    sep = ' + '
+  ) %>%
+    paste("Surv(time, status) ~ ", .) %>%
+    as.formula()
+
+  variation_explained <- mdl_formula %>%
+    coxph(data = data, x = TRUE) %>%
+    coxph_err() %>%
+    getElement('ERR')
+
   list(
-    data = as_tibble(cbind(s1, data_covs[, -drop])) |>
-      rename(time = eventtime) |>
-      select(-id),
+    data = data,
     cmbn_key = attr(data_covs, 'key'),
     effects = list(pred_main = eff_size_pred_main,
                    intr_main = eff_size_intr_main,
                    pred_nlin = eff_size_pred_nlin,
                    intr_nlin = eff_size_intr_nlin,
                    pred_cmbn = eff_size_pred_cmbn,
-                   intr_cmbn = eff_size_intr_cmbn)
+                   intr_cmbn = eff_size_intr_cmbn),
+    variation_explained = variation_explained
   )
 
 

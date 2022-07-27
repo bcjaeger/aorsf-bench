@@ -1,9 +1,25 @@
-\begin{thebibliography}{38}
+\begin{thebibliography}{70}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Allen et~al.(2018)Allen, Therneau, Larson, Coward, Somers, and
+  Kamath]{allen2018nonalcoholic}
+Alina~M Allen, Terry~M Therneau, Joseph~J Larson, Alexandra Coward, Virend~K
+  Somers, and Patrick~S Kamath.
+\newblock Nonalcoholic fatty liver disease incidence and impact on metabolic
+  burden and death: a 20 year-community study.
+\newblock \emph{Hepatology}, 67\penalty0 (5):\penalty0 1726--1736, 2018.
+
+\bibitem[{\nope{ARIC Investigators}ARIC
+  Investigators}(1989)]{aric1989atherosclerosis}
+{\nope{ARIC Investigators}ARIC Investigators}.
+\newblock The atherosclerosis risk in communit (aric) study: design and
+  objectives.
+\newblock \emph{American journal of epidemiology}, 129\penalty0 (4):\penalty0
+  687--702, 1989.
 
 \bibitem[Benavoli et~al.(2017)Benavoli, Corani, Dem{\v{s}}ar, and
   Zaffalon]{benavoli2017time}
@@ -12,6 +28,15 @@ Alessio Benavoli, Giorgio Corani, Janez Dem{\v{s}}ar, and Marco Zaffalon.
   through bayesian analysis.
 \newblock \emph{The Journal of Machine Learning Research}, 18\penalty0
   (1):\penalty0 2653--2688, 2017.
+
+\bibitem[Bild et~al.(2002)Bild, Bluemke, Burke, Detrano, Diez~Roux, Folsom,
+  Greenland, JacobsJr, Kronmal, Liu, et~al.]{bild2002multi}
+Diane~E Bild, David~A Bluemke, Gregory~L Burke, Robert Detrano, Ana~V
+  Diez~Roux, Aaron~R Folsom, Philip Greenland, David~R JacobsJr, Richard
+  Kronmal, Kiang Liu, et~al.
+\newblock Multi-ethnic study of atherosclerosis: objectives and design.
+\newblock \emph{American journal of epidemiology}, 156\penalty0 (9):\penalty0
+  871--881, 2002.
 
 \bibitem[Blanche et~al.(2013)Blanche, Dartigues, and
   Jacqmin-Gadda]{blanche2013estimating}
@@ -33,16 +58,62 @@ Leo Breiman, Jerome~H Friedman, Richard~A Olshen, and Charles~J Stone.
 \newblock \emph{Classification and regression trees}.
 \newblock Routledge, 2017.
 
+\bibitem[Casalicchio et~al.(2017)Casalicchio, Bossek, Lang, Kirchhoff,
+  Kerschke, Hofner, Seibold, Vanschoren, and Bischl]{OpenML}
+Giuseppe Casalicchio, Jakob Bossek, Michel Lang, Dominik Kirchhoff, Pascal
+  Kerschke, Benjamin Hofner, Heidi Seibold, Joaquin Vanschoren, and Bernd
+  Bischl.
+\newblock {OpenML}: An {R} package to connect to the machine learning platform
+  {OpenML}.
+\newblock \emph{Computational Statistics}, pages 1--15, 2017.
+\newblock \doi{10.1007/s00180-017-0742-2}.
+\newblock URL \url{http://dx.doi.org/10.1007/s00180-017-0742-2}.
+
 \bibitem[Cui et~al.(2017)Cui, Zhu, Zhou, and Kosorok]{cui2017consistency}
 Yifan Cui, Ruoqing Zhu, Mai Zhou, and Michael Kosorok.
 \newblock Consistency of survival tree and forest models: splitting bias and
   correction.
 \newblock \emph{arXiv preprint arXiv:1707.09631}, 2017.
 
-\bibitem[Geurts et~al.(2006)Geurts, Ernst, and Wehenkel]{geurts2006extremely}
-Pierre Geurts, Damien Ernst, and Louis Wehenkel.
-\newblock Extremely randomized trees.
-\newblock \emph{Machine Learning}, 63\penalty0 (1):\penalty0 3--42, 2006.
+\bibitem[Desmedt et~al.(2011)Desmedt, Di~Leo, de~Azambuja, Larsimont,
+  Haibe-Kains, Selleslags, Delaloge, Duhem, Kains, Carly,
+  et~al.]{desmedt2011multifactorial}
+Christine Desmedt, Angelo Di~Leo, Evandro de~Azambuja, Denis Larsimont,
+  Benjamin Haibe-Kains, Jean Selleslags, Suzette Delaloge, Caroline Duhem,
+  Jean-Pierre Kains, Birgit Carly, et~al.
+\newblock Multifactorial approach to predicting resistance to anthracyclines.
+\newblock \emph{Journal of Clinical Oncology}, 29\penalty0 (12):\penalty0
+  1578--1586, 2011.
+
+\bibitem[{\nope{Director's Challenge Consortium for the Molecular
+  Classification of Lung Adenocarcinoma}Director's Challenge Consortium for the
+  Molecular Classification of Lung Adenocarcinoma}(2008)]{director2008gene}
+{\nope{Director's Challenge Consortium for the Molecular Classification of Lung
+  Adenocarcinoma}Director's Challenge Consortium for the Molecular
+  Classification of Lung Adenocarcinoma}.
+\newblock Gene expression--based survival prediction in lung adenocarcinoma: a
+  multi-site, blinded validation study.
+\newblock \emph{Nature medicine}, 14\penalty0 (8):\penalty0 822--827, 2008.
+
+\bibitem[Dispenzieri et~al.(2012)Dispenzieri, Katzmann, Kyle, Larson, Therneau,
+  Colby, Clark, Mead, Kumar, Melton~III, et~al.]{dispenzieri2012use}
+Angela Dispenzieri, Jerry~A Katzmann, Robert~A Kyle, Dirk~R Larson, Terry~M
+  Therneau, Colin~L Colby, Raynell~J Clark, Graham~P Mead, Shaji Kumar,
+  L~Joseph Melton~III, et~al.
+\newblock Use of nonclonal serum immunoglobulin free light chains to predict
+  overall survival in the general population.
+\newblock In \emph{Mayo Clinic Proceedings}, volume~87, pages 517--523.
+  Elsevier, 2012.
+
+\bibitem[Felker et~al.(2017)Felker, Anstrom, Adams, Ezekowitz, Fiuzat,
+  Houston-Miller, Januzzi, Mark, Pi{\~n}a, Passmore, et~al.]{felker2017effect}
+G~Michael Felker, Kevin~J Anstrom, Kirkwood~F Adams, Justin~A Ezekowitz, Mona
+  Fiuzat, Nancy Houston-Miller, James~L Januzzi, Daniel~B Mark, Ileana~L
+  Pi{\~n}a, Gayle Passmore, et~al.
+\newblock Effect of natriuretic peptide--guided therapy on hospitalization or
+  cardiovascular mortality in high-risk patients with heart failure and reduced
+  ejection fraction: a randomized clinical trial.
+\newblock \emph{Jama}, 318\penalty0 (8):\penalty0 713--720, 2017.
 
 \bibitem[Goodrich et~al.(2022)Goodrich, Gabry, Ali, and Brilleman]{rstanarm}
 Ben Goodrich, Jonah Gabry, Imad Ali, and Sam Brilleman.
@@ -70,10 +141,36 @@ Frank~E. Harrell, Robert~M. Califf, David~B. Pryor, Kerry~L. Lee, and Robert~A.
 \newblock \doi{10.1001/jama.1982.03320430047030}.
 \newblock URL \url{https://doi.org/10.1001/jama.1982.03320430047030}.
 
+\bibitem[Hatzis et~al.(2011)Hatzis, Pusztai, Valero, Booser, Esserman, Lluch,
+  Vidaurre, Holmes, Souchon, Wang, et~al.]{hatzis2011genomic}
+Christos Hatzis, Lajos Pusztai, Vicente Valero, Daniel~J Booser, Laura
+  Esserman, Ana Lluch, Tatiana Vidaurre, Frankie Holmes, Eduardo Souchon,
+  Hongkun Wang, et~al.
+\newblock A genomic predictor of response and survival following
+  taxane-anthracycline chemotherapy for invasive breast cancer.
+\newblock \emph{Jama}, 305\penalty0 (18):\penalty0 1873--1881, 2011.
+
 \bibitem[Heath et~al.(1993)Heath, Kasif, and Salzberg]{heath1993induction}
 David Heath, Simon Kasif, and Steven Salzberg.
 \newblock Induction of oblique decision trees.
 \newblock In \emph{IJCAI}, volume 1993, pages 1002--1007. Citeseer, 1993.
+
+\bibitem[Heller(2012)]{heller2012measure}
+Glenn Heller.
+\newblock A measure of explained risk in the proportional hazards model.
+\newblock \emph{Biostatistics}, 13\penalty0 (2):\penalty0 315--325, 2012.
+
+\bibitem[Hosmer and Lemeshow(2002)]{hosmer2002applied}
+David~W Hosmer and Stanley Lemeshow.
+\newblock \emph{Applied survival analysis: regression modelling of time to
+  event data}.
+\newblock Wiley, 2002.
+
+\bibitem[Hothorn(2022)]{TH.data}
+Torsten Hothorn.
+\newblock \emph{TH.data: TH's Data Archive}, 2022.
+\newblock URL \url{https://CRAN.R-project.org/package=TH.data}.
+\newblock R package version 1.1-1.
 
 \bibitem[Hothorn et~al.(2004)Hothorn, Lausen, Benner, and
   Radespiel-Tr{\"o}ger]{hothorn2004bagging}
@@ -87,6 +184,34 @@ Torsten Hothorn, Kurt Hornik, and Achim Zeileis.
 \newblock Unbiased recursive partitioning: A conditional inference framework.
 \newblock \emph{Journal of Computational and Graphical statistics}, 15\penalty0
   (3):\penalty0 651--674, 2006.
+
+\bibitem[Hothorn et~al.(2010)Hothorn, Hornik, Strobl, and
+  Zeileis]{hothorn2010party}
+Torsten Hothorn, Kurt Hornik, Carolin Strobl, and Achim Zeileis.
+\newblock Party: a laboratory for recursive partytioning, 2010.
+
+\bibitem[Hsich et~al.(2011)Hsich, Gorodeski, Blackstone, Ishwaran, and
+  Lauer]{hsich2011identifying}
+Eileen Hsich, Eiran~Z Gorodeski, Eugene~H Blackstone, Hemant Ishwaran, and
+  Michael~S Lauer.
+\newblock Identifying important risk factors for survival in patient with
+  systolic heart failure using random survival forests.
+\newblock \emph{Circulation: Cardiovascular Quality and Outcomes}, 4\penalty0
+  (1):\penalty0 39--45, 2011.
+
+\bibitem[Hvitfeldt and Frick()]{censored}
+Emil Hvitfeldt and Hannah Frick.
+\newblock \emph{censored: 'parsnip' Engines for Survival Models}.
+\newblock URL \url{https://github.com/tidymodels/censored}.
+\newblock R package version 0.1.0.9000.
+
+\bibitem[Ishwaran and Kogalur(2019)]{randomForestSRC}
+H.~Ishwaran and U.B. Kogalur.
+\newblock \emph{Random Forests for Survival, Regression, and Classification
+  (RF-SRC)}, 2019.
+\newblock URL \url{https://cran.r-project.org/package=randomForestSRC}.
+\newblock R package version 2.8.0, available at
+  \url{https://cran.r-project.org/package=randomForestSRC}.
 
 \bibitem[Ishwaran and Kogalur(2010)]{ishwaran2010consistency}
 Hemant Ishwaran and Udaya~B Kogalur.
@@ -107,6 +232,12 @@ Hemant Ishwaran, Udaya~B Kogalur, Eugene~H Blackstone, and Michael~S Lauer.
 \newblock Random survival forests.
 \newblock \emph{The Annals of Applied Statistics}, pages 841--860, 2008.
 
+\bibitem[Jaeger(2022)]{aorsf}
+Byron~C Jaeger.
+\newblock \emph{aorsf: Accelerated Oblique Random Survival Forests}, 2022.
+\newblock URL \url{https://github.com/bcjaeger/aorsf}.
+\newblock R package version 1.0.0.
+
 \bibitem[Jaeger et~al.(2019)Jaeger, Long, Long, Sims, Szychowski, Min, Mcclure,
   Howard, and Simon]{jaeger2019oblique}
 Byron~C Jaeger, D~Leann Long, Dustin~M Long, Mario Sims, Jeff~M Szychowski,
@@ -114,6 +245,11 @@ Byron~C Jaeger, D~Leann Long, Dustin~M Long, Mario Sims, Jeff~M Szychowski,
 \newblock Oblique random survival forests.
 \newblock \emph{The Annals of Applied Statistics}, 13\penalty0 (3):\penalty0
   1847--1883, 2019.
+
+\bibitem[Kalbfleisch and Prentice(2011)]{kalbfleisch2011statistical}
+John~D Kalbfleisch and Ross~L Prentice.
+\newblock \emph{The statistical analysis of failure time data}.
+\newblock John Wiley \& Sons, 2011.
 
 \bibitem[Kattan and Gerds(2018)]{kattan2018index}
 Michael~W Kattan and Thomas~A Gerds.
@@ -134,6 +270,42 @@ Max Kuhn and Hadley Wickham.
   learning using tidyverse principles.}, 2020.
 \newblock URL \url{https://www.tidymodels.org}.
 
+\bibitem[Kyle et~al.(2002)Kyle, Therneau, Rajkumar, Offord, Larson, Plevak, and
+  Melton~III]{kyle2002long}
+Robert~A Kyle, Terry~M Therneau, S~Vincent Rajkumar, Janice~R Offord, Dirk~R
+  Larson, Matthew~F Plevak, and L~Joseph Melton~III.
+\newblock A long-term study of prognosis in monoclonal gammopathy of
+  undetermined significance.
+\newblock \emph{New England Journal of Medicine}, 346\penalty0 (8):\penalty0
+  564--569, 2002.
+
+\bibitem[Kyle et~al.(2006)Kyle, Therneau, Rajkumar, Larson, Plevak, Offord,
+  Dispenzieri, Katzmann, and Melton~III]{kyle2006prevalence}
+Robert~A Kyle, Terry~M Therneau, S~Vincent Rajkumar, Dirk~R Larson, Matthew~F
+  Plevak, Janice~R Offord, Angela Dispenzieri, Jerry~A Katzmann, and L~Joseph
+  Melton~III.
+\newblock Prevalence of monoclonal gammopathy of undetermined significance.
+\newblock \emph{New England Journal of Medicine}, 354\penalty0 (13):\penalty0
+  1362--1369, 2006.
+
+\bibitem[Landau(2021)]{targets}
+William~Michael Landau.
+\newblock The targets r package: a dynamic make-like function-oriented pipeline
+  toolkit for reproducibility and high-performance computing.
+\newblock \emph{Journal of Open Source Software}, 6\penalty0 (57):\penalty0
+  2959, 2021.
+\newblock URL \url{https://doi.org/10.21105/joss.02959}.
+
+\bibitem[Loprinzi et~al.(1994)Loprinzi, Laurie, Wieand, Krook, Novotny, Kugler,
+  Bartel, Law, Bateman, and Klatt]{loprinzi1994prospective}
+Charles~Lawrence Loprinzi, John~A Laurie, H~Sam Wieand, James~E Krook, Paul~J
+  Novotny, John~W Kugler, Joan Bartel, Marlys Law, Marilyn Bateman, and Nancy~E
+  Klatt.
+\newblock Prospective evaluation of prognostic variables from patient-completed
+  questionnaires. north central cancer treatment group.
+\newblock \emph{Journal of Clinical Oncology}, 12\penalty0 (3):\penalty0
+  601--607, 1994.
+
 \bibitem[Lundberg and Lee(2017)]{lundberg2017unified}
 Scott Lundberg and Su-In Lee.
 \newblock A unified approach to interpreting model predictions, 2017.
@@ -150,6 +322,16 @@ Bjoern~H Menze, B~Michael Kelm, Daniel~N Splitthoff, Ullrich Koethe, and Fred~A
 \newblock On oblique random forests.
 \newblock In \emph{Joint European Conference on Machine Learning and Knowledge
   Discovery in Databases}, pages 453--469. Springer, 2011.
+
+\bibitem[Moertel et~al.(1995)Moertel, Fleming, Macdonald, Haller, Laurie,
+  Tangen, Ungerleider, Emerson, Tormey, Glick, et~al.]{moertel1995fluorouracil}
+Charles~G Moertel, Thomas~R Fleming, John~S Macdonald, Daniel~G Haller, John~A
+  Laurie, Catherine~M Tangen, James~S Ungerleider, William~A Emerson,
+  Douglass~C Tormey, John~H Glick, et~al.
+\newblock Fluorouracil plus levamisole as effective adjuvant therapy after
+  resection of stage iii colon carcinoma: a final report.
+\newblock \emph{Annals of internal medicine}, 122\penalty0 (5):\penalty0
+  321--326, 1995.
 
 \bibitem[Moons et~al.(2012{\natexlab{a}})Moons, Kengne, Grobbee, Royston,
   Vergouwe, Altman, and Woodward]{moons2012riskII}
@@ -173,6 +355,11 @@ Sreerama~K Murthy, Simon Kasif, and Steven Salzberg.
 \newblock \emph{Journal of Artificial Intelligence Research}, 2:\penalty0
   1--32, 1994.
 
+\bibitem[Pintilie(2006)]{pintilie2006competing}
+Melania Pintilie.
+\newblock \emph{Competing risks: a practical perspective}.
+\newblock John Wiley \& Sons, 2006.
+
 \bibitem[Poona et~al.(2016)Poona, Van~Niekerk, and
   Ismail]{poona2016investigating}
 Nitesh Poona, Adriaan Van~Niekerk, and Riyad Ismail.
@@ -192,6 +379,37 @@ Tom Rainforth and Frank Wood.
 \newblock Canonical correlation forests.
 \newblock \emph{arXiv preprint arXiv:1507.05444}, 2015.
 
+\bibitem[Royston and Altman(2013)]{royston2013external}
+Patrick Royston and Douglas~G Altman.
+\newblock External validation of a cox prognostic model: principles and
+  methods.
+\newblock \emph{BMC medical research methodology}, 13\penalty0 (1):\penalty0
+  1--15, 2013.
+
+\bibitem[Schumacher(1994)]{schumacher1994rauschecker}
+M~Schumacher.
+\newblock Rauschecker for the german breast cancer study group, randomized 2 by
+  2 trial evaluating hormonal treatment and the duration of chemotherapy in
+  node-positive breast cancer patients.
+\newblock \emph{Journal of Clinical Oncology}, 12:\penalty0 2086--2093, 1994.
+
+\bibitem[Sonabend et~al.(2021)Sonabend, Király, Bender, Bischl, and
+  Lang]{mlr3proba}
+Raphael Sonabend, Franz~J Király, Andreas Bender, Bernd Bischl, and Michel
+  Lang.
+\newblock mlr3proba: An r package for machine learning in survival analysis.
+\newblock \emph{Bioinformatics}, 02 2021.
+\newblock ISSN 1367-4803.
+\newblock \doi{10.1093/bioinformatics/btab039}.
+
+\bibitem[{\nope{SPRINT Research Group}SPRINT Research
+  Group}(2015)]{sprint2015randomized}
+{\nope{SPRINT Research Group}SPRINT Research Group}.
+\newblock A randomized trial of intensive versus standard blood-pressure
+  control.
+\newblock \emph{New England Journal of Medicine}, 373\penalty0 (22):\penalty0
+  2103--2116, 2015.
+
 \bibitem[Strobl et~al.(2007)Strobl, Boulesteix, Zeileis, and
   Hothorn]{strobl2007bias}
 Carolin Strobl, Anne-Laure Boulesteix, Achim Zeileis, and Torsten Hothorn.
@@ -199,12 +417,37 @@ Carolin Strobl, Anne-Laure Boulesteix, Achim Zeileis, and Torsten Hothorn.
   sources and a solution.
 \newblock \emph{BMC bioinformatics}, 8\penalty0 (1):\penalty0 25, 2007.
 
-\bibitem[Therneau(2022)]{therneau_survival_2022}
+\bibitem[Tern{\`e}s et~al.(2017)Tern{\`e}s, Rotolo, Heinze, and
+  Michiels]{ternes2017identification}
+Nils Tern{\`e}s, Federico Rotolo, Georg Heinze, and Stefan Michiels.
+\newblock Identification of biomarker-by-treatment interactions in randomized
+  clinical trials with survival outcomes and high-dimensional spaces.
+\newblock \emph{Biometrical Journal}, 59\penalty0 (4):\penalty0 685--701, 2017.
+
+\bibitem[Ternes et~al.(2018)Ternes, Rotolo, and Michiels]{biospear}
+Nils Ternes, Federico Rotolo, and Stefan Michiels.
+\newblock \emph{biospear: Biomarker Selection in Penalized Regression Models},
+  2018.
+\newblock URL \url{https://CRAN.R-project.org/package=biospear}.
+\newblock R package version 1.0.2.
+
+\bibitem[Therneau(2022{\natexlab{a}})]{therneau_survival_2022}
 Terry Therneau.
-\newblock Survival package source code documentation, April 2022.
+\newblock Survival package source code documentation, April 2022{\natexlab{a}}.
 \newblock URL
   \url{https://github.com/therneau/survival/blob/5440691d44abea537b08aeb60153a31654d66a9b/noweb}.
 \newblock original-date: 2016-04-28.
+
+\bibitem[Therneau(2022{\natexlab{b}})]{survival}
+Terry~M Therneau.
+\newblock \emph{A Package for Survival Analysis in R}, 2022{\natexlab{b}}.
+\newblock URL \url{https://CRAN.R-project.org/package=survival}.
+\newblock R package version 3.3-1.
+
+\bibitem[Therneau and Grambsch(2000)]{therneau2000cox}
+Terry~M Therneau and Patricia~M Grambsch.
+\newblock \emph{Modeling {S}urvival {D}ata: {E}xtending the {C}ox {M}odel}.
+\newblock Springer, 2000.
 
 \bibitem[Tomita et~al.(2020)Tomita, Browne, Shen, Chung, Patsolic, Falk,
   Priebe, Yim, Burns, Maggioni, et~al.]{tomita2020sparse}
@@ -213,6 +456,16 @@ Tyler~M Tomita, James Browne, Cencheng Shen, Jaewon Chung, Jesse~L Patsolic,
   et~al.
 \newblock Sparse projection oblique randomer forests.
 \newblock \emph{Journal of machine learning research}, 21\penalty0 (104), 2020.
+
+\bibitem[Van De~Vijver et~al.(2002)Van De~Vijver, He, Van't~Veer, Dai, Hart,
+  Voskuil, Schreiber, Peterse, Roberts, Marton, et~al.]{van2002gene}
+Marc~J Van De~Vijver, Yudong~D He, Laura~J Van't~Veer, Hongyue Dai,
+  Augustinus~AM Hart, Dorien~W Voskuil, George~J Schreiber, Johannes~L Peterse,
+  Chris Roberts, Matthew~J Marton, et~al.
+\newblock A gene-expression signature as a predictor of survival in breast
+  cancer.
+\newblock \emph{New England Journal of Medicine}, 347\penalty0 (25):\penalty0
+  1999--2009, 2002.
 
 \bibitem[Wang and Li(2017)]{wang2017selective}
 Hong Wang and Gang Li.

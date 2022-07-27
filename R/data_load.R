@@ -5,6 +5,36 @@
 #' @title
 #' @param data_source
 
+nki_load <- function(...){
+
+  data_in <- OpenML::getOMLDataSet(data.id = 1228)
+
+  data_in$data %>%
+    rename(status = event)
+
+}
+
+lung_load <- function(...){
+
+  data_in <- OpenML::getOMLDataSet(data.id = 1245)
+
+  data_in$data %>%
+    rename(status = OS_event,
+           time = OS_years) %>%
+    mutate(status = as.numeric(status)-1)
+
+}
+
+lung_ncctg_load <- function(...){
+
+  data(cancer, package="survival")
+
+  out <- cancer %>%
+    mutate(sex = sex - 1,
+           status = status - 1) %>%
+    select(-inst)
+
+}
 
 vdv_load <- function(...){
 

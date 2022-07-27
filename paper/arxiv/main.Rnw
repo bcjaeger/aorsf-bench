@@ -1,33 +1,30 @@
-\documentclass[twoside,11pt]{article}
+\documentclass{article}
 
-% Any additional packages needed should be included after jmlr2e.
-% Note that jmlr2e.sty includes epsfig, amssymb, natbib and graphicx,
-% and defines many common macros, such as 'proof' and 'example'.
-%
-% It also sets the bibliographystyle to plainnat; for more information on
-% natbib citation styles, see the natbib documentation, a copy of which
-% is archived at http://www.jmlr.org/format/natbib.pdf
 
-% Available options for package jmlr2e are:
-%
-%   - abbrvbib : use abbrvnat for the bibliography style
-%   - nohyperref : do not load the hyperref package
-%   - preprint : remove JMLR specific information from the template,
-%         useful for example for posting to preprint servers.
-%
-% Example of using the package with custom options:
-%
-% \usepackage[abbrvbib, preprint]{jmlr2e}
 
-\usepackage{jmlr2e}
+\usepackage{arxiv}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{doi}
+
+\usepackage{lipsum}
+
 % extra packages
 \usepackage{longtable}
 \usepackage{colortbl}
 \usepackage{amsmath}
-\usepackage{booktabs}
 \usepackage{caption}
 \usepackage{multirow}
-\usepackage{hyperref}
 \hypersetup{hidelinks}
 \usepackage{geometry}
 \usepackage{pdflscape}
@@ -72,55 +69,89 @@
 
 \newcommand{\nope}[1]{}
 
-% Heading arguments are {volume}{year}{pages}{date submitted}{date published}{paper id}{author-full-names}
 
-\jmlrheading{1}{2000}{1-48}{4/00}{10/00}{meila00a}{Marina Meil\u{a} and Michael I. Jordan}
-
-% Short headings should be running head and authors last names
-
-\ShortHeadings{Accelerated \& interpretable oblique RSFs}{Jaeger et al}
-\firstpageno{1}
-
-\begin{document}
 
 \title{Accelerated and interpretable oblique random survival forests}
 
-\author{\name Byron C. Jaeger \email bjaeger@wakehealth.edu \\
-       \addr Department of Biostatistics and Data Science\\
-       Wake Forest University School of Medicine\\
-       Winston-Salem, NC 27157, USA
-       \AND
-       \name Sawyer Welden \email swelden@wakehealth.edu \\
-       \addr Department of Biostatistics and Data Science\\
-       Wake Forest University School of Medicine\\
-       Winston-Salem, NC 27157, USA
-       \AND
-       \name Kristin Lenoir \email klenoir@wakehealth.edu \\
-       \addr Department of Biostatistics and Data Science\\
-       Wake Forest University School of Medicine\\
-       Winston-Salem, NC 27157, USA
-       \AND
-       \name Jaime L Speiser \email jspeiser@wakehealth.edu \\
-       \addr Department of Biostatistics and Data Science\\
-       Wake Forest University School of Medicine\\
-       Winston-Salem, NC 27157, USA
-       \AND
-       \name Matthew Segar \email Matthew.Segar@BCM.edu \\
-       \addr Department of Cardiology \\
-       Texas Heart Institute \\
-       Houston, TX 77030, USA
-       \AND
-       \name Ambarish Pandey \email Ambarish.Pandey@UTSouthwestern.edu \\
-       \addr Division of Cardiology, Department of Internal Medicine \\
-       University of Texas Southwestern Medical Center \\
-       Dallas, TX 75235, USA
-       \AND
-       \name Nicholas M. Pajewski \email npajewsk@wakehealth.edu \\
-       \addr Department of Biostatistics and Data Science\\
-       Wake Forest University School of Medicine\\
-       Winston-Salem, NC 27157, USA}
+\date{\today}	% Here you can change the date presented in the paper title
 
-\editor{TBD}
+\author{ \href{https://orcid.org/0000-0001-7399-2299}{\includegraphics[scale=0.06]{orcid.pdf}\hspace{1mm}Byron C. Jaeger} \\
+	Department of Biostatistics and Data Science\\
+	Wake Forest University School of Medicine\\
+	Winston-Salem, NC 27157, USA \\
+	\texttt{bjaeger@wakehealth.edu}
+	\AND
+   Sawyer Welden \\
+   Department of Biostatistics and Data Science\\
+   Wake Forest University School of Medicine\\
+   Winston-Salem, NC 27157, USA \\
+   \texttt{swelden@wakehealth.edu}
+   \And
+   Kristin Lenoir \\
+   Department of Biostatistics and Data Science\\
+   Wake Forest University School of Medicine\\
+   Winston-Salem, NC 27157, USA \\
+   \texttt{klenoir@wakehealth.edu}
+	 \And
+	 Jaime L.~Speiser \\
+	 Department of Biostatistics and Data Science\\
+	 Wake Forest University School of Medicine\\
+	 Winston-Salem, NC 27157, USA \\
+	 \texttt{jspeiser@wakehealth.edu}
+	 \And
+	 Matthew Segar \\
+   Department of Cardiology \\
+   Texas Heart Institute \\
+   Houston, TX 77030, USA \\
+	 \texttt{Matthew.Segar@BCM.edu}
+   \And
+	 Ambarish Pandey \\
+   Division of Cardiology, Department of Internal Medicine \\
+   University of Texas Southwestern Medical Center \\
+   Dallas, TX 75235, USA \\
+	 \texttt{Ambarish.Pandey@UTSouthwestern.edu}
+	 \And
+	 Nicholas M.~Pajewski \\
+	 Department of Biostatistics and Data Science\\
+	 Wake Forest University School of Medicine\\
+	 Winston-Salem, NC 27157, USA \\
+	 \texttt{npajewsk@wakehealth.edu}
+	%% \AND
+	%% Coauthor \\
+	%% Affiliation \\
+	%% Address \\
+	%% \texttt{email} \\
+	%% \And
+	%% Coauthor \\
+	%% Affiliation \\
+	%% Address \\
+	%% \texttt{email} \\
+	%% \And
+	%% Coauthor \\
+	%% Affiliation \\
+	%% Address \\
+	%% \texttt{email} \\
+}
+
+% Uncomment to remove the date
+%\date{}
+
+% Uncomment to override  the `A preprint' in the header
+%\renewcommand{\headeright}{Technical Report}
+%\renewcommand{\undertitle}{Technical Report}
+\renewcommand{\shorttitle}{\textit{arXiv} Accelerated \& interpretable oblique RSFs}
+
+%%% Add PDF metadata to help others organize their library
+%%% Once the PDF is generated, you can check the metadata with
+%%% $ pdfinfo template.pdf
+\hypersetup{
+pdftitle={Accelerated and interpretable oblique random survival forests},
+pdfsubject={q-bio.NC, q-bio.QM},
+pdfauthor={Byron C.~Jaeger},
+pdfkeywords={Random Forest, Survival, Efficiency, Variable Importance},
+}
+
+\begin{document}
 
 \maketitle
 
@@ -180,17 +211,17 @@ pcens_min    <- table_value(100*min(data_key$pcens))
 
 @
 
-\newpage
 
-\begin{abstract}%   <- trailing '%' for backward compatibility of .sty file
+\begin{abstract}
 
-The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors to create branches, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles often have higher prediction accuracy than standard RSF ensembles. However, assessing all possible linear combinations of predictors induces significant computational overhead that limits applications to large-scale data sets. In addition, few methods have been developed for interpretation of oblique RSF ensembles, and they remain more difficult to interpret compared to their axis-based counterparts. In this article, we introduce and evaluate a method to increase computational efficiency of the oblique RSF and a method to estimate importance of individual predictor variables with the oblique RSF. Our strategy to reduce computational overhead makes use of Newton-Raphson scoring, a classical optimization technique that we apply to the Cox partial likelihood function within each non-leaf node of decision trees. We estimate the importance of individual predictors for the oblique RSF by negating each coefficient used for the given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In general benchmarking experiments, we find that our implementation of the oblique RSF is over 500 times faster with equivalent discrimination and superior Brier score compared to existing software for oblique RSFs. We find in simulation studies that `negation importance' discriminates between signal and noise predictors more reliably than permutation importance, Shapley additive explanations, and a previously introduced technique to measure variable importance with oblique RSFs based on analysis of variance. All methods pertaining to oblique RSFs in the current study are available in the \texttt{aorsf} R package.
+	The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors to create branches, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles often have higher prediction accuracy than standard RSF ensembles. However, assessing all possible linear combinations of predictors induces significant computational overhead that limits applications to large-scale data sets. In addition, few methods have been developed for interpretation of oblique RSF ensembles, and they remain more difficult to interpret compared to their axis-based counterparts. In this article, we introduce and evaluate a method to increase computational efficiency of the oblique RSF and a method to estimate importance of individual predictor variables with the oblique RSF. Our strategy to reduce computational overhead makes use of Newton-Raphson scoring, a classical optimization technique that we apply to the Cox partial likelihood function within each non-leaf node of decision trees. We estimate the importance of individual predictors for the oblique RSF by negating each coefficient used for the given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In general benchmarking experiments, we find that our implementation of the oblique RSF is over 500 times faster with equivalent discrimination and superior Brier score compared to existing software for oblique RSFs. We find in simulation studies that `negation importance' discriminates between signal and noise predictors more reliably than permutation importance, Shapley additive explanations, and a previously introduced technique to measure variable importance with oblique RSFs based on analysis of variance. All methods pertaining to oblique RSFs in the current study are available in the \texttt{aorsf} R package.
 
 \end{abstract}
 
-\begin{keywords}
-  Random Forests, Survival, Efficiency, Variable Importance
-\end{keywords}
+
+% keywords can be removed
+\keywords{Random Forests \and Survival \and Efficiency \and Variable Importance}
+
 
 \section{Introduction}
 
@@ -460,7 +491,6 @@ bm_pred_failed_description <-
   ) %>%
   reduce(paste, sep = '. ')
 
-
 n_wins_aorsf <- bm_pred_viz %>%
   getElement('ibs_scaled') %>%
   getElement('rankings') %>%
@@ -592,12 +622,14 @@ times <- bm_pred_time_viz %>%
   as_inline('model', c('time', 'ratio')) %>%
   set_names(str_replace(names(.), '-', '_'))
 
+ms_diff <- round(abs(times$glmnet_cox$time - times$aorsf_fast$time)*1000)
+
 @
 
 
 \paragraph{Computational efficiency}
 
-Overall, \texttt{aorsf-fast} was the second fastest learner, with an expected model development and risk prediction time about 1/2 second longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was \Sexpr{times$obliqueRSF_net$ratio} times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was \Sexpr{times$cif_standard$ratio}, \Sexpr{times$ranger_extratrees$ratio}, and \Sexpr{times$rsf_standard$ratio} faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
+Overall, \texttt{aorsf-fast} was the second fastest learner, with an expected model development and risk prediction time about \Sexpr{ms_diff} milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was \Sexpr{times$obliqueRSF_net$ratio} times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was \Sexpr{times$cif_standard$ratio}, \Sexpr{times$ranger_extratrees$ratio}, and \Sexpr{times$rsf_standard$ratio} faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
 
 
 
@@ -737,7 +769,9 @@ While the current study advances the oblique RSF towards being scalable and inte
 
 % Acknowledgements should go at the end, before appendices and references
 
-\acks{Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine. The project described was supported by the National Center for Advancing Translational Sciences (NCATS), National Institutes of Health, through Grant Award Number UL1TR001420. The content is solely the responsibility of the authors and does not necessarily represent the official views of the NIH.}
+\subsection*{Acknowledgements}
+
+Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine. The project described was supported by the National Center for Advancing Translational Sciences (NCATS), National Institutes of Health, through Grant Award Number UL1TR001420. The content is solely the responsibility of the authors and does not necessarily represent the official views of the NIH.
 
 % Manual newpage inserted to improve layout of sample file - not
 % needed in general before appendices/bibliography.
@@ -1017,8 +1051,9 @@ pack_rows(group_label = 'Combination effects',
 
 @
 
-
 \vskip 0.2in
+\bibliographystyle{unsrtnat}
 \bibliography{main}
+
 
 \end{document}

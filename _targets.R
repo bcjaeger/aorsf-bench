@@ -53,7 +53,9 @@ analyses_real <- expand_grid(
     "breast",
     "sprint_cvd",
     "sprint_acm",
-    # "phts",
+    "nki",
+    "lung",
+    "lung_ncctg",
     "follic_death",
     "follic_relapse",
     "mgus2_death",
@@ -79,7 +81,7 @@ analyses_real <- expand_grid(
 analyses_sim_pred <- expand_grid(data_source = 'sim',
                                  n_obs = c(500, 1000, 2500),
                                  pred_corr_max = c(0, 0.15, 0.30),
-                                 run_seed = 1:200,
+                                 run_seed = 1:300,
                                  model_type = model_fitters) |>
   mutate(
     data_load_fun = syms("sim_surv"),
@@ -114,6 +116,22 @@ tar_plan(
       ),
       memory = "transient",
       garbage_collection = TRUE
+    )
+  ),
+
+
+  tar_target(time_runs, seq(10)),
+  tar_target(n_obs, round(10^seq(from = 2, to = 4, by = 1/2))),
+  tar_target(n_ftr, c(10, 100, 1000)),
+
+  tar_target(
+    bm_time,
+    bench_time(n_obs = n_obs, n_ftr = n_ftr),
+    pattern = cross(time_runs, n_obs, n_ftr),
+    resources = tar_resources(
+      future = tar_resources_future(
+        resources = list(n_cores=4)
+      )
     )
   ),
 
@@ -169,11 +187,11 @@ tar_plan(
 
   tar_target(bm_pred_clean, clean_bm_pred(bm_pred_real_comb)),
 
-  tar_target(bm_pred_viz, bench_pred_visualize(bm_pred_clean,
+  tar_target(bm_pred_viz, bench_pred_visualize(bm_pred_clean$data,
                                                data_key,
                                                model_key)),
 
-  tar_target(bm_pred_model, bench_pred_model(bm_pred_clean,
+  tar_target(bm_pred_model, bench_pred_model(bm_pred_clean$data,
                                              data_key,
                                              model_key)),
 
@@ -182,7 +200,7 @@ tar_plan(
                                         model_key)),
 
   tar_target(bm_pred_time_viz,
-             bench_pred_time_visualize(bm_pred_clean, model_key)),
+             bench_pred_time_visualize(bm_pred_clean$data, model_key)),
 
   tar_combine(bm_vi_comb, bm_vi[[1]]),
 

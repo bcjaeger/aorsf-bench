@@ -74,7 +74,7 @@ aorsf_fast_filter_fit <- function(train, node_size = 10, ...){
   start_time <- Sys.time()
 
   # fit_filter <- orsf(
-  #   data_train = train,
+  #   data = train,
   #   formula = Surv(time, status) ~ .,
   #   n_tree = 100,
   #   mtry = mtry,
@@ -93,7 +93,7 @@ aorsf_fast_filter_fit <- function(train, node_size = 10, ...){
   # keep <- c('time', 'status', names(vi)[seq(n_keep)])
   #
   # fit <- orsf(
-  #   data_train = train[, keep],
+  #   data = train[, keep],
   #   formula = Surv(time, status) ~ .,
   #   mtry = mtry,
   #   n_retry = 3,
@@ -105,7 +105,7 @@ aorsf_fast_filter_fit <- function(train, node_size = 10, ...){
   # )
 
   fit <- orsf(
-    data_train = train,
+    data = train,
     formula = Surv(time, status) ~ .,
     mtry = mtry,
     n_retry = 3,
@@ -132,7 +132,7 @@ aorsf_fast_fit <- function(train, node_size = 10, ...){
   start_time <- Sys.time()
 
   fit <- orsf(
-    data_train = train,
+    data = train,
     formula = Surv(time, status) ~ .,
     mtry = mtry,
     n_retry = 3,
@@ -163,7 +163,7 @@ aorsf_random_fit <- function(train, node_size = 10, ...){
   start_time <- Sys.time()
 
   fit <- orsf(
-    data_train = train,
+    data = train,
     formula = Surv(time, status) ~ .,
     mtry = mtry,
     n_retry = 3,
@@ -189,7 +189,7 @@ aorsf_cph_fit <- function(train, node_size = 10, ...){
   start_time <- Sys.time()
 
   fit <- orsf(
-    data_train = train,
+    data = train,
     formula = Surv(time, status) ~ .,
     mtry = mtry,
     n_retry = 3,
@@ -218,7 +218,7 @@ aorsf_net_fit <- function(train, node_size = 10, ...){
   start_time <- Sys.time()
 
   fit <- orsf(
-    data_train = train,
+    data = train,
     formula = Surv(time, status) ~ .,
     mtry = mtry,
     n_retry = 3,

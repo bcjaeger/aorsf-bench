@@ -76,7 +76,7 @@ bench_pred_real <- function(data_source,
     Score(
       object = set_names(list(predictions$pred), model_type),
       formula = Surv(time, status) ~ 1,
-      data = test,
+      data = select(test, time, status),
       summary = c('IPA', 'ibs'),
       times = pred_horizon
     ),

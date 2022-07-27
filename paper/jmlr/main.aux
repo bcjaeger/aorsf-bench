@@ -32,12 +32,12 @@
 \citation{heath1993induction,murthy1994system}
 \citation{ishwaran2019standard}
 \citation{menze2011oblique}
-\citation{menze2011oblique}
 \citation{breiman2001random}
 \citation{menze2011oblique,zhang2014oblique,rainforth2015canonical,zhu2015reinforcement,poona2016investigating,qiu2017oblique,tomita2020sparse,katuwal2020heterogeneous}
 \citation{zhu2013tree}
 \citation{wang2017selective}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Related work}{3}{section.2}\protected@file@percent }
+\newlabel{sec:background}{{2}{3}{}{section.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Axis-based and oblique random forests}{3}{subsection.2.1}\protected@file@percent }
 \newlabel{sec:rw_forests}{{2.1}{3}{Axis-based and oblique random forests}{subsection.2.1}{}}
 \citation{hothorn2004bagging}
@@ -46,8 +46,10 @@
 \citation{wang2017random}
 \citation{ishwaran2008random}
 \citation{breiman2001random}
+\citation{jaeger2019oblique}
+\citation{randomForestSRC}
 \citation{ranger}
-\citation{geurts2006extremely}
+\citation{hothorn2010party}
 \citation{jaeger2019oblique}
 \citation{breiman2001random}
 \citation{strobl2007bias}
@@ -55,44 +57,48 @@
 \citation{menze2011oblique}
 \citation{menze2011oblique}
 \citation{lundberg2017unified}
+\citation{menze2011oblique}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Variable importance}{4}{subsection.2.2}\protected@file@percent }
 \newlabel{sec:rw_vi}{{2.2}{4}{Variable importance}{subsection.2.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}The acceleracted oblique random survival forest}{4}{section.3}\protected@file@percent }
 \citation{therneau_survival_2022}
-\citation{harrell1982evaluating}
+\@writefile{toc}{\contentsline {section}{\numberline {3}The accelerated oblique random survival forest}{5}{section.3}\protected@file@percent }
+\newlabel{sec:aorsf}{{3}{5}{Variable importance}{section.3}{}}
 \newlabel{eqn:cox-partial-likelihood}{{1}{5}{Variable importance}{equation.3.1}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Accelerated oblique random survival tree using default parameters.\relax }}{6}{algorithm.1}\protected@file@percent }
+\citation{harrell1982evaluating}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Negation variable importance}{6}{section.4}\protected@file@percent }
+\newlabel{sec:negation_vi}{{4}{6}{Variable importance}{section.4}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Accelerated oblique random survival tree using default parameters.\relax }}{7}{algorithm.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{alg:aorsf}{{1}{6}{Accelerated oblique random survival tree using default parameters.\relax }{algorithm.1}{}}
-\newlabel{marker}{{11}{6}{Accelerated oblique random survival tree using default parameters.\relax }{algorithm.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Negation variable importance}{7}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Numeric experiments}{7}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Benchmark of prediction accuracy and computational efficiency}{7}{subsection.4.1}\protected@file@percent }
-\newlabel{sec:bm_pred}{{4.1}{7}{Benchmark of prediction accuracy and computational efficiency}{subsection.4.1}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.1}Learners}{7}{subsubsection.4.1.1}\protected@file@percent }
-\newlabel{sec:learners}{{4.1.1}{7}{Learners}{subsubsection.4.1.1}{}}
+\newlabel{alg:aorsf}{{1}{7}{Accelerated oblique random survival tree using default parameters.\relax }{algorithm.1}{}}
+\newlabel{marker}{{11}{7}{Accelerated oblique random survival tree using default parameters.\relax }{algorithm.1}{}}
+\citation{targets}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Numeric experiments}{8}{section.5}\protected@file@percent }
+\newlabel{sec:numeric}{{5}{8}{Variable importance}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Benchmark of prediction accuracy and computational efficiency}{8}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:bm_pred}{{5.1}{8}{Benchmark of prediction accuracy and computational efficiency}{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Learners}{8}{subsubsection.5.1.1}\protected@file@percent }
+\newlabel{sec:learners}{{5.1.1}{8}{Learners}{subsubsection.5.1.1}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Learning algorithms assessed in numeric studies. \leavevmode {\color  {purple}\texttt  {aorsf-fast}} is the accelerated oblique random survival forest (see Algorithm \ref  {alg:aorsf}), and each of the additional learners are compared to \leavevmode {\color  {purple}\texttt  {aorsf-fast}} in numeric studies.\relax }}{9}{table.caption.1}\protected@file@percent }
 \newlabel{tab:learners}{{1}{9}{Learning algorithms assessed in numeric studies. \textcolor {purple}{\texttt {aorsf-fast}} is the accelerated oblique random survival forest (see Algorithm \ref {alg:aorsf}), and each of the additional learners are compared to \textcolor {purple}{\texttt {aorsf-fast}} in numeric studies.\relax }{table.caption.1}{}}
 \citation{graf1999assessment}
 \citation{kattan2018index}
+\citation{kattan2018index}
 \citation{blanche2013estimating}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.2}Evaluation of prediction accuracy}{10}{subsubsection.4.1.2}\protected@file@percent }
-\newlabel{sec:prediction_accuracy}{{4.1.2}{10}{Evaluation of prediction accuracy}{subsubsection.4.1.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.2}Evaluation of prediction accuracy}{10}{subsubsection.5.1.2}\protected@file@percent }
+\newlabel{sec:prediction_accuracy}{{5.1.2}{10}{Evaluation of prediction accuracy}{subsubsection.5.1.2}{}}
+\citation{aric1989atherosclerosis,bild2002multi,felker2017effect,sprint2015randomized}
 \citation{benavoli2017time}
 \citation{tidymodels}
 \citation{rstanarm}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.3}Data sets}{11}{subsubsection.4.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.4}Monte-Carlo cross validation}{11}{subsubsection.4.1.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.5}Statistical analysis}{11}{subsubsection.4.1.5}\protected@file@percent }
-\citation{strobl2007bias}
-\@writefile{toc}{\contentsline {paragraph}{Hypothesis testing}{12}{subsubsection.4.1.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.1.6}Results}{12}{subsubsection.4.1.6}\protected@file@percent }
-\newlabel{sec:results_pred}{{4.1.6}{12}{Results}{subsubsection.4.1.6}{}}
-\@writefile{toc}{\contentsline {paragraph}{Index of prediction accuracy}{12}{subsubsection.4.1.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.3}Data sets}{11}{subsubsection.5.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.4}Monte-Carlo cross validation}{11}{subsubsection.5.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.5}Statistical analysis}{11}{subsubsection.5.1.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hypothesis testing}{12}{subsubsection.5.1.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.6}Results}{12}{subsubsection.5.1.6}\protected@file@percent }
+\newlabel{sec:results_pred}{{5.1.6}{12}{Results}{subsubsection.5.1.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Index of prediction accuracy}{12}{subsubsection.5.1.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Time-dependent concordance statistic}{12}{figure.caption.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Computational efficiency}{12}{figure.caption.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Benchmark of variable importance}{12}{subsection.4.2}\protected@file@percent }
-\newlabel{sec:bm_vi}{{4.2}{12}{Benchmark of variable importance}{subsection.4.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Index of prediction accuracy for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks}}{13}{figure.caption.2}\protected@file@percent }
 \newlabel{fig:bm_pred_viz_ibs}{{1}{13}{Index of prediction accuracy for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks}{figure.caption.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Expected differences in index of prediction accuracy between the accelerated oblique random survival forest and other learning algorithms}}{14}{figure.caption.3}\protected@file@percent }
@@ -101,25 +107,65 @@
 \newlabel{fig:bm_pred_viz_cstat}{{3}{15}{Time-dependent concordance statistic for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks}{figure.caption.4}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Expected differences in time-dependent concordance statistic between the accelerated oblique random survival forest and other learning algorithms}}{16}{figure.caption.5}\protected@file@percent }
 \newlabel{fig:bm_pred_model_viz_cstat}{{4}{16}{Expected differences in time-dependent concordance statistic between the accelerated oblique random survival forest and other learning algorithms}{figure.caption.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Distribution of time taken to fit a prediction model and compute predicted risk}}{17}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:bm_pred_time}{{5}{17}{Distribution of time taken to fit a prediction model and compute predicted risk}{figure.caption.6}{}}
+\citation{strobl2007bias}
 \citation{menze2011oblique}
 \citation{lundberg2018consistent}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Variable importance techniques}{18}{subsubsection.4.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Variable types}{18}{subsubsection.4.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.3}Simulated data}{18}{subsubsection.4.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Benchmark of variable importance}{17}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:bm_vi}{{5.2}{17}{Benchmark of variable importance}{subsection.5.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Variable importance techniques}{17}{subsubsection.5.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Variable types}{17}{subsubsection.5.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Distribution of time taken to fit a prediction model and compute predicted risk}}{18}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:bm_pred_time}{{5}{18}{Distribution of time taken to fit a prediction model and compute predicted risk}{figure.caption.6}{}}
+\citation{heller2012measure}
 \citation{harrell1982evaluating}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.4}Parameter specifications}{19}{subsubsection.4.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.5}Evaluation of variable importance}{19}{subsubsection.4.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.6}Results}{19}{subsubsection.4.2.6}\protected@file@percent }
-\newlabel{sec:results_vi}{{4.2.6}{19}{Results}{subsubsection.4.2.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{19}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.3}Simulated data}{19}{subsubsection.5.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.4}Parameter specifications}{19}{subsubsection.5.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.5}Evaluation of variable importance}{19}{subsubsection.5.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.6}Results}{19}{subsubsection.5.2.6}\protected@file@percent }
+\newlabel{sec:results_vi}{{5.2.6}{19}{Results}{subsubsection.5.2.6}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Concordance statistic for assigning higher importance to relevant versus irrelevant variables}}{20}{figure.caption.7}\protected@file@percent }
 \newlabel{fig:bm_vi_viz}{{6}{20}{Concordance statistic for assigning higher importance to relevant versus irrelevant variables}{figure.caption.7}{}}
 \citation{cui2017consistency}
 \citation{cui2017consistency}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Implications of our results}{21}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Limitations and next steps}{21}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{21}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{21}{Results}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Implications of our results}{21}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Limitations and next steps}{21}{subsection.6.2}\protected@file@percent }
+\citation{kalbfleisch2011statistical}
+\citation{randomForestSRC}
+\citation{moertel1995fluorouracil}
+\citation{survival}
+\citation{therneau2000cox}
+\citation{aorsf}
+\citation{censored}
+\citation{schumacher1994rauschecker}
+\citation{TH.data}
+\citation{hsich2011identifying}
+\citation{randomForestSRC}
+\citation{dispenzieri2012use,kyle2006prevalence}
+\citation{survival}
+\citation{allen2018nonalcoholic}
+\citation{survival}
+\citation{royston2013external}
+\citation{survival}
+\citation{hosmer2002applied}
+\citation{mlr3proba}
+\citation{felker2017effect}
+\citation{desmedt2011multifactorial,hatzis2011genomic,ternes2017identification}
+\citation{biospear}
+\citation{sprint2015randomized}
+\citation{van2002gene}
+\citation{OpenML}
+\citation{director2008gene}
+\citation{OpenML}
+\citation{loprinzi1994prospective}
+\citation{survival}
+\citation{pintilie2006competing}
+\citation{randomForestSRC}
+\citation{kyle2002long}
+\citation{survival}
+\citation{bild2002multi}
+\citation{aric1989atherosclerosis}
 \gdef \LT@i {\LT@entry 
     {1}{156.32722pt}\LT@entry 
     {1}{82.71884pt}\LT@entry 
@@ -127,31 +173,32 @@
     {1}{126.42763pt}\LT@entry 
     {1}{56.01294pt}\LT@entry 
     {1}{68.6663pt}}
-\newlabel{tab:unnamed-chunk-8}{{1}{24}{Appendix}{table.1}{}}
-\newlabel{tab:datasets}{{1}{24}{Appendix}{table.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Data sets used for numeric experiments \relax }}{24}{table.1}\protected@file@percent }
-\newlabel{tab:unnamed-chunk-9}{{2}{26}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{26}{Appendix}{table.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 31 risk prediction tasks.\relax }}{26}{table.2}\protected@file@percent }
-\newlabel{tab:bm_pred_all}{{2}{27}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{28}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{29}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{30}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{31}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{32}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{33}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{34}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{35}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{36}{Appendix}{table.2}{}}
+\newlabel{tab:unnamed-chunk-10}{{1}{25}{Data sources}{table.1}{}}
+\newlabel{tab:datasets}{{1}{25}{Data sources}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Data sets used for numeric experiments \relax }}{25}{table.1}\protected@file@percent }
+\newlabel{tab:unnamed-chunk-11}{{2}{27}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{27}{Data sources}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 31 risk prediction tasks.\relax }}{27}{table.2}\protected@file@percent }
+\newlabel{tab:bm_pred_all}{{2}{28}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{29}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{30}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{31}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{32}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{33}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{34}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{35}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{36}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{37}{Data sources}{table.2}{}}
 \gdef \LT@ii {\LT@entry 
     {5}{104.34514pt}\LT@entry 
     {5}{77.70007pt}\LT@entry 
     {5}{74.05008pt}\LT@entry 
     {1}{74.65843pt}\LT@entry 
     {1}{84.93927pt}}
-\newlabel{tab:bm_pred_all}{{2}{37}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{38}{Appendix}{table.2}{}}
-\newlabel{tab:bm_pred_all}{{2}{39}{Appendix}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{38}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{39}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{40}{Data sources}{table.2}{}}
+\newlabel{tab:bm_pred_all}{{2}{41}{Data sources}{table.2}{}}
 \gdef \LT@iii {\LT@entry 
     {1}{88.10262pt}\LT@entry 
     {1}{92.45218pt}\LT@entry 
@@ -161,49 +208,81 @@
     {1}{41.96045pt}\LT@entry 
     {5}{36.9417pt}\LT@entry 
     {1}{71.79922pt}}
-\newlabel{tab:unnamed-chunk-10}{{3}{40}{Appendix}{table.3}{}}
-\newlabel{tab:bm_vi}{{3}{40}{Appendix}{table.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Discrimination of relevant versus irrelevant variables for several techniques to estimate variable importance. \relax }}{40}{table.3}\protected@file@percent }
-\newlabel{tab:bm_vi}{{3}{41}{Appendix}{table.3}{}}
+\newlabel{tab:unnamed-chunk-12}{{3}{42}{Data sources}{table.3}{}}
+\newlabel{tab:bm_vi}{{3}{42}{Data sources}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Discrimination of relevant versus irrelevant variables for several techniques to estimate variable importance. \relax }}{42}{table.3}\protected@file@percent }
+\newlabel{tab:bm_vi}{{3}{43}{Data sources}{table.3}{}}
 \bibdata{main}
-\bibcite{benavoli2017time}{{1}{2017}{{Benavoli et~al.}}{{Benavoli, Corani, Dem{\v {s}}ar, and Zaffalon}}}
-\bibcite{blanche2013estimating}{{2}{2013}{{Blanche et~al.}}{{Blanche, Dartigues, and Jacqmin-Gadda}}}
-\bibcite{breiman2001random}{{3}{2001}{{Breiman}}{{}}}
-\bibcite{breiman2017classification}{{4}{2017}{{Breiman et~al.}}{{Breiman, Friedman, Olshen, and Stone}}}
-\bibcite{cui2017consistency}{{5}{2017}{{Cui et~al.}}{{Cui, Zhu, Zhou, and Kosorok}}}
-\bibcite{geurts2006extremely}{{6}{2006}{{Geurts et~al.}}{{Geurts, Ernst, and Wehenkel}}}
-\bibcite{rstanarm}{{7}{2022}{{Goodrich et~al.}}{{Goodrich, Gabry, Ali, and Brilleman}}}
-\bibcite{graf1999assessment}{{8}{1999}{{Graf et~al.}}{{Graf, Schmoor, Sauerbrei, and Schumacher}}}
-\bibcite{harrell1982evaluating}{{9}{1982}{{Harrell et~al.}}{{Harrell, Califf, Pryor, Lee, and Rosati}}}
-\bibcite{heath1993induction}{{10}{1993}{{Heath et~al.}}{{Heath, Kasif, and Salzberg}}}
-\bibcite{hothorn2004bagging}{{11}{2004}{{Hothorn et~al.}}{{Hothorn, Lausen, Benner, and Radespiel-Tr{\"o}ger}}}
-\bibcite{hothorn2006unbiased}{{12}{2006}{{Hothorn et~al.}}{{Hothorn, Hornik, and Zeileis}}}
-\bibcite{ishwaran2010consistency}{{13}{2010}{{Ishwaran and Kogalur}}{{}}}
-\bibcite{ishwaran2019standard}{{14}{2019}{{Ishwaran and Lu}}{{}}}
-\bibcite{ishwaran2008random}{{15}{2008}{{Ishwaran et~al.}}{{Ishwaran, Kogalur, Blackstone, and Lauer}}}
-\bibcite{jaeger2019oblique}{{16}{2019}{{Jaeger et~al.}}{{Jaeger, Long, Long, Sims, Szychowski, Min, Mcclure, Howard, and Simon}}}
-\bibcite{kattan2018index}{{17}{2018}{{Kattan and Gerds}}{{}}}
-\bibcite{katuwal2020heterogeneous}{{18}{2020}{{Katuwal et~al.}}{{Katuwal, Suganthan, and Zhang}}}
-\bibcite{tidymodels}{{19}{2020}{{Kuhn and Wickham}}{{}}}
-\bibcite{lundberg2017unified}{{20}{2017}{{Lundberg and Lee}}{{}}}
-\bibcite{lundberg2018consistent}{{21}{2018}{{Lundberg et~al.}}{{Lundberg, Erion, and Lee}}}
-\bibcite{menze2011oblique}{{22}{2011}{{Menze et~al.}}{{Menze, Kelm, Splitthoff, Koethe, and Hamprecht}}}
-\bibcite{moons2012riskII}{{23}{2012{a}}{{Moons et~al.}}{{Moons, Kengne, Grobbee, Royston, Vergouwe, Altman, and Woodward}}}
-\bibcite{moons2012riskI}{{24}{2012{b}}{{Moons et~al.}}{{Moons, Kengne, Woodward, Royston, Vergouwe, Altman, and Grobbee}}}
-\bibcite{murthy1994system}{{25}{1994}{{Murthy et~al.}}{{Murthy, Kasif, and Salzberg}}}
-\bibcite{poona2016investigating}{{26}{2016}{{Poona et~al.}}{{Poona, Van~Niekerk, and Ismail}}}
-\bibcite{qiu2017oblique}{{27}{2017}{{Qiu et~al.}}{{Qiu, Zhang, Suganthan, and Amaratunga}}}
-\bibcite{rainforth2015canonical}{{28}{2015}{{Rainforth and Wood}}{{}}}
-\bibcite{strobl2007bias}{{29}{2007}{{Strobl et~al.}}{{Strobl, Boulesteix, Zeileis, and Hothorn}}}
-\bibcite{therneau_survival_2022}{{30}{2022}{{Therneau}}{{}}}
-\bibcite{tomita2020sparse}{{31}{2020}{{Tomita et~al.}}{{Tomita, Browne, Shen, Chung, Patsolic, Falk, Priebe, Yim, Burns, Maggioni, et~al.}}}
-\bibcite{wang2017selective}{{32}{2017}{{Wang and Li}}{{}}}
-\bibcite{wang2017random}{{33}{2017}{{Wang and Zhou}}{{}}}
-\bibcite{ranger}{{34}{2017}{{Wright and Ziegler}}{{}}}
-\bibcite{zhang2014oblique}{{35}{2014}{{Zhang and Suganthan}}{{}}}
-\bibcite{zhou2016random}{{36}{2016}{{Zhou et~al.}}{{Zhou, Wang, and Xu}}}
-\bibcite{zhu2013tree}{{37}{2013}{{Zhu}}{{}}}
-\bibcite{zhu2015reinforcement}{{38}{2015}{{Zhu et~al.}}{{Zhu, Zeng, and Kosorok}}}
+\bibcite{allen2018nonalcoholic}{{1}{2018}{{Allen et~al.}}{{Allen, Therneau, Larson, Coward, Somers, and Kamath}}}
+\bibcite{aric1989atherosclerosis}{{2}{1989}{{ARIC Investigators}}{{}}}
+\bibcite{benavoli2017time}{{3}{2017}{{Benavoli et~al.}}{{Benavoli, Corani, Dem{\v {s}}ar, and Zaffalon}}}
+\bibcite{bild2002multi}{{4}{2002}{{Bild et~al.}}{{Bild, Bluemke, Burke, Detrano, Diez~Roux, Folsom, Greenland, JacobsJr, Kronmal, Liu, et~al.}}}
+\bibcite{blanche2013estimating}{{5}{2013}{{Blanche et~al.}}{{Blanche, Dartigues, and Jacqmin-Gadda}}}
+\bibcite{breiman2001random}{{6}{2001}{{Breiman}}{{}}}
+\bibcite{breiman2017classification}{{7}{2017}{{Breiman et~al.}}{{Breiman, Friedman, Olshen, and Stone}}}
+\bibcite{OpenML}{{8}{2017}{{Casalicchio et~al.}}{{Casalicchio, Bossek, Lang, Kirchhoff, Kerschke, Hofner, Seibold, Vanschoren, and Bischl}}}
+\bibcite{cui2017consistency}{{9}{2017}{{Cui et~al.}}{{Cui, Zhu, Zhou, and Kosorok}}}
+\bibcite{desmedt2011multifactorial}{{10}{2011}{{Desmedt et~al.}}{{Desmedt, Di~Leo, de~Azambuja, Larsimont, Haibe-Kains, Selleslags, Delaloge, Duhem, Kains, Carly, et~al.}}}
+\bibcite{director2008gene}{{11}{2008}{{Director's Challenge Consortium for the Molecular Classification of Lung Adenocarcinoma}}{{}}}
+\bibcite{dispenzieri2012use}{{12}{2012}{{Dispenzieri et~al.}}{{Dispenzieri, Katzmann, Kyle, Larson, Therneau, Colby, Clark, Mead, Kumar, Melton~III, et~al.}}}
+\bibcite{felker2017effect}{{13}{2017}{{Felker et~al.}}{{Felker, Anstrom, Adams, Ezekowitz, Fiuzat, Houston-Miller, Januzzi, Mark, Pi{\~n}a, Passmore, et~al.}}}
+\bibcite{rstanarm}{{14}{2022}{{Goodrich et~al.}}{{Goodrich, Gabry, Ali, and Brilleman}}}
+\bibcite{graf1999assessment}{{15}{1999}{{Graf et~al.}}{{Graf, Schmoor, Sauerbrei, and Schumacher}}}
+\bibcite{harrell1982evaluating}{{16}{1982}{{Harrell et~al.}}{{Harrell, Califf, Pryor, Lee, and Rosati}}}
+\bibcite{hatzis2011genomic}{{17}{2011}{{Hatzis et~al.}}{{Hatzis, Pusztai, Valero, Booser, Esserman, Lluch, Vidaurre, Holmes, Souchon, Wang, et~al.}}}
+\bibcite{heath1993induction}{{18}{1993}{{Heath et~al.}}{{Heath, Kasif, and Salzberg}}}
+\bibcite{heller2012measure}{{19}{2012}{{Heller}}{{}}}
+\bibcite{hosmer2002applied}{{20}{2002}{{Hosmer and Lemeshow}}{{}}}
+\bibcite{TH.data}{{21}{2022}{{Hothorn}}{{}}}
+\bibcite{hothorn2004bagging}{{22}{2004}{{Hothorn et~al.}}{{Hothorn, Lausen, Benner, and Radespiel-Tr{\"o}ger}}}
+\bibcite{hothorn2006unbiased}{{23}{2006}{{Hothorn et~al.}}{{Hothorn, Hornik, and Zeileis}}}
+\bibcite{hothorn2010party}{{24}{2010}{{Hothorn et~al.}}{{Hothorn, Hornik, Strobl, and Zeileis}}}
+\bibcite{hsich2011identifying}{{25}{2011}{{Hsich et~al.}}{{Hsich, Gorodeski, Blackstone, Ishwaran, and Lauer}}}
+\bibcite{censored}{{26}{}{{Hvitfeldt and Frick}}{{}}}
+\bibcite{randomForestSRC}{{27}{2019}{{Ishwaran and Kogalur}}{{}}}
+\bibcite{ishwaran2010consistency}{{28}{2010}{{Ishwaran and Kogalur}}{{}}}
+\bibcite{ishwaran2019standard}{{29}{2019}{{Ishwaran and Lu}}{{}}}
+\bibcite{ishwaran2008random}{{30}{2008}{{Ishwaran et~al.}}{{Ishwaran, Kogalur, Blackstone, and Lauer}}}
+\bibcite{aorsf}{{31}{2022}{{Jaeger}}{{}}}
+\bibcite{jaeger2019oblique}{{32}{2019}{{Jaeger et~al.}}{{Jaeger, Long, Long, Sims, Szychowski, Min, Mcclure, Howard, and Simon}}}
+\bibcite{kalbfleisch2011statistical}{{33}{2011}{{Kalbfleisch and Prentice}}{{}}}
+\bibcite{kattan2018index}{{34}{2018}{{Kattan and Gerds}}{{}}}
+\bibcite{katuwal2020heterogeneous}{{35}{2020}{{Katuwal et~al.}}{{Katuwal, Suganthan, and Zhang}}}
+\bibcite{tidymodels}{{36}{2020}{{Kuhn and Wickham}}{{}}}
+\bibcite{kyle2002long}{{37}{2002}{{Kyle et~al.}}{{Kyle, Therneau, Rajkumar, Offord, Larson, Plevak, and Melton~III}}}
+\bibcite{kyle2006prevalence}{{38}{2006}{{Kyle et~al.}}{{Kyle, Therneau, Rajkumar, Larson, Plevak, Offord, Dispenzieri, Katzmann, and Melton~III}}}
+\bibcite{targets}{{39}{2021}{{Landau}}{{}}}
+\bibcite{loprinzi1994prospective}{{40}{1994}{{Loprinzi et~al.}}{{Loprinzi, Laurie, Wieand, Krook, Novotny, Kugler, Bartel, Law, Bateman, and Klatt}}}
+\bibcite{lundberg2017unified}{{41}{2017}{{Lundberg and Lee}}{{}}}
+\bibcite{lundberg2018consistent}{{42}{2018}{{Lundberg et~al.}}{{Lundberg, Erion, and Lee}}}
+\bibcite{menze2011oblique}{{43}{2011}{{Menze et~al.}}{{Menze, Kelm, Splitthoff, Koethe, and Hamprecht}}}
+\bibcite{moertel1995fluorouracil}{{44}{1995}{{Moertel et~al.}}{{Moertel, Fleming, Macdonald, Haller, Laurie, Tangen, Ungerleider, Emerson, Tormey, Glick, et~al.}}}
+\bibcite{moons2012riskII}{{45}{2012{a}}{{Moons et~al.}}{{Moons, Kengne, Grobbee, Royston, Vergouwe, Altman, and Woodward}}}
+\bibcite{moons2012riskI}{{46}{2012{b}}{{Moons et~al.}}{{Moons, Kengne, Woodward, Royston, Vergouwe, Altman, and Grobbee}}}
+\bibcite{murthy1994system}{{47}{1994}{{Murthy et~al.}}{{Murthy, Kasif, and Salzberg}}}
+\bibcite{pintilie2006competing}{{48}{2006}{{Pintilie}}{{}}}
+\bibcite{poona2016investigating}{{49}{2016}{{Poona et~al.}}{{Poona, Van~Niekerk, and Ismail}}}
+\bibcite{qiu2017oblique}{{50}{2017}{{Qiu et~al.}}{{Qiu, Zhang, Suganthan, and Amaratunga}}}
+\bibcite{rainforth2015canonical}{{51}{2015}{{Rainforth and Wood}}{{}}}
+\bibcite{royston2013external}{{52}{2013}{{Royston and Altman}}{{}}}
+\bibcite{schumacher1994rauschecker}{{53}{1994}{{Schumacher}}{{}}}
+\bibcite{mlr3proba}{{54}{2021}{{Sonabend et~al.}}{{Sonabend, Király, Bender, Bischl, and Lang}}}
+\bibcite{sprint2015randomized}{{55}{2015}{{SPRINT Research Group}}{{}}}
+\bibcite{strobl2007bias}{{56}{2007}{{Strobl et~al.}}{{Strobl, Boulesteix, Zeileis, and Hothorn}}}
+\bibcite{ternes2017identification}{{57}{2017}{{Tern{\`e}s et~al.}}{{Tern{\`e}s, Rotolo, Heinze, and Michiels}}}
+\bibcite{biospear}{{58}{2018}{{Ternes et~al.}}{{Ternes, Rotolo, and Michiels}}}
+\bibcite{therneau_survival_2022}{{59}{2022{a}}{{Therneau}}{{}}}
+\bibcite{survival}{{60}{2022{b}}{{Therneau}}{{}}}
+\bibcite{therneau2000cox}{{61}{2000}{{Therneau and Grambsch}}{{}}}
+\bibcite{tomita2020sparse}{{62}{2020}{{Tomita et~al.}}{{Tomita, Browne, Shen, Chung, Patsolic, Falk, Priebe, Yim, Burns, Maggioni, et~al.}}}
+\bibcite{van2002gene}{{63}{2002}{{Van De~Vijver et~al.}}{{Van De~Vijver, He, Van't~Veer, Dai, Hart, Voskuil, Schreiber, Peterse, Roberts, Marton, et~al.}}}
+\bibcite{wang2017selective}{{64}{2017}{{Wang and Li}}{{}}}
+\bibcite{wang2017random}{{65}{2017}{{Wang and Zhou}}{{}}}
+\bibcite{ranger}{{66}{2017}{{Wright and Ziegler}}{{}}}
+\bibcite{zhang2014oblique}{{67}{2014}{{Zhang and Suganthan}}{{}}}
+\bibcite{zhou2016random}{{68}{2016}{{Zhou et~al.}}{{Zhou, Wang, and Xu}}}
+\bibcite{zhu2013tree}{{69}{2013}{{Zhu}}{{}}}
+\bibcite{zhu2015reinforcement}{{70}{2015}{{Zhu et~al.}}{{Zhu, Zeng, and Kosorok}}}
 \expandafter\gdef\csname eqp@this@COMMENT\endcsname{310.76743pt}
 \expandafter\gdef\csname eqp@next@COMMENT\endcsname{0pt}
-\gdef \@abspage@last{44}
+\gdef \@abspage@last{49}
