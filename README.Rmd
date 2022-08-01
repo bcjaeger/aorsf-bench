@@ -40,21 +40,21 @@ In case you want a much quicker summary of the paper:
 
 - We made oblique RSFs faster and also developed a new method to estimate importance of individual predictors with them. These methods are available in the `aorsf` R package.
 
-- We find that the accelerated oblique RSF (`aorsf-fast` in the paper) is very fast. In fact, in a benchmark with 35 different risk prediction tasks, `aorsf-fast` was faster than all of the learners we analyzed, except for penalized Cox regression models (`glmnet-cox` in the paper).
+- We find that the accelerated oblique RSF (`aorsf-fast` in the paper) is very fast. In fact, in a benchmark with 35 different risk prediction tasks, `aorsf-fast` was faster than all of the learners we analyzed, except for penalized Cox regression models (`glmnet-cox` in the paper). __Figure__: Distribution of time taken to fit a prediction model and compute predicted risk. The median time, in seconds, is printed and annotated for each learner by a vertical line.
 
-```{r, fig-bm-time, fig.cap="Distribution of time taken to fit a prediction model and compute predicted risk. The median time, in seconds, is printed and annotated for each learner by a vertical line.", fig.align='center', fig.width=8, fig.height=8}
+```{r, fig-bm-time, fig.align='center', fig.width=8, fig.height=8}
 bm_pred_time_viz$fig
 ```
 
-- We find that `aorsf-fast` has the best index of prediction accuracy out of all the learners we evaluated:
+- We find that `aorsf-fast` has the best index of prediction accuracy out of all the learners we evaluated: __Figure__: Expected differences in index of prediction accuracy between the accelerated oblique random survival forest and other learning algorithms. A region of practical equivalence is shown by purple dotted lines, and a boundary of non-zero difference is shown by an orange dotted line at the origin.
 
-```{r, fig-bm-ibs, fig.cap="Expected differences in index of prediction accuracy between the accelerated oblique random survival forest and other learning algorithms. A region of practical equivalence is shown by purple dotted lines, and a boundary of non-zero difference is shown by an orange dotted line at the origin.", fig.align='center', fig.width=8, fig.height=8}
+```{r, fig-bm-ibs, fig.align='center', fig.width=9, fig.height=8}
 bm_pred_model_viz$fig$ibs_scaled
 ```
 
-- We find that negation variable importance improves the chances of ranking a relevant variable as more important than an irrelevant variable when using an oblique RSF to estimate variable importance:
+- We find that negation variable importance improves the chances of ranking a relevant variable as more important than an irrelevant variable when using an oblique RSF to estimate variable importance. __Figure__: Concordance statistic for assigning higher importance to relevant versus irrelevant variables. Text appears in rows where negation importance obtained the highest concordance, showing absolute and percent improvement over the second best technique.
 
-```{r, fig-bm-vi, fig.cap="Concordance statistic for assigning higher importance to relevant versus irrelevant variables. Text appears in rows where negation importance obtained the highest concordance, showing absolute and percent improvement over the second best technique.", fig.align='center', fig.width=8, fig.height=10}
+```{r, fig-bm-vi, fig.align='center', fig.width=8, fig.height=10}
 bm_vi_viz$fig
 ```
 

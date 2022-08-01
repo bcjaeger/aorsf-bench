@@ -27,20 +27,32 @@ In case you want a much quicker summary of the paper:
     is very fast. In fact, in a benchmark with 35 different risk
     prediction tasks, `aorsf-fast` was faster than all of the learners
     we analyzed, except for penalized Cox regression models
-    (`glmnet-cox` in the paper).
+    (`glmnet-cox` in the paper). **Figure**: Distribution of time taken
+    to fit a prediction model and compute predicted risk. The median
+    time, in seconds, is printed and annotated for each learner by a
+    vertical line.
 
-<img src="README_files/figure-gfm/fig-bm-time-1.png" title="Distribution of time taken to fit a prediction model and compute predicted risk. The median time, in seconds, is printed and annotated for each learner by a vertical line." alt="Distribution of time taken to fit a prediction model and compute predicted risk. The median time, in seconds, is printed and annotated for each learner by a vertical line." style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/fig-bm-time-1.png" style="display: block; margin: auto;" />
 
 -   We find that `aorsf-fast` has the best index of prediction accuracy
-    out of all the learners we evaluated:
+    out of all the learners we evaluated: **Figure**: Expected
+    differences in index of prediction accuracy between the accelerated
+    oblique random survival forest and other learning algorithms. A
+    region of practical equivalence is shown by purple dotted lines, and
+    a boundary of non-zero difference is shown by an orange dotted line
+    at the origin.
 
-<img src="README_files/figure-gfm/fig-bm-ibs-1.png" title="Expected differences in index of prediction accuracy between the accelerated oblique random survival forest and other learning algorithms. A region of practical equivalence is shown by purple dotted lines, and a boundary of non-zero difference is shown by an orange dotted line at the origin." alt="Expected differences in index of prediction accuracy between the accelerated oblique random survival forest and other learning algorithms. A region of practical equivalence is shown by purple dotted lines, and a boundary of non-zero difference is shown by an orange dotted line at the origin." style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/fig-bm-ibs-1.png" style="display: block; margin: auto;" />
 
 -   We find that negation variable importance improves the chances of
     ranking a relevant variable as more important than an irrelevant
-    variable when using an oblique RSF to estimate variable importance:
+    variable when using an oblique RSF to estimate variable importance.
+    **Figure**: Concordance statistic for assigning higher importance to
+    relevant versus irrelevant variables. Text appears in rows where
+    negation importance obtained the highest concordance, showing
+    absolute and percent improvement over the second best technique.
 
-<img src="README_files/figure-gfm/fig-bm-vi-1.png" title="Concordance statistic for assigning higher importance to relevant versus irrelevant variables. Text appears in rows where negation importance obtained the highest concordance, showing absolute and percent improvement over the second best technique." alt="Concordance statistic for assigning higher importance to relevant versus irrelevant variables. Text appears in rows where negation importance obtained the highest concordance, showing absolute and percent improvement over the second best technique." style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/fig-bm-vi-1.png" style="display: block; margin: auto;" />
 
 ## Reproducing this paper
 
