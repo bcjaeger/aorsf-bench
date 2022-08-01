@@ -67,7 +67,9 @@ analyses_real <- expand_grid(
     "aric_hf",
     "aric_chd",
     "aric_stroke",
-    "aric_death"
+    "aric_death",
+    "jhs_stroke",
+    "jhs_chd"
   ),
   model_type = model_fitters,
   run_seed = 1:25
@@ -81,7 +83,7 @@ analyses_real <- expand_grid(
 analyses_sim_pred <- expand_grid(data_source = 'sim',
                                  n_obs = c(500, 1000, 2500),
                                  pred_corr_max = c(0, 0.15, 0.30),
-                                 run_seed = 1:300,
+                                 run_seed = 1:500,
                                  model_type = model_fitters) |>
   mutate(
     data_load_fun = syms("sim_surv"),
@@ -120,19 +122,31 @@ tar_plan(
   ),
 
 
-  tar_target(time_runs, seq(10)),
-  tar_target(n_obs, round(10^seq(from = 2, to = 4, by = 1/2))),
+  tar_target(time_runs, seq(75)),
+  tar_target(n_obs, round(10^seq(from = 2, to = 4+1/3, by = 1/3))),
   tar_target(n_ftr, c(10, 100, 1000)),
+
+  bm_time_data = sim_surv(n_obs = max(n_obs),
+                          n_pred_main = max(n_ftr)) %>%
+    getElement("data") %>%
+    select(time,
+           status,
+           starts_with("main")),
 
   tar_target(
     bm_time,
-    bench_time(n_obs = n_obs, n_ftr = n_ftr),
+    bench_time(data = bm_time_data, n_obs = n_obs, n_ftr = n_ftr),
     pattern = cross(time_runs, n_obs, n_ftr),
     resources = tar_resources(
       future = tar_resources_future(
         resources = list(n_cores=4)
       )
     )
+  ),
+
+  tar_target(
+    bm_time_viz,
+    bm_time_visualize(bm_time)
   ),
 
   # bm_pred_sim <- tar_map(
@@ -177,6 +191,13 @@ tar_plan(
 
   ),
 
+  clincalc_r2 = replicate(
+    n = 100,
+    expr = sim_surv(n_obs = max(analyses_sim_vi$n_obs)) %>%
+      getElement('variation_explained'),
+    simplify = TRUE
+  ),
+
   tar_target(data_key, summarize_data_source(analyses_real)),
 
   tar_target(model_key, make_model_key()),
@@ -200,7 +221,7 @@ tar_plan(
                                         model_key)),
 
   tar_target(bm_pred_time_viz,
-             bench_pred_time_visualize(bm_pred_clean$data, model_key)),
+             bench_pred_time_visualize(bm_pred_clean, model_key)),
 
   tar_combine(bm_vi_comb, bm_vi[[1]]),
 

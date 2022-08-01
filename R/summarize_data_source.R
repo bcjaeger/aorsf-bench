@@ -69,7 +69,9 @@ summarize_data_source <- function(analyses_real) {
         "aric_hf" = "ARIC",
         "aric_chd" = "ARIC",
         "aric_stroke" = "ARIC",
-        "aric_death" = "ARIC"
+        "aric_death" = "ARIC",
+        "jhs_stroke" = "JHS",
+        "jhs_chd" = "JHS"
       ),
       rpack = recode(
         data,
@@ -109,7 +111,9 @@ summarize_data_source <- function(analyses_real) {
         "aric_hf" = NA_character_,
         "aric_chd" = NA_character_,
         "aric_stroke" = NA_character_,
-        "aric_death" = NA_character_
+        "aric_death" = NA_character_,
+        "jhs_stroke" = NA_character_,
+        "jhs_chd" = NA_character_
       ),
       cite = recode(
         data,
@@ -150,7 +154,9 @@ summarize_data_source <- function(analyses_real) {
         "aric_hf" = "aric1989atherosclerosis",
         "aric_chd" = "aric1989atherosclerosis",
         "aric_stroke" = "aric1989atherosclerosis",
-        "aric_death" = "aric1989atherosclerosis"
+        "aric_death" = "aric1989atherosclerosis",
+        "jhs_stroke" = "taylor2005toward",
+        "jhs_chd" = "taylor2005toward"
       ),
       outcome = recode(
         data,
@@ -190,7 +196,9 @@ summarize_data_source <- function(analyses_real) {
         "aric_hf" = "heart failure",
         "aric_chd" = "coronary heart disease",
         "aric_stroke" = "stroke",
-        "aric_death" = "death"
+        "aric_death" = "death",
+        "jhs_stroke" = "stroke",
+        "jhs_chd" = "coronary heart disease"
       ),
       .before = 2
     )

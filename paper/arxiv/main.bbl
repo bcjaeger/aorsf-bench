@@ -1,4 +1,4 @@
-\begin{thebibliography}{70}
+\begin{thebibliography}{75}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -200,9 +200,15 @@ Carolin Strobl, Anne-Laure Boulesteix, Achim Zeileis, and Torsten Hothorn.
 Scott Lundberg and Su-In Lee.
 \newblock A unified approach to interpreting model predictions, 2017.
 
-\bibitem[Therneau(2022{\natexlab{a}})]{therneau_survival_2022}
+\bibitem[Therneau(2022{\natexlab{a}})]{survival}
+Terry~M Therneau.
+\newblock \emph{A Package for Survival Analysis in R}, 2022{\natexlab{a}}.
+\newblock URL \url{https://CRAN.R-project.org/package=survival}.
+\newblock R package version 3.3-1.
+
+\bibitem[Therneau(2022{\natexlab{b}})]{therneau_survival_2022}
 Terry Therneau.
-\newblock Survival package source code documentation, April 2022{\natexlab{a}}.
+\newblock Survival package source code documentation, April 2022{\natexlab{b}}.
 \newblock URL
   \url{https://github.com/therneau/survival/blob/5440691d44abea537b08aeb60153a31654d66a9b/noweb}.
 \newblock original-date: 2016-04-28.
@@ -286,6 +292,14 @@ G~Michael Felker, Kevin~J Anstrom, Kirkwood~F Adams, Justin~A Ezekowitz, Mona
 \newblock \emph{New England Journal of Medicine}, 373\penalty0 (22):\penalty0
   2103--2116, 2015.
 
+\bibitem[Taylor~Jr et~al.(2005)Taylor~Jr, Wilson, Jones, Sarpong, Srinivasan,
+  Garrison, Nelson, and Wyatt]{taylor2005toward}
+Herman~A Taylor~Jr, James~G Wilson, Daniel~W Jones, Daniel~F Sarpong, Asoka
+  Srinivasan, Robert~J Garrison, Cheryl Nelson, and Sharon~B Wyatt.
+\newblock Toward resolution of cardiovascular health disparities in african
+  americans: Design and methods of the jackson heart study.
+\newblock \emph{Ethn Dis}, 15\penalty0 (4 Suppl 6):\penalty0 S6--4, 2005.
+
 \bibitem[Benavoli et~al.(2017)Benavoli, Corani, Dem{\v{s}}ar, and
   Zaffalon]{benavoli2017time}
 Alessio Benavoli, Giorgio Corani, Janez Dem{\v{s}}ar, and Marco Zaffalon.
@@ -306,6 +320,15 @@ Ben Goodrich, Jonah Gabry, Imad Ali, and Sam Brilleman.
 \newblock URL \url{https://mc-stan.org/rstanarm/}.
 \newblock R package version 2.21.3.
 
+\bibitem[Chen et~al.(2022)Chen, He, Benesty, Khotilovich, Tang, Cho, Chen,
+  Mitchell, Cano, Zhou, Li, Xie, Lin, Geng, Li, and Yuan]{xgboost}
+Tianqi Chen, Tong He, Michael Benesty, Vadim Khotilovich, Yuan Tang, Hyunsu
+  Cho, Kailong Chen, Rory Mitchell, Ignacio Cano, Tianyi Zhou, Mu~Li, Junyuan
+  Xie, Min Lin, Yifeng Geng, Yutian Li, and Jiaming Yuan.
+\newblock \emph{xgboost: Extreme Gradient Boosting}, 2022.
+\newblock URL \url{https://CRAN.R-project.org/package=xgboost}.
+\newblock R package version 1.5.2.1.
+
 \bibitem[Lundberg et~al.(2018)Lundberg, Erion, and Lee]{lundberg2018consistent}
 Scott~M Lundberg, Gabriel~G Erion, and Su-In Lee.
 \newblock Consistent individualized feature attribution for tree ensembles.
@@ -315,6 +338,26 @@ Scott~M Lundberg, Gabriel~G Erion, and Su-In Lee.
 Glenn Heller.
 \newblock A measure of explained risk in the proportional hazards model.
 \newblock \emph{Biostatistics}, 13\penalty0 (2):\penalty0 315--325, 2012.
+
+\bibitem[Moss et~al.(2022)Moss, Corsar, Shaw, Piper, and
+  Hawthorne]{moss2022demystifying}
+Laura Moss, David Corsar, Martin Shaw, Ian Piper, and Christopher Hawthorne.
+\newblock Demystifying the black box: The importance of interpretability of
+  predictive models in neurocritical care.
+\newblock \emph{Neurocritical care}, pages 1--7, 2022.
+
+\bibitem[Li et~al.(2015)Li, Han, Hou, Chen, and Chen]{li2015statistical}
+Huimin Li, Dong Han, Yawen Hou, Huilin Chen, and Zheng Chen.
+\newblock Statistical inference methods for two crossing survival curves: a
+  comparison of methods.
+\newblock \emph{PLoS One}, 10\penalty0 (1):\penalty0 e0116774, 2015.
+
+\bibitem[Uno et~al.(2011)Uno, Cai, Pencina, D'Agostino, and Wei]{uno2011c}
+Hajime Uno, Tianxi Cai, Michael~J Pencina, Ralph~B D'Agostino, and Lee-Jen Wei.
+\newblock On the c-statistics for evaluating overall adequacy of risk
+  prediction procedures with censored survival data.
+\newblock \emph{Statistics in medicine}, 30\penalty0 (10):\penalty0 1105--1117,
+  2011.
 
 \bibitem[Kalbfleisch and Prentice(2011)]{kalbfleisch2011statistical}
 John~D Kalbfleisch and Ross~L Prentice.
@@ -330,12 +373,6 @@ Charles~G Moertel, Thomas~R Fleming, John~S Macdonald, Daniel~G Haller, John~A
   resection of stage iii colon carcinoma: a final report.
 \newblock \emph{Annals of internal medicine}, 122\penalty0 (5):\penalty0
   321--326, 1995.
-
-\bibitem[Therneau(2022{\natexlab{b}})]{survival}
-Terry~M Therneau.
-\newblock \emph{A Package for Survival Analysis in R}, 2022{\natexlab{b}}.
-\newblock URL \url{https://CRAN.R-project.org/package=survival}.
-\newblock R package version 3.3-1.
 
 \bibitem[Therneau and Grambsch(2000)]{therneau2000cox}
 Terry~M Therneau and Patricia~M Grambsch.

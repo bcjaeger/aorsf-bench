@@ -4,11 +4,9 @@
 #'
 #' @title
 
-bench_time <- function(n_obs=100, n_ftr=10, n_tree = 50) {
+bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 1) {
 
-  train <- sim_surv(n_obs = n_obs, n_pred_main = n_ftr) %>%
-    getElement("data") %>%
-    select(time, status, starts_with("main"))
+  train <- data[seq(n_obs), seq(n_ftr)]
 
   pred_horizon <- median(train$time)
 

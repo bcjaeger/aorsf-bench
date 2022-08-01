@@ -7,45 +7,45 @@ Reallocating 'name_of_file' (item size: 1) to 5 items.
 Database file #1: main.bib
 Warning--empty year in censored
 Warning--can't use both volume and number fields in dispenzieri2012use
-You've used 70 entries,
+You've used 75 entries,
             2481 wiz_defined-function locations,
-            979 strings with 19734 characters,
-and the built_in function-call counts, 29333 in all, are:
-= -- 2318
-> -- 1930
-< -- 36
-+ -- 724
-- -- 582
-* -- 2523
-:= -- 4850
-add.period$ -- 230
-call.type$ -- 70
-change.case$ -- 127
-chr.to.int$ -- 68
-cite$ -- 72
-duplicate$ -- 1332
-empty$ -- 2447
-format.name$ -- 684
-if$ -- 6046
+            1005 strings with 21106 characters,
+and the built_in function-call counts, 31918 in all, are:
+= -- 2486
+> -- 2179
+< -- 37
++ -- 812
+- -- 660
+* -- 2784
+:= -- 5307
+add.period$ -- 246
+call.type$ -- 75
+change.case$ -- 136
+chr.to.int$ -- 73
+cite$ -- 77
+duplicate$ -- 1429
+empty$ -- 2621
+format.name$ -- 767
+if$ -- 6555
 int.to.chr$ -- 3
-int.to.str$ -- 71
-missing$ -- 63
-newline$ -- 375
-num.names$ -- 210
-pop$ -- 546
+int.to.str$ -- 76
+missing$ -- 67
+newline$ -- 401
+num.names$ -- 225
+pop$ -- 582
 preamble$ -- 1
-purify$ -- 70
+purify$ -- 75
 quote$ -- 0
-skip$ -- 788
+skip$ -- 844
 stack$ -- 0
-substring$ -- 1310
-swap$ -- 203
-text.length$ -- 7
+substring$ -- 1407
+swap$ -- 219
+text.length$ -- 8
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 475
+type$ -- 510
 warning$ -- 2
-while$ -- 235
+while$ -- 253
 width$ -- 0
-write$ -- 935
+write$ -- 1001
 (There were 2 warnings)

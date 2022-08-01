@@ -1050,3 +1050,27 @@ aric_stroke_load <- function(...){
 aric_death_load <- function(...){
   aric_load(outcome = "death")
 }
+
+
+jhs_load <- function(outcome){
+
+  new_names <- c('time', 'status')
+  old_names <- paste(new_names, outcome, sep = '_')
+
+  fread('data/jhs.csv') %>%
+    setnames(old = old_names, new = new_names) %>%
+    select(-starts_with("time_"),
+           -starts_with("status_"),
+           -newid) %>%
+    mutate(sex = factor(sex)) %>%
+    drop_na(time, status)
+
+}
+
+jhs_stroke_load <- function(){
+  jhs_load("stroke")
+}
+
+jhs_chd_load <- function(){
+  jhs_load("chd")
+}
