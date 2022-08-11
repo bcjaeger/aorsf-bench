@@ -1,4 +1,4 @@
-\begin{thebibliography}{75}
+\begin{thebibliography}{77}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -333,6 +333,22 @@ Tianqi Chen, Tong He, Michael Benesty, Vadim Khotilovich, Yuan Tang, Hyunsu
 Scott~M Lundberg, Gabriel~G Erion, and Su-In Lee.
 \newblock Consistent individualized feature attribution for tree ensembles.
 \newblock \emph{arXiv preprint arXiv:1802.03888}, 2018.
+
+\bibitem[Brilleman(2018)]{simsurv}
+Sam Brilleman.
+\newblock \emph{simsurv: Simulate Survival Data}, 2018.
+\newblock URL \url{https://CRAN.R-project.org/package=simsurv}.
+\newblock R package version 0.2.2, available at
+  \url{https://CRAN.R-project.org/package=simsurv}.
+
+\bibitem[Brilleman et~al.(2020)Brilleman, Wolfe, Moreno-Betancur, and
+  Crowther]{simsurv_paper}
+Samuel~L. Brilleman, Rory Wolfe, Margarita Moreno-Betancur, and Michael~J.
+  Crowther.
+\newblock Simulating survival data using the {simsurv} {R} package.
+\newblock \emph{Journal of Statistical Software}, 97\penalty0 (3):\penalty0
+  1--27, 2020.
+\newblock \doi{10.18637/jss.v097.i03}.
 
 \bibitem[Heller(2012)]{heller2012measure}
 Glenn Heller.

@@ -99,7 +99,7 @@
 	 Winston-Salem, NC 27157, USA \\
 	 \texttt{jspeiser@wakehealth.edu}
 	 \And
-	 Matthew Segar \\
+	 Matthew W. Segar \\
    Department of Cardiology \\
    Texas Heart Institute \\
    Houston, TX 77030, USA \\
@@ -226,19 +226,13 @@ pcens_min    <- table_value(100*min(data_key$pcens))
 
 \section{Introduction}
 
-Risk prediction may reduce the burden of disease by guiding strategies for prevention and treatment in a wide range of domains \citep{moons2012riskII, moons2012riskI}. The random survival forest (RSF; \citet{ishwaran2008random, hothorn2006unbiased}) is a supervised learning algorithm that has been used frequently for risk prediction \citep{wang2017selective}. Similar to random forests (RFs) for classification and regression \citep{breiman2001random}, The RSF is a large set of de-correlated and randomized decision trees, with each tree contributing to the ensemble's prediction function. Notable characteristics of the RSF include uniform convergence of its ensemble survival prediction function to the true survival function, first shown by \citet{ishwaran2010consistency} and later by \citet{cui2017consistency} under more general conditions. However, \citet{cui2017consistency} noted that the RSF is at a disadvantage when predictors are correlated and some are not relevant to the censored outcome, which is a strong possibility when large medical databases are leveraged for risk prediction.
+Risk prediction may reduce the burden of disease by guiding strategies for prevention and treatment in a wide range of domains \citep{moons2012riskII, moons2012riskI}. The random survival forest (RSF; \citet{ishwaran2008random, hothorn2006unbiased}) is a supervised learning algorithm that has been used frequently for risk prediction \citep{wang2017selective}. Similar to random forests (RFs) for classification and regression \citep{breiman2001random}, The RSF is a large set of de-correlated and randomized decision trees, with each tree contributing to the ensemble's prediction function. Notable characteristics of the RSF include uniform convergence of its ensemble survival prediction function to the true survival function, first shown by \citet{ishwaran2010consistency} and later by \citet{cui2017consistency} under more general conditions. However, \citet{cui2017consistency} noted that the RSF is at a disadvantage when predictors are correlated and some are not relevant to the censored outcome, which is a strong possibility when large clinical and `omic' databases are leveraged for risk prediction.
 
 A potential approach to improve the RSF when predictors are correlated and some are not relevant to the censored outcome is to use oblique trees instead of axis based trees. Axis based trees split data using a single predictor, creating decision boundaries that are perpendicular or parallel to axes of the predictor space \citep[see][Chapter~2]{breiman2017classification}. Oblique trees split data using a linear combination of predictors, creating decision boundaries that are neither parallel nor perpendicular to axes of their contributing predictors \citep[see][Chapter~5]{breiman2017classification}. \citet{menze2011oblique} examined prediction accuracy of RFs in the presence of correlated predictors and found that oblique RFs had substantially higher prediction accuracy compared to axis-based RFs. Similarly, \citet{jaeger2019oblique} found that growing RSFs with oblique rather than axis-based survival trees reduced the RSF's concordance error, with improvements ranging from 2.5\% to 24.9\% depending on the data analyzed.
 
 Oblique trees have at least two notable drawbacks compared to axis-based trees. First, finding a locally optimal oblique decision rule may require exponentially more computation than an axis-based rule. If $p$ predictors are potentially used to split $n$ observations, up to $\mathcal{O}(n^p)$ oblique splits can be assessed versus $\mathcal{O}(n \cdot p)$ axis-based splits \citep{heath1993induction, murthy1994system}. Second, estimating variable importance (VI) using permutation (a standard method for RFs) may be less effective in ensembles of oblique trees, as permuting the values of one predictor may not destabilize decisions that are based on linear combinations of predictors. Although VI is one of the most widely used strategies to interpret random forests \citep{ishwaran2019standard}, few studies have investigated VI for oblique random forests \citep[see][Section~5]{menze2011oblique}, and fewer have investigated VI specifically for the oblique RSF.
 
 The rest of this article is organized as follows. \secref{sec:background} reviews prior studies that have developed methods related to those introduced in the current study. In \secref{sec:aorsf}, we reduce the computational cost of oblique RSFs (\ie, accelerate them) with a scalable algorithm to identify linear combinations of coefficients. In \secref{sec:negation_vi}, we improve the interpretability of oblique RSFs with `negation VI', a method to estimate VI that flips the sign of coefficients in linear combinations of predictors instead of permuting predictor values. We evaluate these methods with general benchmarking experiments and simulation studies in \secref{sec:numeric}. In \secref{sec:discussion}, we summarize results from the current study and present ideas connecting the current work to existing frameworks and methods for RSFs that future studies may engage with. The accelerated oblique RSF and multiple methods to compute VI for oblique RSFs are available in the \texttt{aorsf} R Package.
-
-
-% However, there remains considerable potential to improve the RSF in settings where training samples are not large enough to guarantee asymptotic properties or do not align with the conditions required for consistency of the RSF.
-
-
-% Random forests (RFs) are large sets of de-correlated, randomized decision trees \citep{breiman2001random}, which can be axis based or oblique.Although using oblique rather than axis-based trees to grow a RSF may improve its prediction accuracy,
 
 
 \section{Related work} \label{sec:background}
@@ -651,18 +645,17 @@ We compute permutation VI for axis based RSFs using the \texttt{randomForestSRC}
 
 \subsubsection{Variable types}
 
-We considered five classes of predictor variables, with each class characterized by its variables' relationship to a right-censored outcome. Specifically, \begin{itemize}
+We considered five classes of predictor variables, with each class characterized by its variables' relationship to a right-censored outcome on the log-hazard scale. Specifically, \begin{itemize}
 \item \textit{irrelevant} variables had no relationship with the outcome.
-\item \textit{main effect} variables had a linear relationship to the outcome.
-\item \textit{non-linear effect} variables had a non-linear relationship to the outcome.
-\item \textit{combination effect} variables were formed by linear combinations of three other variables. While their combination was linearly related to the outcome, each of the three variables contributing to the combination had no relation to the outcome.
+\item \textit{main effect} variables had a linear relationship to the outcome on the log-hazard scale.
+\item \textit{non-linear effect} variables had a non-linear relationship to the outcome. A normally distributed variable $x$ was generated with a linear relationship to the outcome on the log-hazard scale, then $\tilde{x} = \text{sin}(a \cdot \pi \cdot x)$ was retained for modeling. The constant $a$ varied uniformly from 0.125 to 0.25.
+\item \textit{combination effect} variables were formed by linear combinations of three other variables. While their combination was linearly related to the outcome on the log-hazard scale, each of the three variables contributing to the combination had no relation to the outcome.
 \item \textit{interaction effect} variables were related to the outcome by multiplicative interaction with one other variable, which could have been a main effect, non-linear effect, or combination effect variable.
 \end{itemize}
 
-
 \subsubsection{Simulated data}
 
-We initiated each set of simulated data with a random draw of size $n$ from a $p$-dimensional multivariate normal distribution, yielding $n$ observations of $p$ predictors. Each of $p$ predictor variables had a mean of zero, standard deviation of 1, and correlation with other predictor variables drawn at random between a lower and upper boundary. A time-to-event outcome with roughly 45\% of observations censored was generated using the \texttt{simsurv} package. The full predictor matrix (\ie, including interactions, non-linear mappings, and combinations) was used to generate the outcome. Interactions, non-linear mappings, and combinations were dropped from the predictor matrix after the outcome was generated so that VI techniques could be evaluated based on their ability to detect these effects.
+We initiated each set of simulated data with a random draw of size $n$ from a $p$-dimensional multivariate normal distribution, yielding $n$ observations of $p$ predictors. Each of $p$ predictor variables had a mean of zero, standard deviation of 1, and correlation with other predictor variables drawn at random between a lower and upper boundary. A time-to-event outcome with roughly 45\% of observations censored was generated using the \texttt{simsurv} package \citep{simsurv, simsurv_paper}. The full predictor matrix (\ie, including interactions, non-linear mappings, and combinations) was used to generate the outcome. Interactions, non-linear mappings, and combinations were dropped from the predictor matrix after the outcome was generated so that VI techniques could be evaluated based on their ability to detect these effects.
 
 \subsubsection{Parameter specifications}
 
@@ -780,7 +773,7 @@ Oblique RSFs have exceptional prediction accuracy and this study has shown how t
 
 \subsection*{Acknowledgements}
 
-Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine. The project described was supported by the National Center for Advancing Translational Sciences (NCATS), National Institutes of Health, through Grant Award Number UL1TR001420. The content is solely the responsibility of the authors and does not necessarily represent the official views of the NIH.
+Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine. The project described was supported by the National Center for Advancing Translational Sciences (NCATS), National Institutes of Health, through Grant Award Number UL1TR001420. The content is solely the responsibility of the authors and does not necessarily represent the official views of the NIH. Dr. Pajewski was supported by grant number P30AG021332 from the National Institutes of Health, while Dr. Speiser was supported by K25AG068253.
 
 % Manual newpage inserted to improve layout of sample file - not
 % needed in general before appendices/bibliography.

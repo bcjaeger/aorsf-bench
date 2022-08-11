@@ -39,6 +39,9 @@ bench_pred_time_visualize <- function(bm_pred_clean, model_key) {
       )
     )
 
+  write_rds(gg_data, '../seminar-fastpack/time_fig_data.rds')
+  write_rds(medians, '../seminar-fastpack/time_fig_medians.rds')
+
 
   model_subsets <- list(
     slide_one = c('ranger-extratrees',
@@ -61,17 +64,17 @@ bench_pred_time_visualize <- function(bm_pred_clean, model_key) {
       )
     )
 
-  ggsave(figs$slide_one,
-         filename = '../seminar-fastpack/img/aorsf-bench-time_1.png',
-         dpi = 300,
-         width = 5.5,
-         height = 4.5)
-
-  ggsave(figs$slide_two,
-         filename = '../seminar-fastpack/img/aorsf-bench-time_2.png',
-         dpi = 300,
-         width = 5.5,
-         height = 4.5)
+  # ggsave(figs$slide_one,
+  #        filename = '../seminar-fastpack/img/aorsf-bench-time_1.png',
+  #        dpi = 300,
+  #        width = 5.5,
+  #        height = 4.5)
+  #
+  # ggsave(figs$slide_two,
+  #        filename = '../seminar-fastpack/img/aorsf-bench-time_2.png',
+  #        dpi = 300,
+  #        width = 5.5,
+  #        height = 4.5)
 
   list(medians = medians,
        fig = figs$paper)

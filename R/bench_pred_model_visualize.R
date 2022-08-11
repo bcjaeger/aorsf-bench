@@ -50,6 +50,8 @@ bench_pred_model_visualize <- function(bm_pred_model,
                                  "Time-dependent C-statistic"))
     )
 
+  write_rds(gg_data, "../seminar-fastpack/eval_fig_data.rds")
+
   plts <- gg_data |>
     group_by(metric) |>
     group_split() |>
