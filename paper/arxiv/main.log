@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.3) (preloaded format=pdflatex 2022.5.11)  10 AUG 2022 14:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.3) (preloaded format=pdflatex 2022.5.11)  12 AUG 2022 11:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -930,7 +930,7 @@ msfonts/cm/cmsy7.pfb><C:/Users/bjaeger/AppData/Local/Programs/MiKTeX/fonts/type
 pe1/urw/times/utmbi8a.pfb><C:/Users/bjaeger/AppData/Local/Programs/MiKTeX/fonts
 /type1/urw/times/utmr8a.pfb><C:/Users/bjaeger/AppData/Local/Programs/MiKTeX/fon
 ts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (41 pages, 621393 bytes).
+Output written on main.pdf (41 pages, 621343 bytes).
 PDF statistics:
  985 PDF objects out of 1000 (max. 8388607)
  191 named destinations out of 1000 (max. 500000)

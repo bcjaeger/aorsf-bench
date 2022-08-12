@@ -138,8 +138,7 @@ aorsf_fast_fit <- function(train, node_size = 10, ...){
     n_retry = 3,
     split_min_obs = node_size,
     split_min_events = split_min_events,
-    control = orsf_control_cph(iter_max = 1,
-                               do_scale = FALSE),
+    control = orsf_control_fast(),
     importance = 'none',
     oobag_pred = FALSE
   )

@@ -461,7 +461,7 @@ A full summary of all results presented in this Section is provided in \tabrefAp
 
 \paragraph{Index of prediction accuracy}
 
-Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest IPA in 20 out of 35 risk prediction tasks, with an overall mean IPA of 12.7 (Figure \ref{fig:bm_pred_viz_ibs}). Compared to the learner with the second highest mean IPA (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 1.36 points higher, a relative increase of 12.0\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected IPA was 0.99, and the posterior probability of \texttt{aorsf-fast} having a superior IPA to other learners ranged from 0.79 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_ibs})
+Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest IPA in 20 out of 35 risk prediction tasks, with an overall mean IPA of 12.6 (Figure \ref{fig:bm_pred_viz_ibs}). Compared to the learner with the second highest mean IPA (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 1.35 points higher, a relative increase of 12.0\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected IPA was 0.99, and the posterior probability of \texttt{aorsf-fast} having a superior IPA to other learners ranged from 0.78 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_ibs})
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
@@ -483,7 +483,7 @@ Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the hig
 
 
 
-Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest time-dependent C-statistic in 9 out of 35 risk prediction tasks, with an overall mean of 77.2 (Figure \ref{fig:bm_pred_viz_cstat}). Compared to the learner with the second highest mean C-statistic (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 0.721 points higher, a relative increase of 0.943\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected time-dependent C-statistics was 0.99, and the posterior probability of \texttt{aorsf-fast} having a superior time-dependent C-statistic versus other learners ranged from 0.24 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_cstat})
+Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest time-dependent C-statistic in 10 out of 35 risk prediction tasks, with an overall mean of 77.2 (Figure \ref{fig:bm_pred_viz_cstat}). Compared to the learner with the second highest mean C-statistic (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 0.685 points higher, a relative increase of 0.896\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected time-dependent C-statistics was 0.99, and the posterior probability of \texttt{aorsf-fast} having a superior time-dependent C-statistic versus other learners ranged from 0.21 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_cstat})
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
@@ -505,7 +505,7 @@ Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the hig
 
 \paragraph{Computational efficiency}
 
-Overall, \texttt{aorsf-fast} was the second fastest learner, with an expected model development and risk prediction time about 256 milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was 446.1 times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was 18.9, 1.83, and 3.12 faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
+Overall, \texttt{aorsf-fast} was the second fastest learner, with an expected model development and risk prediction time about 287 milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was 428.0 times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was 18.2, 1.75, and 2.99 faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
 
 
 
@@ -568,7 +568,7 @@ The three techniques that used `aorsf' to estimate VI were ranked first (\texttt
 
 \section{Discussion} \label{sec:discussion}
 
-In this paper, we have developed two contributions to the oblique RSF: (1) the accelerated oblique RSF (\ie, \texttt{aorsf-fast}) and (2) negation VI. Our technique to accelerate the oblique RSF reduces the number of operations required to find linear combinations of inputs using a single iteration of Newton Raphson scoring, while our VI technique directly engages with coefficients in linear combinations of inputs to measure importance of individual variables. In numeric experiments, we found that that \texttt{aorsf-fast} is approximately 446.1 times faster than its predecessor, \texttt{obliqueRSF-net}, with a practically equivalent C-statistic. We also found that negation VI, a technique to estimate VI using the oblique RSF, detected non-linear, combination, and main effects more effectively than three standard methods to estimate VI: permutation, ANOVA, and SHAP VI. Overall, we found that estimating VI using negation instead of ANOVA increased the C-statistic for ranking a relevant variable higher than an irrelevant variable by 2.05, a relative increase of 2.78\%.
+In this paper, we have developed two contributions to the oblique RSF: (1) the accelerated oblique RSF (\ie, \texttt{aorsf-fast}) and (2) negation VI. Our technique to accelerate the oblique RSF reduces the number of operations required to find linear combinations of inputs using a single iteration of Newton Raphson scoring, while our VI technique directly engages with coefficients in linear combinations of inputs to measure importance of individual variables. In numeric experiments, we found that that \texttt{aorsf-fast} is approximately 428.0 times faster than its predecessor, \texttt{obliqueRSF-net}, with a practically equivalent C-statistic. We also found that negation VI, a technique to estimate VI using the oblique RSF, detected non-linear, combination, and main effects more effectively than three standard methods to estimate VI: permutation, ANOVA, and SHAP VI. Overall, we found that estimating VI using negation instead of ANOVA increased the C-statistic for ranking a relevant variable higher than an irrelevant variable by 2.05, a relative increase of 2.78\%.
 
 \subsection{Implications of our results}
 
@@ -735,7 +735,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Overall}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.127 (0.109) & 0.772 (0.071) & 0.593 & 0.146\\
+\hspace{1em}aorsf-fast & 0.126 (0.110) & 0.772 (0.071) & 0.632 & 0.135\\
 \hspace{1em}aorsf-cph & 0.126 (0.109) & 0.771 (0.070) & 1.344 & 0.148\\
 \hspace{1em}aorsf-net & 0.124 (0.112) & 0.771 (0.071) & 79.741 & 0.158\\
 \hspace{1em}obliqueRSF-net & 0.113 (0.085) & 0.771 (0.071) & 300.393 & 18.803\\
@@ -757,7 +757,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}obliqueRSF-net & 0.027 (0.022) & 0.746 (0.038) & 25.980 & 15.236\\
 \hspace{1em}aorsf-cph & 0.025 (0.029) & 0.751 (0.042) & 0.471 & 0.033\\
 \hspace{1em}cif-standard & 0.024 (0.031) & 0.744 (0.040) & 1.771 & 4.657\\
-\hspace{1em}aorsf-fast & 0.024 (0.028) & 0.745 (0.044) & 0.198 & 0.033\\
+\hspace{1em}aorsf-fast & 0.024 (0.029) & 0.746 (0.043) & 1.057 & 0.032\\
 \hspace{1em}cif-extension & 0.023 (0.015) & 0.722 (0.038) & 9.848 & 4.083\\
 \hspace{1em}aorsf-net & 0.019 (0.034) & 0.745 (0.042) & 18.451 & 0.035\\
 \hspace{1em}glmnet-cox & 0.016 (0.030) & 0.746 (0.037) & 0.179 & 0.003\\
@@ -769,9 +769,9 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ACTG 320; death, n = 1151, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.010 (0.022) & 0.840 (0.054) & 0.086 & 0.020\\
 \hspace{1em}obliqueRSF-net & 0.007 (0.011) & 0.823 (0.052) & 8.869 & 11.004\\
 \hspace{1em}aorsf-cph & 0.007 (0.018) & 0.821 (0.060) & 0.414 & 0.020\\
+\hspace{1em}aorsf-fast & 0.005 (0.019) & 0.827 (0.056) & 0.993 & 0.019\\
 \hspace{1em}aorsf-random & 0.005 (0.014) & 0.788 (0.074) & 0.278 & 0.023\\
 \hspace{1em}cif-extension & 0.001 (0.020) & 0.765 (0.066) & 8.436 & 3.493\\
 \hspace{1em}ranger-extratrees & 0.001 (0.019) & 0.777 (0.069) & 0.044 & 0.138\\
@@ -786,7 +786,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ARIC; coronary heart disease, n = 13623, p = 41}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.157 (0.007) & 0.810 (0.007) & 4.640 & 1.320\\
+\hspace{1em}aorsf-fast & 0.156 (0.007) & 0.810 (0.007) & 5.063 & 1.279\\
 \hspace{1em}aorsf-cph & 0.153 (0.006) & 0.809 (0.007) & 14.503 & 1.347\\
 \hspace{1em}aorsf-net & 0.152 (0.006) & 0.809 (0.007) & 533.804 & 1.437\\
 \hspace{1em}rsf-standard & 0.150 (0.007) & 0.801 (0.007) & 9.407 & 0.991\\
@@ -805,8 +805,8 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}aorsf-net & 0.217 (0.006) & 0.792 (0.004) & 932.212 & 2.377\\
 \hspace{1em}rsf-standard & 0.216 (0.006) & 0.789 (0.004) & 14.727 & 1.274\\
+\hspace{1em}aorsf-fast & 0.216 (0.007) & 0.792 (0.004) & 7.350 & 2.050\\
 \hspace{1em}aorsf-cph & 0.216 (0.006) & 0.792 (0.004) & 22.922 & 2.179\\
-\hspace{1em}aorsf-fast & 0.215 (0.007) & 0.792 (0.004) & 7.641 & 2.214\\
 \hspace{1em}obliqueRSF-net & 0.207 (0.005) & 0.791 (0.004) & 7329.229 & 331.164\\
 \hspace{1em}cif-standard & 0.201 (0.004) & 0.790 (0.004) & 72.253 & 384.744\\
 \hspace{1em}nn-cox & 0.193 (0.011) & 0.780 (0.005) & 103.296 & 92.992\\
@@ -820,7 +820,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ARIC; heart failure, n = 13623, p = 41}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.234 (0.006) & 0.841 (0.005) & 5.268 & 2.193\\
+\hspace{1em}aorsf-fast & 0.233 (0.006) & 0.841 (0.005) & 5.741 & 1.473\\
 \hspace{1em}rsf-standard & 0.229 (0.006) & 0.835 (0.005) & 11.238 & 1.079\\
 \hspace{1em}aorsf-cph & 0.229 (0.006) & 0.841 (0.005) & 16.864 & 2.308\\
 \hspace{1em}aorsf-net & 0.228 (0.006) & 0.841 (0.005) & 623.727 & 1.685\\
@@ -837,7 +837,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ARIC; stroke, n = 13623, p = 41}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.093 (0.004) & 0.793 (0.007) & 4.179 & 1.122\\
+\hspace{1em}aorsf-fast & 0.093 (0.004) & 0.794 (0.007) & 3.730 & 1.052\\
 \hspace{1em}aorsf-net & 0.090 (0.004) & 0.792 (0.007) & 371.989 & 1.175\\
 \hspace{1em}aorsf-cph & 0.090 (0.004) & 0.792 (0.007) & 13.462 & 1.149\\
 \hspace{1em}rsf-standard & 0.090 (0.006) & 0.784 (0.006) & 8.991 & 0.984\\
@@ -854,7 +854,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Colon cancer; death, n = 929, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.100 (0.014) & 0.718 (0.012) & 0.239 & 0.053\\
+\hspace{1em}aorsf-fast & 0.100 (0.014) & 0.717 (0.012) & 0.234 & 0.047\\
 \hspace{1em}aorsf-cph & 0.099 (0.014) & 0.717 (0.011) & 0.638 & 0.052\\
 \hspace{1em}cif-standard & 0.097 (0.013) & 0.710 (0.012) & 0.745 & 3.685\\
 \hspace{1em}aorsf-net & 0.096 (0.014) & 0.717 (0.012) & 49.140 & 0.047\\
@@ -871,7 +871,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Colon cancer; recurrence, n = 929, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.099 (0.017) & 0.713 (0.016) & 0.225 & 0.050\\
+\hspace{1em}aorsf-fast & 0.100 (0.017) & 0.713 (0.016) & 0.238 & 0.049\\
 \hspace{1em}aorsf-cph & 0.098 (0.017) & 0.712 (0.015) & 0.629 & 0.050\\
 \hspace{1em}aorsf-net & 0.095 (0.018) & 0.713 (0.017) & 49.866 & 0.048\\
 \hspace{1em}aorsf-random & 0.091 (0.013) & 0.706 (0.013) & 0.926 & 0.043\\
@@ -892,7 +892,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}cif-rotate & 0.070 (0.018) & 0.747 (0.027) & 6452.563 & 360.067\\
 \hspace{1em}cif-standard & 0.067 (0.019) & 0.747 (0.030) & 9.660 & 4.247\\
 \hspace{1em}aorsf-cph & 0.067 (0.029) & 0.747 (0.026) & 1.287 & 0.185\\
-\hspace{1em}aorsf-fast & 0.065 (0.028) & 0.746 (0.026) & 0.724 & 0.177\\
+\hspace{1em}aorsf-fast & 0.065 (0.028) & 0.747 (0.027) & 0.700 & 0.165\\
 \hspace{1em}cif-extension & 0.064 (0.016) & 0.746 (0.028) & 44.047 & 6.554\\
 \hspace{1em}ranger-extratrees & 0.061 (0.022) & 0.742 (0.031) & 0.228 & 0.169\\
 \hspace{1em}glmnet-cox & 0.041 (0.032) & 0.724 (0.036) & 5.780 & 0.006\\
@@ -907,7 +907,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}glmnet-cox & 0.117 (0.028) & 0.787 (0.037) & 0.098 & 0.002\\
 \hspace{1em}aorsf-cph & 0.100 (0.039) & 0.769 (0.033) & 0.169 & 0.018\\
-\hspace{1em}aorsf-fast & 0.100 (0.038) & 0.768 (0.033) & 0.090 & 0.018\\
+\hspace{1em}aorsf-fast & 0.100 (0.037) & 0.768 (0.032) & 0.078 & 0.017\\
 \hspace{1em}aorsf-net & 0.097 (0.040) & 0.760 (0.034) & 12.619 & 0.018\\
 \hspace{1em}obliqueRSF-net & 0.089 (0.027) & 0.758 (0.036) & 97.158 & 5.447\\
 \hspace{1em}cif-rotate & 0.087 (0.048) & 0.755 (0.027) & 6.083 & 1.964\\
@@ -929,7 +929,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}xgboost-cox & 0.010 (0.016) & 0.598 (0.031) & 1.331 & 0.002\\
 \hspace{1em}cif-standard & 0.008 (0.021) & 0.594 (0.023) & 0.315 & 1.056\\
 \hspace{1em}aorsf-cph & 0.007 (0.020) & 0.595 (0.026) & 0.262 & 0.021\\
-\hspace{1em}aorsf-fast & 0.007 (0.019) & 0.594 (0.025) & 0.122 & 0.021\\
+\hspace{1em}aorsf-fast & 0.007 (0.020) & 0.594 (0.026) & 0.113 & 0.020\\
 \hspace{1em}aorsf-net & 0.006 (0.020) & 0.592 (0.026) & 18.761 & 0.022\\
 \hspace{1em}cif-extension & -0.005 (0.023) & 0.580 (0.028) & 6.164 & 2.309\\
 \hspace{1em}nn-cox & -0.008 (0.023) & 0.526 (0.055) & 12.031 & 0.466\\
@@ -944,7 +944,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}rsf-standard & 0.120 (0.023) & 0.738 (0.019) & 1.437 & 0.115\\
 \hspace{1em}aorsf-net & 0.120 (0.024) & 0.738 (0.020) & 36.113 & 0.038\\
 \hspace{1em}aorsf-cph & 0.120 (0.025) & 0.736 (0.018) & 0.411 & 0.038\\
-\hspace{1em}aorsf-fast & 0.115 (0.024) & 0.733 (0.017) & 0.168 & 0.037\\
+\hspace{1em}aorsf-fast & 0.115 (0.024) & 0.733 (0.017) & 0.163 & 0.036\\
 \hspace{1em}cif-extension & 0.114 (0.017) & 0.743 (0.019) & 7.560 & 2.919\\
 \hspace{1em}cif-rotate & 0.107 (0.023) & 0.729 (0.017) & 11.241 & 3.023\\
 \hspace{1em}aorsf-random & 0.104 (0.023) & 0.724 (0.025) & 0.754 & 0.036\\
@@ -956,7 +956,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{GUIDE-IT; CVD death, n = 894, p = 59}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.075 (0.018) & 0.746 (0.027) & 0.152 & 0.036\\
+\hspace{1em}aorsf-fast & 0.075 (0.018) & 0.745 (0.027) & 0.165 & 0.035\\
 \hspace{1em}aorsf-net & 0.074 (0.019) & 0.743 (0.027) & 29.058 & 0.041\\
 \hspace{1em}aorsf-cph & 0.071 (0.018) & 0.741 (0.028) & 0.403 & 0.037\\
 \hspace{1em}glmnet-cox & 0.063 (0.041) & 0.715 (0.091) & 0.502 & 0.002\\
@@ -975,7 +975,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}aorsf-net & 0.082 (0.017) & 0.722 (0.023) & 53.095 & 0.058\\
 \hspace{1em}aorsf-cph & 0.081 (0.018) & 0.722 (0.023) & 0.659 & 0.052\\
-\hspace{1em}aorsf-fast & 0.081 (0.019) & 0.722 (0.025) & 0.232 & 0.052\\
+\hspace{1em}aorsf-fast & 0.080 (0.020) & 0.722 (0.025) & 0.253 & 0.051\\
 \hspace{1em}ranger-extratrees & 0.073 (0.010) & 0.722 (0.022) & 0.137 & 0.198\\
 \hspace{1em}obliqueRSF-net & 0.073 (0.010) & 0.721 (0.023) & 389.465 & 9.365\\
 \hspace{1em}cif-standard & 0.070 (0.010) & 0.716 (0.023) & 1.468 & 3.315\\
@@ -992,7 +992,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}aorsf-cph & 0.040 (0.008) & 0.778 (0.015) & 6.783 & 0.588\\
 \hspace{1em}obliqueRSF-net & 0.039 (0.007) & 0.780 (0.015) & 185.659 & 130.539\\
-\hspace{1em}aorsf-fast & 0.039 (0.007) & 0.777 (0.015) & 2.260 & 0.566\\
+\hspace{1em}aorsf-fast & 0.039 (0.007) & 0.776 (0.014) & 0.581 & 0.138\\
 \hspace{1em}aorsf-net & 0.039 (0.009) & 0.777 (0.016) & 78.653 & 0.606\\
 \hspace{1em}cif-standard & 0.038 (0.006) & 0.779 (0.017) & 10.065 & 30.887\\
 \hspace{1em}cif-extension & 0.036 (0.004) & 0.781 (0.019) & 54.976 & 20.544\\
@@ -1009,7 +1009,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}aorsf-cph & 0.036 (0.006) & 0.806 (0.016) & 6.729 & 0.588\\
 \hspace{1em}aorsf-net & 0.035 (0.008) & 0.807 (0.016) & 72.257 & 0.610\\
-\hspace{1em}aorsf-fast & 0.035 (0.007) & 0.807 (0.018) & 2.321 & 0.571\\
+\hspace{1em}aorsf-fast & 0.035 (0.007) & 0.806 (0.017) & 0.588 & 0.149\\
 \hspace{1em}obliqueRSF-net & 0.030 (0.006) & 0.807 (0.016) & 161.865 & 165.270\\
 \hspace{1em}glmnet-cox & 0.028 (0.008) & 0.798 (0.017) & 2.325 & 0.004\\
 \hspace{1em}cif-standard & 0.028 (0.005) & 0.803 (0.016) & 10.613 & 32.291\\
@@ -1026,7 +1026,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}aorsf-cph & 0.063 (0.032) & 0.691 (0.019) & 0.316 & 0.030\\
 \hspace{1em}aorsf-net & 0.061 (0.030) & 0.685 (0.019) & 31.742 & 0.031\\
-\hspace{1em}aorsf-fast & 0.059 (0.033) & 0.690 (0.019) & 0.125 & 0.030\\
+\hspace{1em}aorsf-fast & 0.059 (0.033) & 0.690 (0.019) & 0.126 & 0.028\\
 \hspace{1em}obliqueRSF-net & 0.058 (0.020) & 0.678 (0.020) & 294.626 & 2.961\\
 \hspace{1em}cif-extension & 0.050 (0.018) & 0.667 (0.019) & 9.104 & 3.317\\
 \hspace{1em}rsf-standard & 0.050 (0.035) & 0.673 (0.023) & 0.941 & 0.073\\
@@ -1041,7 +1041,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{MESA; coronary heart disease, n = 6785, p = 48}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.063 (0.010) & 0.807 (0.011) & 1.219 & 0.352\\
+\hspace{1em}aorsf-fast & 0.064 (0.009) & 0.807 (0.010) & 1.338 & 0.349\\
 \hspace{1em}aorsf-net & 0.062 (0.010) & 0.805 (0.012) & 176.990 & 0.387\\
 \hspace{1em}obliqueRSF-net & 0.062 (0.008) & 0.808 (0.012) & 488.662 & 265.171\\
 \hspace{1em}aorsf-cph & 0.060 (0.010) & 0.801 (0.012) & 5.393 & 0.382\\
@@ -1058,8 +1058,8 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{MESA; death, n = 6793, p = 48}}}\\
 \hline
+\hspace{1em}aorsf-fast & 0.145 (0.008) & 0.792 (0.008) & 1.863 & 0.497\\
 \hspace{1em}aorsf-net & 0.144 (0.008) & 0.792 (0.009) & 318.785 & 0.546\\
-\hspace{1em}aorsf-fast & 0.144 (0.009) & 0.792 (0.009) & 1.694 & 0.506\\
 \hspace{1em}aorsf-cph & 0.143 (0.008) & 0.791 (0.009) & 6.893 & 0.523\\
 \hspace{1em}rsf-standard & 0.140 (0.008) & 0.784 (0.009) & 4.818 & 0.502\\
 \hspace{1em}obliqueRSF-net & 0.139 (0.007) & 0.791 (0.009) & 1176.365 & 156.871\\
@@ -1075,7 +1075,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{MESA; heart failure, n = 6785, p = 48}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.115 (0.010) & 0.866 (0.013) & 1.094 & 0.311\\
+\hspace{1em}aorsf-fast & 0.115 (0.011) & 0.865 (0.012) & 1.216 & 0.311\\
 \hspace{1em}aorsf-net & 0.114 (0.011) & 0.863 (0.013) & 149.605 & 0.339\\
 \hspace{1em}aorsf-cph & 0.109 (0.011) & 0.858 (0.014) & 4.842 & 0.326\\
 \hspace{1em}rsf-standard & 0.108 (0.012) & 0.856 (0.012) & 3.125 & 1.151\\
@@ -1095,7 +1095,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}obliqueRSF-net & 0.025 (0.004) & 0.767 (0.016) & 357.039 & 299.786\\
 \hspace{1em}cif-rotate & 0.025 (0.004) & 0.764 (0.017) & 268.402 & 37.899\\
 \hspace{1em}cif-standard & 0.025 (0.004) & 0.762 (0.017) & 23.450 & 98.166\\
-\hspace{1em}aorsf-fast & 0.025 (0.006) & 0.764 (0.016) & 1.072 & 0.307\\
+\hspace{1em}aorsf-fast & 0.025 (0.006) & 0.764 (0.016) & 1.174 & 0.303\\
 \hspace{1em}aorsf-net & 0.024 (0.006) & 0.759 (0.017) & 139.617 & 0.333\\
 \hspace{1em}aorsf-cph & 0.023 (0.005) & 0.758 (0.016) & 4.266 & 0.316\\
 \hspace{1em}ranger-extratrees & 0.022 (0.003) & 0.759 (0.016) & 7.610 & 6.738\\
@@ -1111,7 +1111,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}cif-rotate & 0.159 (0.019) & 0.744 (0.014) & 15.123 & 4.858\\
 \hspace{1em}aorsf-cph & 0.158 (0.016) & 0.743 (0.011) & 1.154 & 0.084\\
-\hspace{1em}aorsf-fast & 0.157 (0.016) & 0.743 (0.011) & 0.408 & 0.088\\
+\hspace{1em}aorsf-fast & 0.157 (0.016) & 0.743 (0.011) & 0.496 & 0.084\\
 \hspace{1em}aorsf-net & 0.155 (0.016) & 0.741 (0.011) & 85.428 & 0.085\\
 \hspace{1em}obliqueRSF-net & 0.155 (0.013) & 0.743 (0.011) & 232.467 & 12.924\\
 \hspace{1em}cif-standard & 0.151 (0.015) & 0.738 (0.012) & 1.537 & 5.829\\
@@ -1128,7 +1128,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}glmnet-cox & 0.015 (0.011) & 0.651 (0.055) & 0.118 & 0.003\\
 \hspace{1em}aorsf-cph & 0.011 (0.013) & 0.644 (0.036) & 0.574 & 0.040\\
-\hspace{1em}aorsf-fast & 0.010 (0.014) & 0.641 (0.036) & 0.201 & 0.041\\
+\hspace{1em}aorsf-fast & 0.010 (0.014) & 0.642 (0.036) & 0.194 & 0.039\\
 \hspace{1em}ranger-extratrees & 0.008 (0.006) & 0.642 (0.030) & 0.095 & 0.177\\
 \hspace{1em}cif-extension & 0.008 (0.010) & 0.625 (0.028) & 9.141 & 4.788\\
 \hspace{1em}obliqueRSF-net & 0.007 (0.010) & 0.628 (0.033) & 41.856 & 16.910\\
@@ -1149,7 +1149,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}aorsf-net & 0.530 (0.028) & 0.928 (0.010) & 50.720 & 0.043\\
 \hspace{1em}aorsf-cph & 0.522 (0.024) & 0.925 (0.011) & 0.788 & 0.041\\
 \hspace{1em}rsf-standard & 0.519 (0.022) & 0.922 (0.010) & 1.631 & 0.106\\
-\hspace{1em}aorsf-fast & 0.516 (0.027) & 0.923 (0.012) & 0.214 & 0.041\\
+\hspace{1em}aorsf-fast & 0.517 (0.027) & 0.923 (0.012) & 0.314 & 0.039\\
 \hspace{1em}xgboost-cox & 0.512 (0.029) & 0.932 (0.009) & 13.972 & 0.004\\
 \hspace{1em}cif-standard & 0.472 (0.029) & 0.902 (0.018) & 0.453 & 1.910\\
 \hspace{1em}cif-extension & 0.454 (0.025) & 0.920 (0.013) & 8.854 & 3.924\\
@@ -1162,7 +1162,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}aorsf-random & 0.076 (0.030) & 0.686 (0.026) & 0.304 & 0.015\\
 \hspace{1em}ranger-extratrees & 0.062 (0.028) & 0.675 (0.033) & 0.023 & 0.031\\
-\hspace{1em}aorsf-fast & 0.060 (0.043) & 0.672 (0.026) & 0.067 & 0.016\\
+\hspace{1em}aorsf-fast & 0.061 (0.043) & 0.672 (0.025) & 0.068 & 0.015\\
 \hspace{1em}obliqueRSF-net & 0.058 (0.026) & 0.676 (0.029) & 106.084 & 1.468\\
 \hspace{1em}aorsf-cph & 0.058 (0.041) & 0.670 (0.024) & 0.150 & 0.016\\
 \hspace{1em}cif-standard & 0.055 (0.032) & 0.670 (0.030) & 0.130 & 0.252\\
@@ -1179,7 +1179,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}aorsf-net & 0.142 (0.056) & 0.804 (0.056) & 10.798 & 0.014\\
 \hspace{1em}aorsf-cph & 0.124 (0.049) & 0.802 (0.051) & 0.078 & 0.013\\
-\hspace{1em}aorsf-fast & 0.121 (0.052) & 0.802 (0.054) & 0.052 & 0.014\\
+\hspace{1em}aorsf-fast & 0.121 (0.052) & 0.802 (0.054) & 0.050 & 0.013\\
 \hspace{1em}cif-rotate & 0.118 (0.059) & 0.787 (0.049) & 27.382 & 3.379\\
 \hspace{1em}obliqueRSF-net & 0.106 (0.051) & 0.792 (0.061) & 79.059 & 0.558\\
 \hspace{1em}cif-extension & 0.098 (0.055) & 0.799 (0.061) & 8.595 & 3.554\\
@@ -1195,7 +1195,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \multicolumn{5}{l}{\textit{\textbf{Non-alcohol fatty liver disease; death, n = 17549, p = 24}}}\\
 \hline
 \hspace{1em}aorsf-cph & 0.213 (0.008) & 0.868 (0.005) & 17.724 & 1.232\\
-\hspace{1em}aorsf-fast & 0.212 (0.009) & 0.869 (0.005) & 4.868 & 1.247\\
+\hspace{1em}aorsf-fast & 0.212 (0.008) & 0.868 (0.005) & 4.466 & 1.206\\
 \hspace{1em}aorsf-net & 0.210 (0.008) & 0.864 (0.006) & 471.404 & 1.283\\
 \hspace{1em}obliqueRSF-net & 0.209 (0.008) & 0.868 (0.006) & 1428.698 & 1042.701\\
 \hspace{1em}rsf-standard & 0.207 (0.009) & 0.860 (0.005) & 10.516 & 1.205\\
@@ -1211,7 +1211,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Primary biliary cholangitis; death, n = 276, p = 19}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.430 (0.032) & 0.908 (0.021) & 0.082 & 0.019\\
+\hspace{1em}aorsf-fast & 0.430 (0.032) & 0.908 (0.021) & 0.068 & 0.017\\
 \hspace{1em}aorsf-cph & 0.418 (0.034) & 0.906 (0.021) & 0.162 & 0.018\\
 \hspace{1em}aorsf-net & 0.413 (0.035) & 0.905 (0.021) & 14.047 & 0.019\\
 \hspace{1em}cif-rotate & 0.405 (0.040) & 0.899 (0.022) & 10.102 & 1.933\\
@@ -1231,7 +1231,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}aorsf-net & 0.166 (0.012) & 0.762 (0.009) & 147.998 & 0.185\\
 \hspace{1em}obliqueRSF-net & 0.163 (0.010) & 0.761 (0.009) & 439.210 & 37.683\\
 \hspace{1em}aorsf-cph & 0.163 (0.012) & 0.759 (0.009) & 2.520 & 0.201\\
-\hspace{1em}aorsf-fast & 0.161 (0.012) & 0.757 (0.009) & 0.845 & 0.198\\
+\hspace{1em}aorsf-fast & 0.160 (0.013) & 0.757 (0.010) & 0.920 & 0.191\\
 \hspace{1em}cif-standard & 0.159 (0.010) & 0.759 (0.009) & 4.629 & 22.523\\
 \hspace{1em}rsf-standard & 0.159 (0.014) & 0.756 (0.009) & 3.066 & 0.967\\
 \hspace{1em}aorsf-random & 0.153 (0.010) & 0.752 (0.010) & 2.840 & 0.180\\
@@ -1249,7 +1249,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}aorsf-net & 0.146 (0.011) & 0.735 (0.009) & 160.272 & 0.191\\
 \hspace{1em}aorsf-cph & 0.145 (0.012) & 0.734 (0.008) & 2.678 & 0.205\\
 \hspace{1em}cif-standard & 0.144 (0.011) & 0.734 (0.009) & 4.807 & 23.027\\
-\hspace{1em}aorsf-fast & 0.143 (0.011) & 0.733 (0.009) & 0.854 & 0.206\\
+\hspace{1em}aorsf-fast & 0.143 (0.011) & 0.733 (0.009) & 0.990 & 0.201\\
 \hspace{1em}aorsf-random & 0.141 (0.010) & 0.730 (0.008) & 3.192 & 0.185\\
 \hspace{1em}rsf-standard & 0.139 (0.012) & 0.731 (0.008) & 3.003 & 1.000\\
 \hspace{1em}ranger-extratrees & 0.135 (0.007) & 0.734 (0.009) & 3.564 & 2.555\\
@@ -1262,7 +1262,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Serum free light chain; death, n = 7874, p = 10}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.250 (0.014) & 0.825 (0.007) & 2.023 & 0.587\\
+\hspace{1em}aorsf-fast & 0.250 (0.014) & 0.825 (0.007) & 3.030 & 0.559\\
 \hspace{1em}aorsf-cph & 0.250 (0.013) & 0.825 (0.008) & 6.401 & 0.580\\
 \hspace{1em}aorsf-net & 0.250 (0.012) & 0.823 (0.008) & 278.411 & 0.563\\
 \hspace{1em}glmnet-cox & 0.248 (0.012) & 0.820 (0.007) & 0.539 & 0.006\\
@@ -1281,7 +1281,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}glmnet-cox & 0.071 (0.011) & 0.795 (0.011) & 13.850 & 0.011\\
 \hspace{1em}aorsf-net & 0.070 (0.007) & 0.796 (0.011) & 337.860 & 0.660\\
-\hspace{1em}aorsf-fast & 0.069 (0.006) & 0.797 (0.011) & 2.581 & 0.638\\
+\hspace{1em}aorsf-fast & 0.070 (0.006) & 0.797 (0.010) & 2.522 & 0.578\\
 \hspace{1em}aorsf-cph & 0.069 (0.006) & 0.797 (0.011) & 9.028 & 0.596\\
 \hspace{1em}obliqueRSF-net & 0.068 (0.005) & 0.798 (0.012) & 1017.350 & 425.134\\
 \hspace{1em}rsf-standard & 0.065 (0.007) & 0.788 (0.014) & 3.894 & 1.314\\
@@ -1298,7 +1298,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hline
 \hspace{1em}glmnet-cox & 0.123 (0.012) & 0.771 (0.009) & 5.422 & 0.010\\
 \hspace{1em}aorsf-cph & 0.117 (0.008) & 0.770 (0.008) & 12.876 & 1.527\\
-\hspace{1em}aorsf-fast & 0.116 (0.008) & 0.770 (0.008) & 3.583 & 1.514\\
+\hspace{1em}aorsf-fast & 0.115 (0.009) & 0.769 (0.008) & 3.749 & 1.716\\
 \hspace{1em}aorsf-net & 0.113 (0.009) & 0.769 (0.009) & 590.419 & 0.934\\
 \hspace{1em}obliqueRSF-net & 0.112 (0.007) & 0.767 (0.008) & 2630.588 & 231.667\\
 \hspace{1em}rsf-standard & 0.110 (0.008) & 0.763 (0.009) & 6.407 & 0.663\\
@@ -1318,8 +1318,8 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}cif-rotate & 0.113 (0.013) & 0.741 (0.011) & 71.714 & 10.523\\
 \hspace{1em}aorsf-net & 0.112 (0.013) & 0.743 (0.012) & 118.505 & 0.158\\
 \hspace{1em}aorsf-cph & 0.112 (0.013) & 0.744 (0.012) & 1.895 & 0.147\\
-\hspace{1em}aorsf-fast & 0.110 (0.015) & 0.743 (0.011) & 0.586 & 0.146\\
 \hspace{1em}cif-standard & 0.110 (0.011) & 0.744 (0.011) & 4.079 & 16.213\\
+\hspace{1em}aorsf-fast & 0.109 (0.015) & 0.743 (0.012) & 0.634 & 0.142\\
 \hspace{1em}rsf-standard & 0.105 (0.011) & 0.735 (0.011) & 2.510 & 0.252\\
 \hspace{1em}cif-extension & 0.094 (0.006) & 0.744 (0.012) & 29.918 & 10.109\\
 \hspace{1em}ranger-extratrees & 0.091 (0.008) & 0.738 (0.012) & 3.266 & 1.328\\
@@ -1331,7 +1331,7 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \multicolumn{5}{l}{\textit{\textbf{VA lung cancer trial; death, n = 137, p = 8}}}\\
 \hline
 \hspace{1em}aorsf-net & 0.201 (0.050) & 0.797 (0.035) & 9.602 & 0.011\\
-\hspace{1em}aorsf-fast & 0.200 (0.050) & 0.795 (0.034) & 0.082 & 0.014\\
+\hspace{1em}aorsf-fast & 0.200 (0.049) & 0.795 (0.034) & 0.047 & 0.010\\
 \hspace{1em}cif-rotate & 0.198 (0.065) & 0.789 (0.036) & 4.476 & 1.284\\
 \hspace{1em}aorsf-cph & 0.198 (0.052) & 0.794 (0.035) & 0.105 & 0.011\\
 \hspace{1em}rsf-standard & 0.176 (0.048) & 0.787 (0.037) & 0.078 & 0.025\\
