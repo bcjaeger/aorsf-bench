@@ -4,7 +4,7 @@
 #'
 #' @title
 
-bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 1) {
+bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 50) {
 
   train <- data[seq(n_obs), seq(n_ftr)]
 
@@ -12,7 +12,6 @@ bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 1) {
 
   node_size <- 10
   mtry <- ceiling(sqrt(n_ftr))
-
 
   start_time <- Sys.time()
 
@@ -23,10 +22,9 @@ bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 1) {
     mtry = mtry,
     n_retry = 3,
     split_min_obs = node_size,
-    control = orsf_control_cph(iter_max = 1,
-                               do_scale = FALSE),
+    control = orsf_control_fast(),
     importance = 'none',
-    oobag_pred = FALSE
+    oobag_pred_type = 'none'
   )
 
   end_time <- Sys.time()
@@ -64,22 +62,22 @@ bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 1) {
   time_fit_ranger <- end_time - start_time
 
 
-  start_time <- Sys.time()
-
-  cif_party <- cforest(Surv(time, status) ~ .,
-                       controls = cforest_unbiased(mtry = mtry),
-                       data = train)
-
-  end_time <- Sys.time()
-
-  time_fit_party = end_time - start_time
+  # start_time <- Sys.time()
+  #
+  # cif_party <- cforest(Surv(time, status) ~ .,
+  #                      controls = cforest_unbiased(mtry = mtry),
+  #                      data = train)
+  #
+  # end_time <- Sys.time()
+  #
+  # time_fit_party = end_time - start_time
 
 
   list(
     aorsf_fast = time_fit_aorsf,
     rsf_rfsrc = time_fit_rfsrc,
-    rsf_ranger = time_fit_ranger,
-    cif_party = time_fit_party
+    rsf_ranger = time_fit_ranger
+    # cif_party = time_fit_party
   ) %>%
     map(as.numeric, units = 'secs') %>%
     as_tibble() %>%

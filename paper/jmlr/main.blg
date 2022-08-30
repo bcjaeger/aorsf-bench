@@ -5,47 +5,49 @@ Reallocating 'name_of_file' (item size: 1) to 9 items.
 The style file: plainnat.bst
 Reallocating 'name_of_file' (item size: 1) to 5 items.
 Database file #1: main.bib
+Warning--I didn't find a database entry for "xgboost"
+Warning--I didn't find a database entry for "simsurv_paper"
 Warning--can't use both volume and number fields in dispenzieri2012use
 Warning--empty year in censored
-You've used 70 entries,
+You've used 75 entries,
             2773 wiz_defined-function locations,
-            1021 strings with 20144 characters,
-and the built_in function-call counts, 37588 in all, are:
-= -- 3243
-> -- 2795
-< -- 36
-+ -- 945
-- -- 873
-* -- 3368
-:= -- 5932
-add.period$ -- 230
-call.type$ -- 70
-change.case$ -- 480
-chr.to.int$ -- 68
-cite$ -- 142
-duplicate$ -- 1443
-empty$ -- 2628
-format.name$ -- 975
-if$ -- 7656
+            1049 strings with 21360 characters,
+and the built_in function-call counts, 40454 in all, are:
+= -- 3486
+> -- 3024
+< -- 38
++ -- 1022
+- -- 945
+* -- 3635
+:= -- 6386
+add.period$ -- 246
+call.type$ -- 75
+change.case$ -- 518
+chr.to.int$ -- 73
+cite$ -- 152
+duplicate$ -- 1549
+empty$ -- 2816
+format.name$ -- 1052
+if$ -- 8236
 int.to.chr$ -- 3
 int.to.str$ -- 1
-missing$ -- 63
-newline$ -- 375
-num.names$ -- 280
-pop$ -- 916
+missing$ -- 67
+newline$ -- 401
+num.names$ -- 300
+pop$ -- 986
 preamble$ -- 1
-purify$ -- 423
+purify$ -- 457
 quote$ -- 0
-skip$ -- 1205
+skip$ -- 1295
 stack$ -- 0
-substring$ -- 1310
-swap$ -- 133
-text.length$ -- 7
+substring$ -- 1407
+swap$ -- 144
+text.length$ -- 8
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 745
+type$ -- 800
 warning$ -- 2
-while$ -- 305
+while$ -- 328
 width$ -- 0
-write$ -- 935
-(There were 2 warnings)
+write$ -- 1001
+(There were 4 warnings)

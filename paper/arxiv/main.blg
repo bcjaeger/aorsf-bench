@@ -9,16 +9,16 @@ Warning--empty year in censored
 Warning--can't use both volume and number fields in dispenzieri2012use
 You've used 77 entries,
             2481 wiz_defined-function locations,
-            1016 strings with 21470 characters,
-and the built_in function-call counts, 32593 in all, are:
-= -- 2546
+            1019 strings with 21540 characters,
+and the built_in function-call counts, 32635 in all, are:
+= -- 2555
 > -- 2213
 < -- 38
 + -- 826
 - -- 670
-* -- 2837
-:= -- 5420
-add.period$ -- 254
+* -- 2843
+:= -- 5429
+add.period$ -- 257
 call.type$ -- 77
 change.case$ -- 139
 chr.to.int$ -- 75
@@ -26,13 +26,13 @@ cite$ -- 79
 duplicate$ -- 1464
 empty$ -- 2679
 format.name$ -- 779
-if$ -- 6693
+if$ -- 6702
 int.to.chr$ -- 3
 int.to.str$ -- 78
 missing$ -- 68
-newline$ -- 413
+newline$ -- 416
 num.names$ -- 231
-pop$ -- 594
+pop$ -- 591
 preamble$ -- 1
 purify$ -- 77
 quote$ -- 0
@@ -47,5 +47,5 @@ type$ -- 524
 warning$ -- 2
 while$ -- 259
 width$ -- 0
-write$ -- 1030
+write$ -- 1036
 (There were 2 warnings)

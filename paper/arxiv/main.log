@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.3) (preloaded format=pdflatex 2022.5.11)  12 AUG 2022 11:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.3) (preloaded format=pdflatex 2022.5.11)  24 AUG 2022 14:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -879,13 +879,13 @@ LaTeX Warning: Float too large for page by 8.94075pt on input line 564.
 ] [36] (main.bbl [37
 
 ]
-Underfull \hbox (badness 3009) in paragraph at lines 218--225
+Underfull \hbox (badness 3009) in paragraph at lines 221--228
 []\T1/ptm/m/n/10 (+20) Frank E. Har-rell, Robert M. Califf, David B. Pryor, Ker
 ry L. Lee, and Robert A. Rosati.
  []
 
 
-Underfull \hbox (badness 1496) in paragraph at lines 218--225
+Underfull \hbox (badness 1496) in paragraph at lines 221--228
 \T1/ptm/m/n/10 (+20) Eval-u-at-ing the Yield of Med-i-cal Tests.  \T1/ptm/m/it/
 10 (+20) JAMA\T1/ptm/m/n/10 (+20) , 247(18):2543--2546, 05 1982.  ISSN 0098-
  []
@@ -898,11 +898,11 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 105E0383EAC5F5C8E2FCD6608D18E0EA;4331.
  ) 
 Here is how much of TeX's memory you used:
- 17306 strings out of 478619
- 289839 string characters out of 2842301
+ 17309 strings out of 478619
+ 289866 string characters out of 2842301
  838794 words of memory out of 3000000
  34619 multiletter control sequences out of 15000+600000
- 544852 words of font info for 289 fonts, out of 8000000 for 9000
+ 545077 words of font info for 291 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  72i,13n,77p,2063b,591s stack positions out of 10000i,1000n,20000p,200000b,80000s
  <C:\Users\bjaeger\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ec
@@ -930,9 +930,9 @@ msfonts/cm/cmsy7.pfb><C:/Users/bjaeger/AppData/Local/Programs/MiKTeX/fonts/type
 pe1/urw/times/utmbi8a.pfb><C:/Users/bjaeger/AppData/Local/Programs/MiKTeX/fonts
 /type1/urw/times/utmr8a.pfb><C:/Users/bjaeger/AppData/Local/Programs/MiKTeX/fon
 ts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (41 pages, 621343 bytes).
+Output written on main.pdf (41 pages, 621983 bytes).
 PDF statistics:
- 985 PDF objects out of 1000 (max. 8388607)
+ 988 PDF objects out of 1000 (max. 8388607)
  191 named destinations out of 1000 (max. 500000)
  67812 words of extra memory for PDF output out of 74296 (max. 10000000)
 

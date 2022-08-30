@@ -43,6 +43,7 @@ Hong Wang and Gang Li.
 Leo Breiman.
 \newblock Random forests.
 \newblock \emph{Machine Learning}, 45\penalty0 (1):\penalty0 5--32, 2001.
+\newblock \doi{10.1023/A:1010933404324}.
 
 \bibitem[Ishwaran and Kogalur(2010)]{ishwaran2010consistency}
 Hemant Ishwaran and Udaya~B Kogalur.
@@ -77,6 +78,7 @@ Byron~C Jaeger, D~Leann Long, Dustin~M Long, Mario Sims, Jeff~M Szychowski,
 \newblock Oblique random survival forests.
 \newblock \emph{The Annals of Applied Statistics}, 13\penalty0 (3):\penalty0
   1847--1883, 2019.
+\newblock \doi{10.1214/19-AOAS1261}.
 
 \bibitem[Heath et~al.(1993)Heath, Kasif, and Salzberg]{heath1993induction}
 David Heath, Simon Kasif, and Steven Salzberg.
@@ -141,6 +143,7 @@ Tyler~M Tomita, James Browne, Cencheng Shen, Jaewon Chung, Jesse~L Patsolic,
 Rakesh Katuwal, Ponnuthurai~Nagaratnam Suganthan, and Le~Zhang.
 \newblock Heterogeneous oblique random forest.
 \newblock \emph{Pattern Recognition}, 99:\penalty0 107078, 2020.
+\newblock \doi{10.1016/j.patcog.2019.107078}.
 
 \bibitem[Zhu(2013)]{zhu2013tree}
 Ruoqing Zhu.

@@ -122,8 +122,8 @@ tar_plan(
   ),
 
 
-  tar_target(time_runs, seq(75)),
-  tar_target(n_obs, round(10^seq(from = 2, to = 4+1/3, by = 1/3))),
+  tar_target(time_runs, seq(10)),
+  tar_target(n_obs, round(10^seq(from = 2, to = 4+1/3, by = 1/6))),
   tar_target(n_ftr, c(10, 100, 1000)),
 
   bm_time_data = sim_surv(n_obs = max(n_obs),
@@ -200,13 +200,28 @@ tar_plan(
 
   tar_target(data_key, summarize_data_source(analyses_real)),
 
+  # readr::write_rds(
+  #   data_key,
+  #   '../seminar-orsf-grandrounds/data_key.rds'
+  # )
+
   tar_target(model_key, make_model_key()),
+
+  # readr::write_rds(
+  #   model_key,
+  #   '../seminar-orsf-grandrounds/model_key.rds'
+  # )
 
   tar_combine(bm_pred_real_comb, bm_pred_real[[1]]),
 
   # tar_combine(bm_pred_sim_comb, bm_pred_sim[[1]]),
 
   tar_target(bm_pred_clean, clean_bm_pred(bm_pred_real_comb)),
+
+  # readr::write_rds(
+  #   bm_pred_clean$data,
+  #   '../seminar-orsf-grandrounds/bm_pred_clean.rds'
+  # )
 
   tar_target(bm_pred_viz, bench_pred_visualize(bm_pred_clean$data,
                                                data_key,

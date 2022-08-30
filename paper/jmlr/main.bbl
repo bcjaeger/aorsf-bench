@@ -1,4 +1,4 @@
-\begin{thebibliography}{70}
+\begin{thebibliography}{75}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -57,6 +57,13 @@ Leo Breiman.
 Leo Breiman, Jerome~H Friedman, Richard~A Olshen, and Charles~J Stone.
 \newblock \emph{Classification and regression trees}.
 \newblock Routledge, 2017.
+
+\bibitem[Brilleman(2018)]{simsurv}
+Sam Brilleman.
+\newblock \emph{simsurv: Simulate Survival Data}, 2018.
+\newblock URL \url{https://CRAN.R-project.org/package=simsurv}.
+\newblock R package version 0.2.2, available at
+  \url{https://CRAN.R-project.org/package=simsurv}.
 
 \bibitem[Casalicchio et~al.(2017)Casalicchio, Bossek, Lang, Kirchhoff,
   Kerschke, Hofner, Seibold, Vanschoren, and Bischl]{OpenML}
@@ -296,6 +303,12 @@ William~Michael Landau.
   2959, 2021.
 \newblock URL \url{https://doi.org/10.21105/joss.02959}.
 
+\bibitem[Li et~al.(2015)Li, Han, Hou, Chen, and Chen]{li2015statistical}
+Huimin Li, Dong Han, Yawen Hou, Huilin Chen, and Zheng Chen.
+\newblock Statistical inference methods for two crossing survival curves: a
+  comparison of methods.
+\newblock \emph{PLoS One}, 10\penalty0 (1):\penalty0 e0116774, 2015.
+
 \bibitem[Loprinzi et~al.(1994)Loprinzi, Laurie, Wieand, Krook, Novotny, Kugler,
   Bartel, Law, Bateman, and Klatt]{loprinzi1994prospective}
 Charles~Lawrence Loprinzi, John~A Laurie, H~Sam Wieand, James~E Krook, Paul~J
@@ -348,6 +361,13 @@ Karel~GM Moons, Andre~Pascal Kengne, Mark Woodward, Patrick Royston, Yvonne
 \newblock Risk prediction models: {I}. development, internal validation, and
   assessing the incremental value of a new (bio) marker.
 \newblock \emph{Heart}, 98\penalty0 (9):\penalty0 683--690, 2012{\natexlab{b}}.
+
+\bibitem[Moss et~al.(2022)Moss, Corsar, Shaw, Piper, and
+  Hawthorne]{moss2022demystifying}
+Laura Moss, David Corsar, Martin Shaw, Ian Piper, and Christopher Hawthorne.
+\newblock Demystifying the black box: The importance of interpretability of
+  predictive models in neurocritical care.
+\newblock \emph{Neurocritical care}, pages 1--7, 2022.
 
 \bibitem[Murthy et~al.(1994)Murthy, Kasif, and Salzberg]{murthy1994system}
 Sreerama~K Murthy, Simon Kasif, and Steven Salzberg.
@@ -417,6 +437,14 @@ Carolin Strobl, Anne-Laure Boulesteix, Achim Zeileis, and Torsten Hothorn.
   sources and a solution.
 \newblock \emph{BMC bioinformatics}, 8\penalty0 (1):\penalty0 25, 2007.
 
+\bibitem[Taylor~Jr et~al.(2005)Taylor~Jr, Wilson, Jones, Sarpong, Srinivasan,
+  Garrison, Nelson, and Wyatt]{taylor2005toward}
+Herman~A Taylor~Jr, James~G Wilson, Daniel~W Jones, Daniel~F Sarpong, Asoka
+  Srinivasan, Robert~J Garrison, Cheryl Nelson, and Sharon~B Wyatt.
+\newblock Toward resolution of cardiovascular health disparities in african
+  americans: Design and methods of the jackson heart study.
+\newblock \emph{Ethn Dis}, 15\penalty0 (4 Suppl 6):\penalty0 S6--4, 2005.
+
 \bibitem[Tern{\`e}s et~al.(2017)Tern{\`e}s, Rotolo, Heinze, and
   Michiels]{ternes2017identification}
 Nils Tern{\`e}s, Federico Rotolo, Georg Heinze, and Stefan Michiels.
@@ -456,6 +484,13 @@ Tyler~M Tomita, James Browne, Cencheng Shen, Jaewon Chung, Jesse~L Patsolic,
   et~al.
 \newblock Sparse projection oblique randomer forests.
 \newblock \emph{Journal of machine learning research}, 21\penalty0 (104), 2020.
+
+\bibitem[Uno et~al.(2011)Uno, Cai, Pencina, D'Agostino, and Wei]{uno2011c}
+Hajime Uno, Tianxi Cai, Michael~J Pencina, Ralph~B D'Agostino, and Lee-Jen Wei.
+\newblock On the c-statistics for evaluating overall adequacy of risk
+  prediction procedures with censored survival data.
+\newblock \emph{Statistics in medicine}, 30\penalty0 (10):\penalty0 1105--1117,
+  2011.
 
 \bibitem[Van De~Vijver et~al.(2002)Van De~Vijver, He, Van't~Veer, Dai, Hart,
   Voskuil, Schreiber, Peterse, Roberts, Marton, et~al.]{van2002gene}

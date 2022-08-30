@@ -178,31 +178,25 @@
 
 \newpage
 
-\begin{abstract}%   <- trailing '%' for backward compatibility of .sty file
+\begin{abstract}
 
-The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors to create branches, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles often have higher prediction accuracy than standard RSF ensembles. However, assessing all possible linear combinations of predictors induces significant computational overhead that limits applications to large-scale data sets. In addition, few methods have been developed for interpretation of oblique RSF ensembles, and they remain more difficult to interpret compared to their axis-based counterparts. In this article, we introduce and evaluate a method to increase computational efficiency of the oblique RSF and a method to estimate importance of individual predictor variables with the oblique RSF. Our strategy to reduce computational overhead makes use of Newton-Raphson scoring, a classical optimization technique that we apply to the Cox partial likelihood function within each non-leaf node of decision trees. We estimate the importance of individual predictors for the oblique RSF by negating each coefficient used for the given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In general benchmarking experiments, we find that our implementation of the oblique RSF is over 500 times faster with equivalent discrimination and superior Brier score compared to existing software for oblique RSFs. We find in simulation studies that `negation importance' discriminates between signal and noise predictors more reliably than permutation importance, Shapley additive explanations, and a previously introduced technique to measure variable importance with oblique RSFs based on analysis of variance. All methods pertaining to oblique RSFs in the current study are available in the \texttt{aorsf} R package.
+	The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles have high prediction accuracy, but assessing many linear combinations of predictors induces high computational overhead. In addition, few methods have been developed for estimation of variable importance (VI) with oblique RSFs. We introduce a method to increase computational efficiency of the oblique RSF and a method to estimate VI with the oblique RSF. Our computational approach uses Newton-Raphson scoring in each non-leaf node, We estimate VI by negating each coefficient used for a given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In benchmarking experiments, we find our implementation of the oblique RSF is hundreds of times faster, with equivalent prediction accuracy, compared to existing software for oblique RSFs. We find in simulation studies that `negation VI' discriminates between relevant and irrelevant predictors more accurately than permutation VI, Shapley VI, and a technique to measure VI using analysis of variance. All  oblique RSF methods in the current study are available in the \texttt{aorsf} R package.
 
 \end{abstract}
 
 \begin{keywords}
-  Random Forests, Survival, Efficiency, Variable Importance
+Oblique, Survival, Random Forests, Fast, Variable Importance
 \end{keywords}
 
 \section{Introduction}
 
-Risk prediction may reduce the burden of disease by guiding strategies for prevention and treatment in a wide range of domains \citep{moons2012riskII, moons2012riskI}. The random survival forest (RSF; \citet{ishwaran2008random, hothorn2006unbiased}) is a supervised learning algorithm that has been used frequently for risk prediction \citep{wang2017selective}. Similar to random forests (RFs) for classification and regression \citep{breiman2001random}, The RSF is a large set of de-correlated and randomized decision trees, with each tree contributing to the ensemble's prediction function. Notable characteristics of the RSF include uniform convergence of its ensemble survival prediction function to the true survival function, first shown by \citet{ishwaran2010consistency} and later by \citet{cui2017consistency} under more general conditions. However, \citet{cui2017consistency} noted that the RSF is at a disadvantage when predictors are correlated and some are not relevant to the censored outcome, which is a strong possibility when large medical databases are leveraged for risk prediction.
+Risk prediction may reduce the burden of disease by guiding strategies for prevention and treatment in a wide range of domains \citep{moons2012riskII, moons2012riskI}. The random survival forest (RSF; \citet{ishwaran2008random, hothorn2006unbiased}) is a supervised learning algorithm that has been used frequently for risk prediction \citep{wang2017selective}. Similar to random forests (RFs) for classification and regression \citep{breiman2001random}, The RSF is a large set of de-correlated and randomized decision trees, with each tree contributing to the ensemble's prediction function. Notable characteristics of the RSF include uniform convergence of its ensemble survival prediction function to the true survival function, first shown by \citet{ishwaran2010consistency} and later by \citet{cui2017consistency} under more general conditions. However, \citet{cui2017consistency} noted that the RSF is at a disadvantage when predictors are correlated and some are not relevant to the censored outcome, which is a strong possibility when large clinical and `omic' databases are leveraged for risk prediction.
 
 A potential approach to improve the RSF when predictors are correlated and some are not relevant to the censored outcome is to use oblique trees instead of axis based trees. Axis based trees split data using a single predictor, creating decision boundaries that are perpendicular or parallel to axes of the predictor space \citep[see][Chapter~2]{breiman2017classification}. Oblique trees split data using a linear combination of predictors, creating decision boundaries that are neither parallel nor perpendicular to axes of their contributing predictors \citep[see][Chapter~5]{breiman2017classification}. \citet{menze2011oblique} examined prediction accuracy of RFs in the presence of correlated predictors and found that oblique RFs had substantially higher prediction accuracy compared to axis-based RFs. Similarly, \citet{jaeger2019oblique} found that growing RSFs with oblique rather than axis-based survival trees reduced the RSF's concordance error, with improvements ranging from 2.5\% to 24.9\% depending on the data analyzed.
 
-Oblique trees have at least two notable drawbacks compared to axis-based trees. First, finding a locally optimal oblique decision rule may require exponentially more computation than an axis-based rule. If $p$ predictors are potentially used to split $n$ observations, up to $\mathcal{O}(n^p)$ oblique splits can be assessed versus $\mathcal{O}(n \cdot p)$ axis-based splits \citep{heath1993induction, murthy1994system}. Second, estimating variable importance (VI) using permutation (a standard method for RFs) may be less effective in ensembles of oblique trees, as permuting the values of one predictor may not destabilize decisions that are based on linear combinations of predictors. Although VI is one of the most widely used strategies to interpret random forests \citep{ishwaran2019standard}, few studies have investigated VI for oblique random forests \citep[see][Section~5]{menze2011oblique}, and fewer have investigated VI specifically for the oblique RSF.
+Despite the potential for higher accuracy, oblique trees have at least two notable drawbacks compared to axis-based trees. First, finding a locally optimal oblique decision rule may require exponentially more computation than an axis-based rule. If $p$ predictors are potentially used to split $n$ observations, up to $\mathcal{O}(n^p)$ oblique splits can be assessed versus $\mathcal{O}(n \cdot p)$ axis-based splits \citep{heath1993induction, murthy1994system}. Second, estimating variable importance (VI) using permutation (a standard method for RFs) may be less effective in ensembles of oblique trees, as permuting the values of one predictor may not destabilize decisions that are based on linear combinations of predictors. Although VI is one of the most widely used strategies to interpret random forests \citep{ishwaran2019standard}, few studies have investigated VI for oblique random forests \citep[see][Section~5]{menze2011oblique}, and fewer have investigated VI specifically for the oblique RSF.
 
-The rest of this article is organized as follows. \secref{sec:background} reviews prior studies that have developed methods related to those introduced in the current study. In \secref{sec:aorsf}, we reduce the computational cost of oblique RSFs (\ie, accelerate them) with a scalable algorithm to identify linear combinations of coefficients. In \secref{sec:negation_vi}, we improve the interpretability of oblique RSFs with `negation VI', a method to estimate VI that flips the sign of coefficients in linear combinations of predictors instead of permuting predictor values. We evaluate these methods with general benchmarking experiments and simulation studies in \secref{sec:numeric}. In \secref{sec:discussion}, we summarize results from the current study and present ideas connecting the current work to existing frameworks and methods for RSFs that future studies may engage with. The accelerated oblique RSF and multiple methods to compute VI for oblique RSFs are available in the \texttt{aorsf} R Package.
-
-
-% However, there remains considerable potential to improve the RSF in settings where training samples are not large enough to guarantee asymptotic properties or do not align with the conditions required for consistency of the RSF.
-
-
-% Random forests (RFs) are large sets of de-correlated, randomized decision trees \citep{breiman2001random}, which can be axis based or oblique.Although using oblique rather than axis-based trees to grow a RSF may improve its prediction accuracy,
+The aim of this paper is to introduce methodology that improves the computational efficiency and interpretation of oblique RSFs. \secref{sec:background} reviews prior studies that have developed methods related to those introduced in the current study. In \secref{sec:aorsf}, we reduce the computational cost of oblique RSFs (\ie, accelerate them) with a scalable algorithm to identify linear combinations of coefficients. In \secref{sec:negation_vi}, we improve the interpretability of oblique RSFs with `negation VI', a method to estimate VI that flips the sign of coefficients in linear combinations of predictors instead of permuting predictor values. We evaluate these methods with general benchmarking experiments and simulation studies in \secref{sec:numeric}. In \secref{sec:discussion}, we summarize results from the current study and present ideas connecting the current work to existing frameworks and methods for RSFs that future studies may engage with.
 
 
 \section{Related work} \label{sec:background}
@@ -232,7 +226,7 @@ To accelerate the oblique RSF, we propose to identify linear combinations of pre
 \begin{equation}\label{eqn:cox-partial-likelihood}
 L(\bm\beta) = \prod_{i=1}^m \frac{e^{\bm{x}_{j(i)}^T \bm\beta}}{\sum_{j \in R_i} e^{\bm{x}_j^T \bm\beta}},
 \end{equation}
-where $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (i.e., those still at risk at time $t_i$), and $j(i)$ is the index of the observation for which an event occurred at time $t_i$. Newton Raphson scoring is an exceptionally fast estimation procedure, and the \texttt{survival} package includes documentation that outlines how to efficiently program it \citep{therneau_survival_2022}. Briefly, a vector of estimated regression coefficients, $\hat{\beta}$, is updated in each step of the procedure based on its first derivative, $U(\hat{\beta})$, and second derivative, $H(\hat{\beta})$:
+where $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (\ie, those still at risk at time $t_i$), and $j(i)$ is the index of the observation for which an event occurred at time $t_i$. Newton Raphson scoring is an exceptionally fast estimation procedure, and the \texttt{survival} package \citep{survival} includes documentation that outlines how to efficiently program it \citep{therneau_survival_2022}. Briefly, a vector of estimated regression coefficients, $\hat{\beta}$, is updated in each step of the procedure based on its first derivative, $U(\hat{\beta})$, and second derivative, $H(\hat{\beta})$:
 $$ \hat{\beta}^{k+1} =  \hat{\beta}^{k} + U(\hat{\beta} = \hat{\beta}^{k})\, H^{-1}(\hat{\beta} = \hat{\beta}^{k}) $$
 
 For statistical inference, it is recommended to continue updating $\hat{\beta}$ by completing additional iterations of Newton Raphson scoring until a convergence threshold is met. However, since an estimate of $\hat{\beta}$ is created by the first iteration of Newton Raphson scoring, only one iteration of Newton Raphson scoring is needed to identify a valid linear combination of predictors. Moreover, computing $U$ and $H$ requires computation and exponentiation of the vector $\bm{x}\hat{\beta}$, but these steps can be skipped on the first iteration of Newton Raphson scoring if an initial value of $\hat{\beta} = 0$ is chosen, allowing for a reduction in computing operations and removing the need to scale predictor values prior to initiating the Newton Raphson algorithm.\footnote{Predictors are scaled prior to initiating the Newton Raphson algorithm to avoid exponentiation of large numbers. However, if only one iteration is completed with an initial value of 0 for $\hat{\beta}$, then $\exp(\bm{x}\hat{\beta}) = 1$.} In \secref{sec:results_pred}, we formally test whether growing oblique survival trees using one iteration of Newton Raphson scoring provides equivalent prediction accuracy compared to trees where iterations are completed until a convergence threshold is met.
@@ -296,13 +290,13 @@ Negation VI has several helpful characteristics. First, negation VI generalizes 
 
 Sections \ref{sec:bm_pred} and \ref{sec:bm_vi} present numerical experiments examining the accelerated oblique RSF and negation VI, respectively. The code used to run these experiments is available online at \href{https://github.com/bcjaeger/aorsf-bench}{https://github.com/bcjaeger/aorsf-bench}. All analyses were conducted using R version 4.1.3 and coordinated by the \texttt{targets} R package \citep{targets}. To standardize comparisons of computational efficiency, all learners and VI techniques used up to 4 processing units.
 
-\subsection{Benchmark of prediction accuracy and computational efficiency} \label{sec:bm_pred}
+\subsection{Benchmark of prediction accuracy} \label{sec:bm_pred}
 
-The aim of this numeric experiment is to evaluate and compare the accelerated oblique RSF with its predecessor (the oblique RSF from the \texttt{obliqueRSF} R package) and with other machine learning algorithms for risk prediction. Inferences drawn from this experiment include equivalence and inferiority tests based on Bayesian linear mixed models.
+The aim of this numeric experiment is to evaluate the prediction accuracy of the accelerated oblique RSF compared to its predecessor (the oblique RSF from the \texttt{obliqueRSF} R package) and to several other machine learning algorithms. Inferences drawn from this experiment include equivalence and inferiority tests based on Bayesian linear mixed models.
 
 \subsubsection{Learners} \label{sec:learners}
 
-We consider four classes of learners: RSFs (both axis-based and oblique), boosting ensembles, regression models, and neural networks. Specific learners from each class are summarized in \tabref{tab:learners}. To facilitate fair comparisons, tuning parameters were harmonized within each class. For example, for RSF learners, we set the minimum node size (a parameter shared by all RSF learners) as 10. Additionally, for RSF learners, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500. For boosting, regression, and neural network learners, nested 10-fold cross-validation was applied to tune relevant model parameters. Specifically, tuning for boosting models included identifying the number of steps to complete. For regression models, tuning was used to identify the magnitude of penalization. For neural networks, the number and density of layers was tuned.
+We consider four classes of learners: RSFs (both axis-based and oblique), boosting ensembles, regression models, and neural networks. Specific learners from each class are summarized in \tabref{tab:learners}. To facilitate fair comparisons, tuning parameters were harmonized within each class. For example, for RSF learners, we set the minimum node size (a parameter shared by all RSF learners) as 10. Additionally, for RSF learners, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500 (a common default value for the number of trees). For boosting, regression, and neural network learners, nested cross-validation was applied to tune relevant model parameters. Specifically, tuning for boosting models included identifying the number of steps to complete. For regression models, tuning was used to identify the magnitude of penalization. For neural networks, the number and density of layers was tuned.
 
 \newgeometry{margin=1cm} % modify this if you need even more space
 \begin{landscape}
@@ -415,32 +409,32 @@ Both the IPA and time-dependent C-statistic generally take values between 0 and 
 
 \subsubsection{Data sets}
 
-We used a collection of 20 data sets containing a total of 33 risk prediction tasks (tasks per data set ranged from one to four) to benchmark the accelerated oblique RSF versus other learners. Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC and MESA community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from 137 to 17,549 (median: 1,384), the number of predictors ranged from 7 to 1,692 (median: 24), and the percentage of censored observations ranged from 5.26 to 97.7 (median: 72.5) (\tabrefAppendix{tab:datasets}).
+We used a collection of 21 data sets containing a total of 35 risk prediction tasks (tasks per data set ranged from one to four) to benchmark the accelerated oblique RSF versus other learners. Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from 137 to 17,549 (median: 1,384), the number of predictors ranged from 7 to 1,692 (median: 41), and the percentage of censored observations ranged from 5.26 to 97.7 (median: 78.1) (\tabrefAppendix{tab:datasets}).
 
 \subsubsection{Monte-Carlo cross validation}
 
-For each risk prediction task, we completed 22 runs of Monte-Carlo cross validation. In each run, we used a random sample containing 50\% of the available data for training and the remaining 50\% for testing each of the learners described in \secref{sec:learners}. Then, for each learner, we computed the IPA, time-dependent C-statistic, and computational time required to fit a prediction model and compute risk predictions. If any learner failed to obtain predictions on any particular split of data\footnote{For example, when the prediction task was to predict risk of death in the ACTG 320 clinical trial (26 events total), some splits did not leave enough events in the training data to fit complex learners such as the neural network}, the results for that split were omitted from downstream analyses.
+For each risk prediction task, we completed 25 runs of Monte-Carlo cross validation. In each run, we used a random sample containing 50\% of the available data for training and the remaining 50\% for testing each of the learners described in \secref{sec:learners}. Then, for each learner, we computed the IPA and time-dependent C-statistic. If any learner failed to obtain predictions on any particular split of data\footnote{For example, when the prediction task was to predict risk of death in the ACTG 320 clinical trial (26 events total), some splits did not leave enough events in the training data to fit complex learners such as neural networks}, the results for that split were omitted from downstream analyses for all learners.
 
 
 \subsubsection{Statistical analysis}
 
-After collecting data from 22 replications of Monte-Carlo cross validation for the 14 learners in all 33 risk prediction tasks, we analyzed the resulting 10,164 observations of IPA and, separately, time-dependent C-statistic, using a Bayesian linear mixed model. Our approach follows the ideas described by \citet{benavoli2017time} and \citet{tidymodels}, who developed guidelines on making statistical comparisons between learners using Bayesian models. Specifically, we fit two models: $$\text{IPA} = \widehat{\gamma}_0 + \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run}) $$ and $$\text{C-stat} = \widehat{\gamma}_0 + \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run}).$$ Random intercepts for specific splits of data (\ie, \texttt{run} in the model formula) were nested within datasets. The intercept, $\widehat{\gamma}_0$, was the expected value of the outcome using \texttt{aorsf-fast}, making the coefficients in $\widehat{\gamma}$ the expected differences between \texttt{aorsf-fast} and other learners. Default priors from \texttt{rstanarm} were applied for model fitting \citep{rstanarm}.
+After collecting data from 25 replications of Monte-Carlo cross validation for the 14 learners in all 35 risk prediction tasks, we analyzed the resulting 12,250 observations of IPA and, separately, time-dependent C-statistic, using a Bayesian linear mixed model. Our approach follows the ideas described by \citet{benavoli2017time} and \citet{tidymodels}, who developed guidelines on making statistical comparisons between learners using Bayesian models. Specifically, we fit two models: $$\text{IPA} = \widehat{\gamma}_0 + \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run}) $$ and $$\text{C-stat} = \widehat{\gamma}_0 + \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run}).$$ Random intercepts for specific splits of data (\ie, \texttt{run} in the model formula) were nested within datasets. The intercept, $\widehat{\gamma}_0$, was the expected value of the outcome using \texttt{aorsf-fast}, making the coefficients in $\widehat{\gamma}$ the expected differences between \texttt{aorsf-fast} and other learners. Default priors from \texttt{rstanarm} were applied for model fitting \citep{rstanarm}.
 
-\paragraph{Hypothesis testing} For both the IPA and time-dependent C-statistic, we conducted equivalence and inferiority tests based on a 1 point region of practical equivalence. More specifically, we concluded that two learners had practically equivalent IPA or time-dependent C-statistic if there was a 95\% or higher posterior probability that the absolute difference in the relevant metric was less than 1. We concluded that one learner was weakly superior when there was $\geq$ 95\% posterior probability that the difference in the relevant metric was non-zero, and concluded superiority when when there was $\geq$ 95\% posterior probability that the difference in the relevant metric was 1 or more.
+\paragraph{Hypothesis testing} For both the IPA and time-dependent C-statistic, we conducted equivalence and inferiority tests based on a 1 point region of practical equivalence. More specifically, we concluded that two learners had practically equivalent IPA or time-dependent C-statistic if there was a 95\% or higher posterior probability that the absolute difference in the relevant metric was less than 1. We concluded that one learner was weakly superior when there was $\geq$ 95\% posterior probability that the absolute difference in the relevant metric was non-zero, and concluded superiority when when there was $\geq$ 95\% posterior probability that the absolute difference in the relevant metric was 1 or more.
 
 
 
 \subsubsection{Results} \label{sec:results_pred}
 
-A full summary of all results presented in this Section is provided in \tabrefAppendix{tab:bm_pred_all}. In total, 724 out of 726 Monte-Carlo cross validation runs were completed. On run 13 and 18 for the ACTG 320 data, the \texttt{nn-cox} learner encountered an error during its fitting procedure.
+A full summary of all results presented in this Section is provided in \tabrefAppendix{tab:bm_pred_all}. In total, 871 out of 875 Monte-Carlo cross validation runs were completed. On run 13, 18, 24 and 25 for the ACTG 320 data, the \texttt{nn-cox} learner encountered an error during its fitting procedure.
 
 \paragraph{Index of prediction accuracy}
 
-Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest IPA in 18 out of 33 risk prediction tasks, with an overall mean IPA of 13.2 (Figure \ref{fig:bm_pred_viz_ibs}). Compared to the learner with the second highest mean IPA (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 1.42 points higher, a relative increase of 12.1\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected IPA was 0.99, and the posterior probability of \texttt{aorsf-fast} having a superior IPA to other learners ranged from 0.84 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_ibs})
+Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest IPA in 20 out of 35 risk prediction tasks, with an overall mean IPA of 12.6 (Figure \ref{fig:bm_pred_viz_ibs}). Compared to the learner with the second highest mean IPA (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 1.35 points higher, a relative increase of 12.0\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected IPA was 0.99, and the posterior probability of \texttt{aorsf-fast} having a superior IPA to other learners ranged from 0.86 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_ibs})
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/bm_pred_viz_ibs-1} \caption[Index of prediction accuracy for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks]{Index of prediction accuracy for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks. Text appears in tasks where the accelerated oblique random survival forest obtained the highest index of prediction accuracy, showing the absolute and percent improvement over the second best learner. As predicted survival probabilities are not a standard output from \texttt{xgboost-aft}, it is not included in this figure.}\label{fig:bm_pred_viz_ibs}
+\includegraphics[width=\maxwidth]{figure/bm_pred_viz_ibs-1} \caption{Index of prediction accuracy for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks. Text appears in tasks where the accelerated oblique random survival forest obtained the highest index of prediction accuracy, showing the absolute and percent improvement over the second best learner. As predicted survival probabilities are not a standard output from \texttt{xgboost-aft}, it is not included in this figure. Also, since this figure is intended to compare \texttt{aorsf-fast} to learners that are not oblique random survival forests, \texttt{aorsf-cph}, \texttt{aorsf-net}, \texttt{aorsf-random}, and \texttt{obliqueRSF-net} are not included.}\label{fig:bm_pred_viz_ibs}
 \end{figure}
 
 \end{knitrout}
@@ -458,11 +452,11 @@ Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the hig
 
 
 
-Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest time-dependent C-statistic in 12 out of 33 risk prediction tasks, with an overall mean of 77.1 (Figure \ref{fig:bm_pred_viz_cstat}). Compared to the learner with the second highest mean C-statistic (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 0.777 points higher, a relative increase of 1.02\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected time-dependent C-statistics was 0.99, and the posterior probability of \texttt{aorsf-fast} having a superior time-dependent C-statistic versus other learners ranged from 0.25 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_cstat})
+Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest time-dependent C-statistic in 10 out of 35 risk prediction tasks, with an overall mean of 77.2 (Figure \ref{fig:bm_pred_viz_cstat}). Compared to the learner with the second highest mean C-statistic (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 0.685 points higher, a relative increase of 0.896\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected time-dependent C-statistics was $>$ 0.999, and the posterior probability of \texttt{aorsf-fast} having a superior time-dependent C-statistic versus other learners ranged from 0.18 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_cstat})
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/bm_pred_viz_cstat-1} \caption[Time-dependent concordance statistic for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks]{Time-dependent concordance statistic for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks. Text appears in tasks where the accelerated oblique random survival forest obtained the highest concordance, showing the absolute and percent improvement over the second best learner.}\label{fig:bm_pred_viz_cstat}
+\includegraphics[width=\maxwidth]{figure/bm_pred_viz_cstat-1} \caption[Time-dependent concordance statistic for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks]{Time-dependent concordance statistic for the accelerated oblique random survival forest and other learning algorithms across multiple risk prediction tasks. Text appears in tasks where the accelerated oblique random survival forest obtained the highest concordance, showing the absolute and percent improvement over the second best learner. Since this figure is intended to compare \texttt{aorsf-fast} to learners that are not oblique random survival forests, \texttt{aorsf-cph}, \texttt{aorsf-net}, \texttt{aorsf-random}, and \texttt{obliqueRSF-net} are not included.}\label{fig:bm_pred_viz_cstat}
 \end{figure}
 
 \end{knitrout}
@@ -475,54 +469,36 @@ Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the hig
 
 \end{knitrout}
 
-
-
-
-\paragraph{Computational efficiency}
-
-Overall, \texttt{aorsf-fast} was the second fastest learner, with an expected model development and risk prediction time about 1/2 second longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was 794.5 times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was 15.4, 2.14, and 4.79 faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
-
-
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/bm_pred_time-1} \caption[Distribution of time taken to fit a prediction model and compute predicted risk]{Distribution of time taken to fit a prediction model and compute predicted risk. The median time, in seconds, is printed and annotated for each learner by a vertical line.}\label{fig:bm_pred_time}
-\end{figure}
-
-\end{knitrout}
-
-
 \subsection{Benchmark of variable importance} \label{sec:bm_vi}
 
-The aim of this experiment is to evaluate negation VI and similar VI methods based on how well they can discriminate between variables that do or do not have a relationship with a simulated outcome. We consider methods that are intrinsic to the oblique RF (\eg, ANOVA VI), those that are intrinsic to the RF (\eg, permutation VI), and those that are model-agnostic (\eg, SHAP VI). VI methods with unavailable or still developing software were not included.\footnote{Although the \texttt{party} package implements the approach to VI developed by \citet{strobl2007bias}, the developers of the \texttt{party} package note that the implementation of this approach for survival outcomes is ``extremely slow and experimental'' as of version 1.3.10. Therefore, it is not incorporated in the current simulation study.}
+The aim of this experiment is to evaluate negation VI and similar VI methods based on how well they can discriminate between relevant and irrelevant variables, where relevance is defined by having a relationship with the simulated outcome. We consider methods that are intrinsic to the oblique RF (\eg, ANOVA VI), those that are intrinsic to the RF (\eg, permutation VI), and those that are model-agnostic (\eg, SHAP VI). VI methods with unavailable or still developing software were not included.\footnote{Although the \texttt{party} package implements the approach to VI developed by \citet{strobl2007bias}, the developers of the \texttt{party} package note that the implementation of this approach for survival outcomes is ``extremely slow and experimental'' as of version 1.3.10. Therefore, it is not incorporated in the current simulation study.}
 
 \subsubsection{Variable importance techniques}
 
-We compute permutation VI for axis based RSFs using the \texttt{randomForestSRC} package. We compute ANOVA VI, negation VI, and permutation VI for oblique RSFs using the \texttt{aorsf} package. For ANOVA VI, we applied a p-value threshold of 0.01, following the threshold recommended by \citet{menze2011oblique}. We compute SHAP VI for boosted tree models using the \texttt{xgboost} package, which incorporates the tree SHAP approach proposed by \citet{lundberg2018consistent}.
+We compute permutation VI for axis based RSFs using the \texttt{randomForestSRC} package. We compute ANOVA VI, negation VI, and permutation VI for oblique RSFs using the \texttt{aorsf} package. For ANOVA VI, we applied a p-value threshold of 0.01, following the threshold recommended by \citet{menze2011oblique}. We compute SHAP VI for boosted tree models using the \texttt{xgboost} package \citep{xgboost}, which incorporates the tree SHAP approach proposed by \citet{lundberg2018consistent}.
 
 % We also compute SHAP VI for accelerated oblique RSFs using the \texttt{fastshap} package.
 
 \subsubsection{Variable types}
 
-We considered five classes of predictor variables, with each class characterized by its variables' relationship to a right-censored outcome. Specifically, \begin{itemize}
+We considered five classes of predictor variables, with each class characterized by its variables' relationship to a right-censored outcome on the log-hazard scale. Specifically, \begin{itemize}
 \item \textit{irrelevant} variables had no relationship with the outcome.
-\item \textit{main effect} variables had a linear relationship to the outcome.
-\item \textit{non-linear effect} variables had a non-linear relationship to the outcome.
-\item \textit{combination effect} variables were formed by linear combinations of three other variables. While their combination was linearly related to the outcome, each of the three variables contributing to the combination had no relation to the outcome.
+\item \textit{main effect} variables had a linear relationship to the outcome on the log-hazard scale.
+\item \textit{non-linear effect} variables had a non-linear relationship to the outcome. A normally distributed variable $x$ was generated with a linear relationship to the outcome on the log-hazard scale, then $\tilde{x} = \text{sin}(a \cdot \pi \cdot x)$ was retained for modeling. The constant $a$ varied uniformly from 0.125 to 0.25.
+\item \textit{combination effect} variables were formed by linear combinations of three other variables. While their combination was linearly related to the outcome on the log-hazard scale, each of the three variables contributing to the combination had no relation to the outcome.
 \item \textit{interaction effect} variables were related to the outcome by multiplicative interaction with one other variable, which could have been a main effect, non-linear effect, or combination effect variable.
 \end{itemize}
 
+\subsubsection{Simulated data} \label{sec:data_sim}
 
-\subsubsection{Simulated data}
-
-We initiated each set of simulated data with a random draw of size $n$ from a $p$-dimensional multivariate normal distribution, yielding $n$ observations of $p$ predictors. Each of $p$ predictor variables had a mean of zero, standard deviation of 1, and correlation with other predictor variables drawn at random between a lower and upper boundary. A time-to-event outcome with roughly 45\% of observations censored was generated using the \texttt{simsurv} package. The full predictor matrix (\ie, including interactions, non-linear mappings, and combinations) was used to generate the outcome. Interactions, non-linear mappings, and combinations were dropped from the predictor matrix after the outcome was generated so that VI techniques could be evaluated based on their ability to detect these effects.
+We initiated each set of simulated data with a random draw of size $n$ from a $p$-dimensional multivariate normal distribution, yielding $n$ observations of $p$ predictors. Each of $p$ predictor variables had a mean of zero, standard deviation of 1, and correlation with other predictor variables drawn at random between a lower and upper boundary. A time-to-event outcome with roughly 45\% of observations censored was generated using the \texttt{simsurv} package \citep{simsurv, simsurv_paper}. The full predictor matrix (\ie, including interactions, non-linear mappings, and combinations) was used to generate the outcome. Interactions, non-linear mappings, and combinations were dropped from the predictor matrix after the outcome was generated so that VI techniques could be evaluated based on their ability to detect these effects.
 
 \subsubsection{Parameter specifications}
 
 
 
 
-Parameters that varied in the current simulation study included the number of observations (500, 1000, and 2500) and the absolute value of the maximum correlation between predictors (0.3, 0.15, and 0). Parameters that remain fixed throughout the study included the number of predictors in each class (15) and the effect size of each predictor (one standard deviation increase associated with a 64\% increase in relative risk). Using this design for simulated data, the proportion of relative risk explained by our covariates ranged from FILL IN to FILL IN, according to Heller's explained relative risk measure \citep{heller2012measure}.
+Parameters that varied in the current simulation study included the number of observations (500, 1000, and 2500) and the absolute value of the maximum correlation between predictors (0.3, 0.15, and 0). Parameters that remain fixed throughout the study included the number of predictors in each class (15) and the effect size of each predictor (one standard deviation increase associated with a 64\% increase in relative risk). Using this design for simulated data, the Heller explained relative risk (95\% confidence interval) of our covariates was 88.4 (88.1, 88.7) \citep{heller2012measure} with 2,500 observations.
 
 \subsubsection{Evaluation of variable importance}
 
@@ -532,7 +508,7 @@ We compared VI techniques based on their discrimination (\ie, C-statistic) betwe
 
 
 
-The three techniques that used `aorsf' to estimate VI were ranked first (\texttt{aorsf-negate}; $C = 76.0$), second (\texttt{aorsf-anova}; $C = 74.0$), and third (\texttt{aorsf-permute}; $C = 73.2$) in overall mean C-statistic across all of the simulation scenarios, with \texttt{aorsf-negate} obtaining the highest C-statistic in 26 out of 36 VI tasks (Figure \ref{fig:bm_vi_viz}). Among the four relevant variable classes, \texttt{aorsf-negate} had the highest mean C-statistic for main effects, combination effects, and non-linear effects, with the greatest advantage of using \texttt{aorsf-negate} occurring among non-linear and combination variables. Full results from the experiment are provided in \tabrefAppendix{tab:bm_vi}. Computationally, ANOVA VI was faster than negation and permutation VI, with a median time of 1.27 seconds versus 11.9 and 13.0 seconds, respectively.
+The three techniques that used `aorsf' to estimate VI were ranked first (\texttt{aorsf-negate}; $C = 75.9$), second (\texttt{aorsf-anova}; $C = 73.9$), and third (\texttt{aorsf-permute}; $C = 73.2$) in overall mean C-statistic across all of the simulation scenarios, with \texttt{aorsf-negate} obtaining the highest C-statistic in 26 out of 36 VI tasks (Figure \ref{fig:bm_vi_viz}). Among the four relevant variable classes, \texttt{aorsf-negate} had the highest mean C-statistic for main effects, combination effects, and non-linear effects, with the greatest advantage of using \texttt{aorsf-negate} occurring among non-linear and combination variables. Full results from the experiment are provided in \tabrefAppendix{tab:bm_vi}. Computationally, ANOVA VI was faster than negation and permutation VI, with a median time of 2.88 seconds versus 20.4 and 21.8 seconds, respectively.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
@@ -541,22 +517,61 @@ The three techniques that used `aorsf' to estimate VI were ranked first (\texttt
 
 \end{knitrout}
 
+\subsection{Benchmark of computational efficiency}
+
+The aim of this numeric experiment is to evaluate the computational efficiency of the accelerated oblique RSF compared to its predecessor (the oblique RSF from the \texttt{obliqueRSF} R package) and to several other machine learning algorithms.
+
+\subsubsection{Evaluation of computational efficiency}
+
+For each learner discussed in \secref{sec:learners} and for each of the 35 risk prediction tasks analyzed in \secref{sec:bm_pred}, we tracked the amount of time required to fit a prediction model (including time used to tune parameters) and compute predicted risk.
+
+We also performed more specific benchmarks on the time required to fit 50 trees\footnote{We decided to use 50 trees for this benchmark rather than 500, as using 500 trees caused excessive memory usage and job failure with larger datasets.} using the three fastest random forest R packages, \texttt{aorsf}, \texttt{randomForestSRC}, and \texttt{ranger}. The learners that represented these R packages, respectively, are \texttt{aorsf-fast}, \texttt{rsf-standard}, and \texttt{rsf-extratrees}. We used the simulated data described in \secref{sec:data_sim} with number of observations in the training data ranging from 100 to 21544 and number of predictors ranging from 10 to 1000.
+
+\subsubsection{Results}
+
+
+
+
+In the analysis of 35 risk prediction tasks, \texttt{aorsf-fast} was the second fastest learner overall, with an expected model development and risk prediction time about 385 milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was 379.8 times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was 16.1, 1.55, and 2.66 faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
+\includegraphics[width=\maxwidth]{figure/bm_pred_time-1} \caption[Distribution of time taken to fit a prediction model and compute predicted risk]{Distribution of time taken to fit a prediction model and compute predicted risk. The median time, in seconds, is printed and annotated for each learner by a vertical line.}\label{fig:bm_pred_time}
+\end{figure}
+
+\end{knitrout}
+
+In the analysis of time to fit 50 trees using simulated data, the \texttt{ranger} package exhibited the fastest computation times for samples with 1000 or fewer observations while \texttt{aorsf} and \texttt{randomForestSRC} were more efficient in larger samples. In particular, \texttt{aorsf} was substantially faster than both \texttt{ranger} and \texttt{randomForestSRC} with 10 or 100 features and over 1000 observations in the training data (see Figure \ref{fig:bm_time_viz}).
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
+\includegraphics[width=\maxwidth]{figure/bm_time_viz-1} \caption[Time, in seconds, to fit an ensemble of 50 survival trees]{Time, in seconds, to fit an ensemble of 50 survival trees. The aorsf package appears to be more efficient in larger samples, particularly when 10 or 100 predictors are present in the training data. All three packages appear to scale linearly in computation time with the number of observations in the training data.}\label{fig:bm_time_viz}
+\end{figure}
+
+\end{knitrout}
+
+
+
 
 \section{Discussion} \label{sec:discussion}
 
-In this paper, we have developed two contributions to the oblique RSF: (1) the accelerated oblique RSF (\ie, \texttt{aorsf-fast}) and (2) negation VI. Our technique to accelerate the oblique RSF reduces the number of operations required to find linear combinations of inputs using a single iteration of Newton Raphson scoring, while our VI technique directly engages with coefficients in linear combinations of inputs to measure importance of individual variables. In numeric experiments, we found that that \texttt{aorsf-fast} is over 500 times faster and just as accurate in risk prediction tasks compared to its predecessor, \texttt{obliqueRSF-net}. We also found that negation VI, a technique to estimate VI using the oblique RSF, detected non-linear, combination, and main effects more effectively than three standard methods to estimate VI: permutation, ANOVA, and SHAP VI. Overall, we found that estimating VI using negation instead of ANOVA increased the C-statistic for ranking a relevant variable higher than an irrelevant variable by 1.97, a relative increase of 2.66\%.
+In this paper, we have developed two contributions to the oblique RSF: (1) the accelerated oblique RSF (\ie, \texttt{aorsf-fast}) and (2) negation VI. Our technique to accelerate the oblique RSF reduces the number of operations required to find linear combinations of inputs using a single iteration of Newton Raphson scoring, while our VI technique directly engages with coefficients in linear combinations of inputs to measure importance of individual variables. In numeric experiments, we found that that \texttt{aorsf-fast} is approximately 379.8 times faster than its predecessor, \texttt{obliqueRSF-net}, with a practically equivalent C-statistic. We also found that negation VI, a technique to estimate VI using the oblique RSF, detected non-linear, combination, and main effects more effectively than three standard methods to estimate VI: permutation, ANOVA, and SHAP VI. Overall, we found that estimating VI using negation instead of ANOVA increased the C-statistic for ranking a relevant variable higher than an irrelevant variable by 2.05, a relative increase of 2.78\%.
 
 \subsection{Implications of our results}
 
-Accurate risk prediction models have the potential to improve healthcare by directing timely interventions to patients who are most likely to benefit. However, prediction models that cannot scale adequately to large databases or cannot be interpreted and explained have no place in clinical practice. The current study advances the oblique RSF, an accurate risk prediction model, towards being accurate, scalable, and interpretable. The improved computational efficiency of the accelerated oblique RSF increases the feasibility of applying oblique RSFs in a wide range of prediction tasks. Faster model evaluation and re-fitting also improve diagnosis and resolution of model-based issues (\eg, model calibration deteriorates over time). The introduction of negation VI also advances interpretability. VI is intrinsically linked to model fairness, as it can be used to identify when protected characteristics such as race, religion, and sexuality are inadvertently used (either directly or through correlates of these characteristics) by a prediction model. Since negation VI  engages with the coefficients used in linear combinations of variables, a major component of oblique RSFs, it may be more capable of diagnosing unfairness in oblique RSFs compared to permutation importance and model-agnostic VI techniques.
+Accurate risk prediction models have the potential to improve healthcare by directing timely interventions to patients who are most likely to benefit. However, prediction models that cannot scale adequately to large databases or cannot be interpreted and explained will struggle to gain acceptance in clinical practice \citep{moss2022demystifying}. The current study advances the oblique RSF, an accurate risk prediction model, towards being accurate, scalable, and interpretable. The improved computational efficiency of the accelerated oblique RSF increases the feasibility of applying oblique RSFs in a wide range of prediction tasks. Faster model evaluation and re-fitting also improve diagnosis and resolution of model-based issues (\eg, model calibration deteriorates over time). The introduction of negation VI also advances interpretability. VI is intrinsically linked to model fairness, as it can be used to identify when protected characteristics such as race, religion, and sexuality are inadvertently used (either directly or through correlates of these characteristics) by a prediction model. Since negation VI engages with the coefficients used in linear combinations of variables, a major component of oblique RSFs, it may be more capable of diagnosing unfairness in oblique RSFs compared to permutation importance and model-agnostic VI techniques.
 
 \subsection{Limitations and next steps}
 
-While the current study advances the oblique RSF towards being scalable and interpretable, there remain several limitations that can be targeted in future studies. The accelerated oblique RSF does not account for competing risks, and biased estimation of incidence may occur when competing risks are ignored. Thus, allowing the oblique RSF to account for competing risks is a high priority for future studies. In addition, missing data are not addressed in the accelerated oblique RSF, and users of the \texttt{aorsf} R package are expected to impute missing values prior to model training and testing. However, missing data are common and there are numerous techniques for ensemble tree methods to handle missing data during the tree growing procedure. Thus, a second item of high priority for future studies is to develop and evaluate strategies to handle missing data while growing an oblique RSF. Last, \citet{cui2017consistency} found that estimating an inverse-probability weighted hazard function at each non-leaf node of a survival tree allows the RSF to converge asymptotically to the true survival function when some variables contribute both to the risk of the event and the risk of censoring, a scenario that is very likely in the analysis of electronic medical records. The accelerated oblique RSF could incorporate this splitting technique by using Newton Raphson scoring to fit a model for the censoring distribution and then a weighted model could be fit to the failure distribution. This final item has the highest priority, as \citet{cui2017consistency} showed it is a requisite condition for consistency of axis based survival trees in fairly general settings.
+While the current study advances the oblique RSF towards being scalable and interpretable, there remain several limitations that can be targeted in future studies. The accelerated oblique RSF does not account for competing risks, and biased estimation of incidence may occur when competing risks are ignored. Thus, allowing the oblique RSF to account for competing risks is a high priority for future studies. In addition, the current study only considered data without missing values, only evaluated oblique RSFs that applied the log-rank statistic for node splitting, and only considered negation VI estimates based on Harrell's C-statistic. Few studies have developed strategies to deal with missing data while growing oblique survival trees. Prior studies have found that log-rank tests can be mis-informative when survival curves cross \citep{li2015statistical}, and that Harrell's C-statistic is dependent on the censoring distribution of the outcome \citep{uno2011c}. Thus, a second item is to expand the range of options available to users of the \texttt{aorsf} package, enabling them to apply strategies for imputation of missing values and use a broad range of statistical criteria while growing oblique survival trees. Last, \citet{cui2017consistency} found that estimating an inverse-probability weighted hazard function at each non-leaf node of a survival tree allows the RSF to converge asymptotically to the true survival function when some variables contribute both to the risk of the event and the risk of censoring, a scenario that is very likely in the analysis of medical data. The accelerated oblique RSF could incorporate this splitting technique by using Newton Raphson scoring to fit a model for the censoring distribution after which a weighted model could be fit to the failure distribution. This final item has the highest priority, as \citet{cui2017consistency} showed it is a requisite condition for consistency of axis-based survival trees in fairly general settings.
 
 % Acknowledgements should go at the end, before appendices and references
 
-\acks{Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine. The project described was supported by the National Center for Advancing Translational Sciences (NCATS), National Institutes of Health, through Grant Award Number UL1TR001420. The content is solely the responsibility of the authors and does not necessarily represent the official views of the NIH.}
+Oblique RSFs have exceptional prediction accuracy and this study has shown how they can be fit with computational efficiency that rivals their axis-based counterparts. We have also introduced a general and flexible method to estimate VI with oblique RFs, and demonstrated its effectiveness specifically for the oblique RSF. Code used for the current study is available at \href{https://github.com/bcjaeger/aorsf-bench}{https://github.com/bcjaeger/aorsf-bench}, and the \texttt{aorsf} package is available at \href{https://github.com/bcjaeger/aorsf}{https://github.com/bcjaeger/aorsf}.
+
+\subsection*{Acknowledgements}
+
+Research reported in this publication was supported by the Center for Biomedical Informatics, Wake Forest University School of Medicine. The project described was supported by the National Center for Advancing Translational Sciences (NCATS), National Institutes of Health, through Grant Award Number UL1TR001420. The content is solely the responsibility of the authors and does not necessarily represent the official views of the NIH. Dr. Pajewski was supported by grant number P30AG021332 from the National Institutes of Health, while Dr. Speiser was supported by K25AG068253.
 
 % Manual newpage inserted to improve layout of sample file - not
 % needed in general before appendices/bibliography.
@@ -576,26 +591,27 @@ While the current study advances the oblique RSF towards being scalable and inte
 
 \begin{enumerate}
 
- \item[] The ``VA lung cancer trial'' data \citep{kalbfleisch2011statistical} were obtained from the \texttt{randomForestSRC} R package \citep{randomForestSRC}. 
- \item[] The ``Colon cancer'' data \citep{moertel1995fluorouracil} were obtained from the \texttt{survival} R package \citep{survival}. 
- \item[] The ``Primary biliary cholangitis'' data \citep{therneau2000cox} were obtained from the \texttt{aorsf} R package \citep{aorsf}. 
- \item[] The ``Movies released in 2015-2018'' data  were obtained from the \texttt{censored} R package \citep{censored}. 
- \item[] The ``GBSG II'' data \citep{schumacher1994rauschecker} were obtained from the \texttt{TH.data} R package \citep{TH.data}. 
- \item[] The ``Systolic Heart Failure'' data \citep{hsich2011identifying} were obtained from the \texttt{randomForestSRC} R package \citep{randomForestSRC}. 
- \item[] The ``Serum free light chain'' data \citep{dispenzieri2012use, kyle2006prevalence} were obtained from the \texttt{survival} R package \citep{survival}. 
- \item[] The ``Non-alcohol fatty liver disease'' data \citep{allen2018nonalcoholic} were obtained from the \texttt{survival} R package \citep{survival}. 
- \item[] The ``Rotterdam tumor bank'' data \citep{royston2013external} were obtained from the \texttt{survival} R package \citep{survival}. 
- \item[] The ``ACTG 320'' data \citep{hosmer2002applied} were obtained from the \texttt{mlr3proba} R package \citep{mlr3proba}. 
- \item[] The ``GUIDE-IT'' data \citep{felker2017effect} were obtained from BioLINCC. 
- \item[] The ``Early breast cancer'' data \citep{desmedt2011multifactorial, hatzis2011genomic, ternes2017identification} were obtained from the \texttt{biospear} R package \citep{biospear}. 
- \item[] The ``SPRINT'' data \citep{sprint2015randomized} were obtained from BioLINCC. 
- \item[] The ``NKI 70 gene signature'' data \citep{van2002gene} were obtained from the \texttt{OpenML} R package \citep{OpenML}. 
- \item[] The ``Lung cancer'' data \citep{director2008gene} were obtained from the \texttt{OpenML} R package \citep{OpenML}. 
- \item[] The ``NCCTG Lung Cancer'' data \citep{loprinzi1994prospective} were obtained from the \texttt{survival} R package \citep{survival}. 
- \item[] The ``FCL'' data \citep{pintilie2006competing} were obtained from the \texttt{randomForestSRC} R package \citep{randomForestSRC}. 
- \item[] The ``Monoclonal gammopathy'' data \citep{kyle2002long} were obtained from the \texttt{survival} R package \citep{survival}. 
- \item[] The ``MESA'' data \citep{bild2002multi} were obtained from BioLINCC. 
- \item[] The ``ARIC'' data \citep{aric1989atherosclerosis} were obtained from BioLINCC.
+ \item The ``VA lung cancer trial'' data \citep{kalbfleisch2011statistical} were obtained from the \texttt{randomForestSRC} R package \citep{randomForestSRC}. 
+ \item The ``Colon cancer'' data \citep{moertel1995fluorouracil} were obtained from the \texttt{survival} R package \citep{survival}. 
+ \item The ``Primary biliary cholangitis'' data \citep{therneau2000cox} were obtained from the \texttt{aorsf} R package \citep{aorsf}. 
+ \item The ``Movies released in 2015-2018'' data  were obtained from the \texttt{censored} R package \citep{censored}. 
+ \item The ``GBSG II'' data \citep{schumacher1994rauschecker} were obtained from the \texttt{TH.data} R package \citep{TH.data}. 
+ \item The ``Systolic Heart Failure'' data \citep{hsich2011identifying} were obtained from the \texttt{randomForestSRC} R package \citep{randomForestSRC}. 
+ \item The ``Serum free light chain'' data \citep{dispenzieri2012use, kyle2006prevalence} were obtained from the \texttt{survival} R package \citep{survival}. 
+ \item The ``Non-alcohol fatty liver disease'' data \citep{allen2018nonalcoholic} were obtained from the \texttt{survival} R package \citep{survival}. 
+ \item The ``Rotterdam tumor bank'' data \citep{royston2013external} were obtained from the \texttt{survival} R package \citep{survival}. 
+ \item The ``ACTG 320'' data \citep{hosmer2002applied} were obtained from the \texttt{mlr3proba} R package \citep{mlr3proba}. 
+ \item The ``GUIDE-IT'' data \citep{felker2017effect} were obtained from BioLINCC. 
+ \item The ``Early breast cancer'' data \citep{desmedt2011multifactorial, hatzis2011genomic, ternes2017identification} were obtained from the \texttt{biospear} R package \citep{biospear}. 
+ \item The ``SPRINT'' data \citep{sprint2015randomized} were obtained from BioLINCC. 
+ \item The ``NKI 70 gene signature'' data \citep{van2002gene} were obtained from the \texttt{OpenML} R package \citep{OpenML}. 
+ \item The ``Lung cancer'' data \citep{director2008gene} were obtained from the \texttt{OpenML} R package \citep{OpenML}. 
+ \item The ``NCCTG Lung Cancer'' data \citep{loprinzi1994prospective} were obtained from the \texttt{survival} R package \citep{survival}. 
+ \item The ``FCL'' data \citep{pintilie2006competing} were obtained from the \texttt{randomForestSRC} R package \citep{randomForestSRC}. 
+ \item The ``Monoclonal gammopathy'' data \citep{kyle2002long} were obtained from the \texttt{survival} R package \citep{survival}. 
+ \item The ``MESA'' data \citep{bild2002multi} were obtained from BioLINCC. 
+ \item The ``ARIC'' data \citep{aric1989atherosclerosis} were obtained from BioLINCC. 
+ \item The ``JHS'' data \citep{taylor2005toward} were obtained from BioLINCC.
 
 \end{enumerate}
 
@@ -672,6 +688,10 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
  &  &  & Stroke & 1,323 & 90.3\\
 \cmidrule{4-6}\nopagebreak
 \multirow{-4}{*}{\raggedright\arraybackslash ARIC} & \multirow{-4}{*}{\centering\arraybackslash 13,623} & \multirow{-4}{*}{\centering\arraybackslash 41} & Death & 6,662 & 51.1\\
+\cmidrule{1-6}\pagebreak[0]
+ &  &  & Stroke & 152 & 95.8\\
+\cmidrule{4-6}\nopagebreak
+\multirow{-2}{*}{\raggedright\arraybackslash JHS} & \multirow{-2}{*}{\centering\arraybackslash 3,501} & \multirow{-2}{*}{\centering\arraybackslash 80} & Coronary Heart Disease & 190 & 94.6\\
 \bottomrule
 \end{longtable}
 \end{landscape}
@@ -683,14 +703,14 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \begin{longtable}[t]{lcccc}
-\caption{\label{tab:unnamed-chunk-11}Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 31 risk prediction tasks.\label{tab:bm_pred_all}}\\
+\caption{\label{tab:unnamed-chunk-11}Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 35 risk prediction tasks.\label{tab:bm_pred_all}}\\
 \toprule
 \multicolumn{1}{c}{ } & \multicolumn{2}{c}{Performance metric (SD)} & \multicolumn{2}{c}{Computation time, seconds} \\
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
   & Scaled Brier & C-Statistic & Model fitting & Risk prediction\\
 \midrule
 \endfirsthead
-\caption[]{Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 31 risk prediction tasks.\label{tab:bm_pred_all} \textit{(continued)}}\\
+\caption[]{Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 35 risk prediction tasks.\label{tab:bm_pred_all} \textit{(continued)}}\\
 \toprule
   & Scaled Brier & C-Statistic & Model fitting & Risk prediction\\
 \midrule
@@ -702,581 +722,615 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Overall}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.132 (0.110) & 0.771 (0.073) & 0.410 & 0.089\\
-\hspace{1em}aorsf-cph & 0.131 (0.110) & 0.770 (0.072) & 1.139 & 0.084\\
-\hspace{1em}aorsf-net & 0.129 (0.114) & 0.769 (0.073) & 85.854 & 0.086\\
-\hspace{1em}obliqueRSF-net & 0.118 (0.085) & 0.770 (0.073) & 356.959 & 17.324\\
-\hspace{1em}cif-standard & 0.117 (0.098) & 0.763 (0.073) & 2.020 & 5.584\\
-\hspace{1em}rsf-standard & 0.117 (0.115) & 0.755 (0.078) & 2.162 & 0.189\\
-\hspace{1em}cif-rotate & 0.116 (0.126) & 0.753 (0.083) & 35.270 & 6.040\\
-\hspace{1em}glmnet-cox & 0.112 (0.121) & 0.755 (0.079) & 0.417 & 0.003\\
-\hspace{1em}ranger-extratrees & 0.103 (0.086) & 0.760 (0.069) & 0.737 & 0.816\\
-\hspace{1em}cif-extension & 0.099 (0.093) & 0.760 (0.074) & 15.472 & 6.218\\
-\hspace{1em}aorsf-random & 0.094 (0.082) & 0.740 (0.065) & 1.285 & 0.085\\
-\hspace{1em}xgboost-cox & 0.067 (0.102) & 0.747 (0.096) & 4.122 & 0.004\\
-\hspace{1em}nn-cox & 0.049 (0.106) & 0.650 (0.139) & 16.304 & 1.461\\
-\hspace{1em}xgboost-aft & --- & 0.761 (0.078) & 13.135 & 0.007\\
+\hspace{1em}aorsf-fast & 0.126 (0.110) & 0.772 (0.071) & 0.620 & 0.145\\
+\hspace{1em}aorsf-cph & 0.126 (0.109) & 0.771 (0.070) & 1.912 & 0.148\\
+\hspace{1em}aorsf-net & 0.124 (0.112) & 0.771 (0.071) & 78.512 & 0.143\\
+\hspace{1em}obliqueRSF-net & 0.113 (0.085) & 0.771 (0.071) & 300.393 & 18.803\\
+\hspace{1em}cif-standard & 0.113 (0.098) & 0.765 (0.071) & 4.293 & 6.044\\
+\hspace{1em}rsf-standard & 0.113 (0.114) & 0.755 (0.075) & 2.099 & 0.199\\
+\hspace{1em}cif-rotate & 0.112 (0.124) & 0.755 (0.081) & 37.695 & 8.348\\
+\hspace{1em}glmnet-cox & 0.108 (0.119) & 0.757 (0.077) & 0.473 & 0.003\\
+\hspace{1em}ranger-extratrees & 0.099 (0.085) & 0.762 (0.067) & 0.878 & 1.156\\
+\hspace{1em}cif-extension & 0.095 (0.092) & 0.761 (0.072) & 22.321 & 6.949\\
+\hspace{1em}aorsf-random & 0.090 (0.081) & 0.741 (0.063) & 1.790 & 0.141\\
+\hspace{1em}xgboost-cox & 0.064 (0.100) & 0.749 (0.094) & 3.973 & 0.004\\
+\hspace{1em}nn-cox & 0.047 (0.108) & 0.656 (0.138) & 15.352 & 2.060\\
+\hspace{1em}xgboost-aft & --- & 0.762 (0.076) & 13.060 & 0.007\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ACTG 320; AIDS diagnosis, n = 1151, p = 12}}}\\
 \hline
-\hspace{1em}ranger-extratrees & 0.027 (0.017) & 0.736 (0.036) & 0.060 & 0.147\\
-\hspace{1em}aorsf-random & 0.027 (0.022) & 0.741 (0.035) & 0.535 & 0.040\\
-\hspace{1em}obliqueRSF-net & 0.026 (0.023) & 0.741 (0.038) & 25.742 & 15.383\\
-\hspace{1em}cif-standard & 0.023 (0.032) & 0.740 (0.041) & 1.752 & 4.733\\
-\hspace{1em}aorsf-cph & 0.023 (0.030) & 0.744 (0.039) & 0.468 & 0.033\\
-\hspace{1em}cif-extension & 0.023 (0.016) & 0.719 (0.040) & 9.771 & 4.100\\
-\hspace{1em}aorsf-fast & 0.022 (0.029) & 0.737 (0.041) & 0.196 & 0.033\\
-\hspace{1em}aorsf-net & 0.016 (0.035) & 0.738 (0.040) & 18.402 & 0.035\\
-\hspace{1em}glmnet-cox & 0.015 (0.029) & 0.742 (0.035) & 0.174 & 0.003\\
-\hspace{1em}rsf-standard & 0.005 (0.041) & 0.727 (0.044) & 0.180 & 0.061\\
-\hspace{1em}cif-rotate & 0.002 (0.042) & 0.729 (0.040) & 16.011 & 3.961\\
-\hspace{1em}nn-cox & -0.001 (0.005) & 0.544 (0.122) & 11.297 & 0.689\\
-\hspace{1em}xgboost-cox & -0.003 (0.046) & 0.747 (0.031) & 3.862 & 0.003\\
-\hspace{1em}xgboost-aft & --- & 0.734 (0.034) & 10.233 & 0.006\\
+\hspace{1em}aorsf-random & 0.028 (0.022) & 0.748 (0.038) & 0.382 & 0.034\\
+\hspace{1em}ranger-extratrees & 0.028 (0.017) & 0.740 (0.036) & 0.064 & 0.146\\
+\hspace{1em}obliqueRSF-net & 0.027 (0.022) & 0.746 (0.038) & 25.980 & 15.236\\
+\hspace{1em}aorsf-cph & 0.025 (0.029) & 0.751 (0.042) & 0.424 & 0.033\\
+\hspace{1em}cif-standard & 0.024 (0.031) & 0.744 (0.040) & 1.771 & 4.657\\
+\hspace{1em}aorsf-fast & 0.024 (0.029) & 0.746 (0.043) & 0.144 & 0.032\\
+\hspace{1em}cif-extension & 0.023 (0.015) & 0.722 (0.038) & 9.848 & 4.083\\
+\hspace{1em}aorsf-net & 0.019 (0.034) & 0.745 (0.042) & 17.078 & 0.034\\
+\hspace{1em}glmnet-cox & 0.016 (0.030) & 0.746 (0.037) & 0.179 & 0.003\\
+\hspace{1em}rsf-standard & 0.005 (0.041) & 0.730 (0.042) & 0.192 & 0.061\\
+\hspace{1em}cif-rotate & 0.004 (0.040) & 0.731 (0.038) & 16.095 & 3.888\\
+\hspace{1em}xgboost-cox & 0.000 (0.044) & 0.751 (0.033) & 3.704 & 0.003\\
+\hspace{1em}nn-cox & -0.001 (0.008) & 0.549 (0.125) & 11.075 & 0.668\\
+\hspace{1em}xgboost-aft & --- & 0.737 (0.035) & 10.015 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ACTG 320; death, n = 1151, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.010 (0.022) & 0.843 (0.054) & 0.089 & 0.020\\
-\hspace{1em}obliqueRSF-net & 0.007 (0.012) & 0.824 (0.053) & 8.885 & 10.976\\
-\hspace{1em}aorsf-cph & 0.006 (0.018) & 0.823 (0.061) & 0.416 & 0.020\\
-\hspace{1em}aorsf-random & 0.004 (0.015) & 0.791 (0.075) & 0.277 & 0.024\\
-\hspace{1em}cif-extension & 0.000 (0.020) & 0.764 (0.067) & 8.432 & 3.512\\
-\hspace{1em}ranger-extratrees & 0.000 (0.019) & 0.776 (0.070) & 0.044 & 0.142\\
-\hspace{1em}xgboost-cox & -0.004 (0.004) & 0.500 (0.000) & 0.120 & 0.002\\
-\hspace{1em}nn-cox & -0.004 (0.004) & 0.515 (0.117) & 10.872 & 0.510\\
-\hspace{1em}cif-standard & -0.006 (0.025) & 0.780 (0.063) & 1.724 & 4.648\\
-\hspace{1em}aorsf-net & -0.006 (0.033) & 0.808 (0.068) & 14.565 & 0.024\\
-\hspace{1em}rsf-standard & -0.033 (0.052) & 0.776 (0.075) & 0.090 & 0.036\\
-\hspace{1em}cif-rotate & -0.040 (0.048) & 0.702 (0.090) & 13.903 & 3.447\\
-\hspace{1em}glmnet-cox & -0.065 (0.098) & 0.747 (0.100) & 0.272 & 0.002\\
-\hspace{1em}xgboost-aft & --- & 0.773 (0.072) & 9.272 & 0.005\\
+\hspace{1em}obliqueRSF-net & 0.007 (0.011) & 0.823 (0.052) & 8.869 & 11.004\\
+\hspace{1em}aorsf-cph & 0.007 (0.018) & 0.821 (0.060) & 0.340 & 0.018\\
+\hspace{1em}aorsf-fast & 0.005 (0.019) & 0.827 (0.056) & 0.086 & 0.018\\
+\hspace{1em}aorsf-random & 0.005 (0.014) & 0.788 (0.074) & 0.221 & 0.022\\
+\hspace{1em}cif-extension & 0.001 (0.020) & 0.765 (0.066) & 8.436 & 3.493\\
+\hspace{1em}ranger-extratrees & 0.001 (0.019) & 0.777 (0.069) & 0.044 & 0.138\\
+\hspace{1em}xgboost-cox & -0.004 (0.004) & 0.500 (0.000) & 0.119 & 0.002\\
+\hspace{1em}nn-cox & -0.004 (0.004) & 0.508 (0.119) & 10.867 & 0.518\\
+\hspace{1em}cif-standard & -0.005 (0.025) & 0.781 (0.062) & 1.726 & 4.648\\
+\hspace{1em}aorsf-net & -0.005 (0.032) & 0.806 (0.067) & 13.309 & 0.022\\
+\hspace{1em}rsf-standard & -0.031 (0.051) & 0.776 (0.073) & 0.090 & 0.035\\
+\hspace{1em}cif-rotate & -0.037 (0.049) & 0.707 (0.090) & 13.920 & 3.444\\
+\hspace{1em}glmnet-cox & -0.065 (0.095) & 0.746 (0.098) & 0.281 & 0.002\\
+\hspace{1em}xgboost-aft & --- & 0.773 (0.071) & 9.190 & 0.005\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ARIC; coronary heart disease, n = 13623, p = 41}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.157 (0.007) & 0.810 (0.007) & 4.650 & 1.324\\
-\hspace{1em}aorsf-cph & 0.153 (0.007) & 0.809 (0.007) & 14.626 & 1.339\\
-\hspace{1em}aorsf-net & 0.153 (0.007) & 0.810 (0.007) & 511.638 & 1.423\\
-\hspace{1em}rsf-standard & 0.151 (0.007) & 0.801 (0.007) & 9.225 & 0.994\\
-\hspace{1em}obliqueRSF-net & 0.144 (0.005) & 0.812 (0.007) & 2848.016 & 350.017\\
-\hspace{1em}cif-standard & 0.132 (0.005) & 0.810 (0.007) & 71.737 & 367.815\\
-\hspace{1em}glmnet-cox & 0.129 (0.012) & 0.796 (0.008) & 1.468 & 0.011\\
-\hspace{1em}nn-cox & 0.125 (0.014) & 0.795 (0.006) & 51.682 & 80.375\\
-\hspace{1em}ranger-extratrees & 0.112 (0.005) & 0.796 (0.009) & 300.413 & 61.814\\
-\hspace{1em}cif-rotate & 0.104 (0.004) & 0.784 (0.007) & 568.292 & 67.251\\
-\hspace{1em}aorsf-random & 0.098 (0.005) & 0.772 (0.008) & 11.618 & 1.322\\
-\hspace{1em}cif-extension & 0.069 (0.002) & 0.787 (0.009) & 168.430 & 54.292\\
-\hspace{1em}xgboost-cox & 0.065 (0.017) & 0.814 (0.005) & 8.572 & 0.015\\
-\hspace{1em}xgboost-aft & --- & 0.815 (0.006) & 23.633 & 0.013\\
+\hspace{1em}aorsf-fast & 0.156 (0.007) & 0.810 (0.007) & 5.048 & 1.287\\
+\hspace{1em}aorsf-cph & 0.153 (0.006) & 0.809 (0.007) & 14.564 & 1.300\\
+\hspace{1em}aorsf-net & 0.152 (0.006) & 0.809 (0.007) & 480.098 & 1.437\\
+\hspace{1em}rsf-standard & 0.150 (0.007) & 0.801 (0.007) & 9.407 & 0.991\\
+\hspace{1em}obliqueRSF-net & 0.143 (0.005) & 0.811 (0.008) & 2830.398 & 356.908\\
+\hspace{1em}cif-standard & 0.132 (0.005) & 0.809 (0.007) & 71.835 & 371.102\\
+\hspace{1em}glmnet-cox & 0.129 (0.011) & 0.795 (0.008) & 1.473 & 0.011\\
+\hspace{1em}nn-cox & 0.117 (0.029) & 0.786 (0.046) & 51.356 & 84.715\\
+\hspace{1em}ranger-extratrees & 0.112 (0.005) & 0.795 (0.009) & 293.864 & 61.837\\
+\hspace{1em}cif-rotate & 0.104 (0.004) & 0.783 (0.009) & 569.289 & 67.436\\
+\hspace{1em}aorsf-random & 0.097 (0.005) & 0.772 (0.008) & 10.996 & 1.259\\
+\hspace{1em}cif-extension & 0.069 (0.002) & 0.786 (0.009) & 169.206 & 56.091\\
+\hspace{1em}xgboost-cox & 0.064 (0.017) & 0.814 (0.006) & 8.544 & 0.015\\
+\hspace{1em}xgboost-aft & --- & 0.814 (0.006) & 23.781 & 0.013\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ARIC; death, n = 13623, p = 41}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.217 (0.006) & 0.792 (0.004) & 929.632 & 2.372\\
-\hspace{1em}rsf-standard & 0.216 (0.007) & 0.789 (0.004) & 14.438 & 1.243\\
-\hspace{1em}aorsf-cph & 0.215 (0.006) & 0.792 (0.004) & 23.042 & 2.202\\
-\hspace{1em}aorsf-fast & 0.215 (0.007) & 0.792 (0.004) & 7.692 & 2.218\\
-\hspace{1em}obliqueRSF-net & 0.207 (0.005) & 0.792 (0.004) & 7227.981 & 327.819\\
-\hspace{1em}cif-standard & 0.202 (0.004) & 0.790 (0.004) & 73.071 & 386.914\\
-\hspace{1em}nn-cox & 0.193 (0.011) & 0.780 (0.005) & 101.894 & 92.558\\
-\hspace{1em}glmnet-cox & 0.190 (0.015) & 0.777 (0.008) & 2.147 & 0.011\\
-\hspace{1em}ranger-extratrees & 0.181 (0.004) & 0.781 (0.005) & 308.079 & 70.063\\
-\hspace{1em}cif-rotate & 0.152 (0.007) & 0.757 (0.006) & 586.027 & 66.383\\
-\hspace{1em}xgboost-cox & 0.132 (0.011) & 0.795 (0.004) & 11.388 & 0.016\\
-\hspace{1em}aorsf-random & 0.130 (0.005) & 0.734 (0.006) & 20.385 & 2.113\\
-\hspace{1em}cif-extension & 0.113 (0.002) & 0.776 (0.005) & 179.497 & 53.506\\
-\hspace{1em}xgboost-aft & --- & 0.794 (0.004) & 29.269 & 0.014\\
+\hspace{1em}aorsf-net & 0.217 (0.006) & 0.792 (0.004) & 902.210 & 2.343\\
+\hspace{1em}rsf-standard & 0.216 (0.006) & 0.789 (0.004) & 14.727 & 1.274\\
+\hspace{1em}aorsf-fast & 0.216 (0.007) & 0.792 (0.004) & 7.268 & 2.936\\
+\hspace{1em}aorsf-cph & 0.215 (0.006) & 0.792 (0.004) & 22.420 & 3.070\\
+\hspace{1em}obliqueRSF-net & 0.207 (0.005) & 0.791 (0.004) & 7329.229 & 331.164\\
+\hspace{1em}cif-standard & 0.201 (0.004) & 0.790 (0.004) & 72.253 & 384.744\\
+\hspace{1em}nn-cox & 0.193 (0.011) & 0.780 (0.005) & 103.296 & 92.992\\
+\hspace{1em}glmnet-cox & 0.191 (0.015) & 0.777 (0.007) & 2.256 & 0.011\\
+\hspace{1em}ranger-extratrees & 0.181 (0.004) & 0.780 (0.005) & 332.296 & 70.372\\
+\hspace{1em}cif-rotate & 0.151 (0.007) & 0.757 (0.006) & 589.958 & 66.749\\
+\hspace{1em}xgboost-cox & 0.131 (0.012) & 0.794 (0.004) & 11.220 & 0.015\\
+\hspace{1em}aorsf-random & 0.130 (0.005) & 0.733 (0.005) & 19.416 & 2.051\\
+\hspace{1em}cif-extension & 0.113 (0.002) & 0.775 (0.005) & 180.483 & 54.092\\
+\hspace{1em}xgboost-aft & --- & 0.794 (0.004) & 28.692 & 0.014\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ARIC; heart failure, n = 13623, p = 41}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.234 (0.007) & 0.842 (0.005) & 5.261 & 2.190\\
-\hspace{1em}rsf-standard & 0.230 (0.007) & 0.835 (0.005) & 10.694 & 1.067\\
-\hspace{1em}aorsf-cph & 0.229 (0.007) & 0.841 (0.005) & 16.937 & 2.243\\
-\hspace{1em}aorsf-net & 0.229 (0.006) & 0.841 (0.005) & 623.271 & 1.674\\
-\hspace{1em}obliqueRSF-net & 0.213 (0.005) & 0.841 (0.005) & 3729.416 & 319.840\\
-\hspace{1em}cif-standard & 0.199 (0.005) & 0.839 (0.005) & 71.703 & 382.388\\
-\hspace{1em}nn-cox & 0.180 (0.017) & 0.827 (0.007) & 54.369 & 95.681\\
-\hspace{1em}cif-rotate & 0.172 (0.006) & 0.806 (0.007) & 578.879 & 69.220\\
-\hspace{1em}ranger-extratrees & 0.171 (0.004) & 0.824 (0.005) & 366.025 & 79.901\\
-\hspace{1em}glmnet-cox & 0.164 (0.046) & 0.816 (0.019) & 2.081 & 0.011\\
-\hspace{1em}aorsf-random & 0.139 (0.005) & 0.789 (0.006) & 13.971 & 1.519\\
-\hspace{1em}xgboost-cox & 0.121 (0.018) & 0.845 (0.005) & 11.018 & 0.016\\
-\hspace{1em}cif-extension & 0.109 (0.003) & 0.809 (0.006) & 175.961 & 56.949\\
-\hspace{1em}xgboost-aft & --- & 0.844 (0.005) & 24.863 & 0.013\\
+\hspace{1em}aorsf-fast & 0.233 (0.006) & 0.841 (0.005) & 5.731 & 1.497\\
+\hspace{1em}rsf-standard & 0.229 (0.006) & 0.835 (0.005) & 11.238 & 1.079\\
+\hspace{1em}aorsf-cph & 0.229 (0.006) & 0.841 (0.005) & 16.768 & 1.549\\
+\hspace{1em}aorsf-net & 0.228 (0.006) & 0.841 (0.005) & 597.572 & 1.659\\
+\hspace{1em}obliqueRSF-net & 0.212 (0.005) & 0.841 (0.005) & 3737.617 & 320.616\\
+\hspace{1em}cif-standard & 0.199 (0.005) & 0.839 (0.005) & 71.854 & 391.419\\
+\hspace{1em}nn-cox & 0.180 (0.017) & 0.826 (0.007) & 56.056 & 96.125\\
+\hspace{1em}cif-rotate & 0.172 (0.006) & 0.806 (0.007) & 589.494 & 69.448\\
+\hspace{1em}ranger-extratrees & 0.170 (0.004) & 0.824 (0.005) & 387.176 & 77.513\\
+\hspace{1em}glmnet-cox & 0.167 (0.044) & 0.817 (0.018) & 2.141 & 0.011\\
+\hspace{1em}aorsf-random & 0.139 (0.005) & 0.789 (0.006) & 12.952 & 1.501\\
+\hspace{1em}xgboost-cox & 0.122 (0.017) & 0.845 (0.005) & 10.926 & 0.015\\
+\hspace{1em}cif-extension & 0.109 (0.003) & 0.808 (0.006) & 176.907 & 57.216\\
+\hspace{1em}xgboost-aft & --- & 0.844 (0.005) & 24.549 & 0.013\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ARIC; stroke, n = 13623, p = 41}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.093 (0.004) & 0.794 (0.006) & 4.159 & 1.120\\
-\hspace{1em}aorsf-net & 0.090 (0.004) & 0.792 (0.007) & 354.704 & 1.172\\
-\hspace{1em}rsf-standard & 0.090 (0.006) & 0.785 (0.007) & 8.872 & 0.978\\
-\hspace{1em}aorsf-cph & 0.090 (0.004) & 0.793 (0.007) & 13.478 & 1.150\\
-\hspace{1em}obliqueRSF-net & 0.082 (0.003) & 0.791 (0.007) & 1855.277 & 382.650\\
-\hspace{1em}glmnet-cox & 0.078 (0.005) & 0.788 (0.007) & 1.670 & 0.011\\
-\hspace{1em}cif-standard & 0.073 (0.003) & 0.788 (0.007) & 73.421 & 363.514\\
-\hspace{1em}nn-cox & 0.069 (0.012) & 0.783 (0.010) & 32.032 & 91.233\\
-\hspace{1em}ranger-extratrees & 0.067 (0.003) & 0.780 (0.008) & 243.169 & 50.062\\
-\hspace{1em}aorsf-random & 0.059 (0.004) & 0.750 (0.008) & 9.528 & 1.132\\
-\hspace{1em}cif-rotate & 0.052 (0.003) & 0.769 (0.009) & 593.273 & 68.403\\
-\hspace{1em}xgboost-cox & 0.047 (0.013) & 0.794 (0.006) & 7.226 & 0.014\\
-\hspace{1em}cif-extension & 0.036 (0.002) & 0.771 (0.008) & 169.125 & 53.061\\
-\hspace{1em}xgboost-aft & --- & 0.793 (0.007) & 20.599 & 0.012\\
+\hspace{1em}aorsf-fast & 0.093 (0.004) & 0.794 (0.007) & 4.549 & 1.078\\
+\hspace{1em}aorsf-net & 0.090 (0.004) & 0.792 (0.007) & 349.547 & 1.189\\
+\hspace{1em}rsf-standard & 0.090 (0.006) & 0.784 (0.006) & 8.991 & 0.984\\
+\hspace{1em}aorsf-cph & 0.090 (0.004) & 0.792 (0.007) & 12.609 & 1.077\\
+\hspace{1em}obliqueRSF-net & 0.082 (0.003) & 0.791 (0.007) & 1869.359 & 387.014\\
+\hspace{1em}glmnet-cox & 0.078 (0.004) & 0.787 (0.007) & 1.673 & 0.011\\
+\hspace{1em}cif-standard & 0.073 (0.003) & 0.787 (0.007) & 73.989 & 364.863\\
+\hspace{1em}nn-cox & 0.070 (0.012) & 0.783 (0.010) & 32.099 & 82.720\\
+\hspace{1em}ranger-extratrees & 0.067 (0.003) & 0.779 (0.008) & 251.130 & 50.542\\
+\hspace{1em}aorsf-random & 0.059 (0.004) & 0.750 (0.008) & 9.179 & 1.091\\
+\hspace{1em}cif-rotate & 0.052 (0.003) & 0.768 (0.009) & 586.962 & 68.410\\
+\hspace{1em}xgboost-cox & 0.046 (0.014) & 0.794 (0.006) & 7.316 & 0.015\\
+\hspace{1em}cif-extension & 0.036 (0.002) & 0.769 (0.009) & 169.866 & 53.493\\
+\hspace{1em}xgboost-aft & --- & 0.793 (0.006) & 20.363 & 0.013\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Colon cancer; death, n = 929, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.098 (0.013) & 0.718 (0.012) & 0.233 & 0.053\\
-\hspace{1em}aorsf-cph & 0.097 (0.013) & 0.717 (0.012) & 0.636 & 0.052\\
-\hspace{1em}cif-standard & 0.096 (0.013) & 0.710 (0.012) & 0.741 & 3.557\\
-\hspace{1em}aorsf-net & 0.094 (0.013) & 0.717 (0.013) & 48.748 & 0.047\\
-\hspace{1em}aorsf-random & 0.094 (0.009) & 0.715 (0.012) & 0.917 & 0.044\\
-\hspace{1em}obliqueRSF-net & 0.088 (0.006) & 0.717 (0.012) & 249.388 & 17.334\\
-\hspace{1em}cif-rotate & 0.086 (0.018) & 0.705 (0.015) & 13.264 & 3.321\\
-\hspace{1em}rsf-standard & 0.085 (0.019) & 0.703 (0.011) & 1.725 & 0.149\\
-\hspace{1em}ranger-extratrees & 0.082 (0.007) & 0.710 (0.012) & 0.631 & 0.247\\
-\hspace{1em}cif-extension & 0.080 (0.006) & 0.709 (0.012) & 8.436 & 3.352\\
-\hspace{1em}glmnet-cox & 0.072 (0.013) & 0.709 (0.018) & 0.138 & 0.003\\
-\hspace{1em}xgboost-cox & 0.061 (0.012) & 0.700 (0.013) & 3.302 & 0.003\\
-\hspace{1em}nn-cox & -0.003 (0.003) & 0.509 (0.035) & 12.947 & 1.092\\
-\hspace{1em}xgboost-aft & --- & 0.706 (0.014) & 10.595 & 0.006\\
+\hspace{1em}aorsf-fast & 0.100 (0.014) & 0.717 (0.012) & 0.237 & 0.049\\
+\hspace{1em}aorsf-cph & 0.099 (0.014) & 0.717 (0.011) & 0.636 & 0.049\\
+\hspace{1em}cif-standard & 0.097 (0.013) & 0.710 (0.012) & 0.745 & 3.685\\
+\hspace{1em}aorsf-net & 0.096 (0.014) & 0.717 (0.012) & 47.226 & 0.048\\
+\hspace{1em}aorsf-random & 0.096 (0.010) & 0.716 (0.011) & 1.717 & 0.044\\
+\hspace{1em}obliqueRSF-net & 0.089 (0.006) & 0.717 (0.012) & 252.190 & 16.726\\
+\hspace{1em}cif-rotate & 0.086 (0.017) & 0.705 (0.014) & 13.242 & 3.448\\
+\hspace{1em}rsf-standard & 0.086 (0.019) & 0.704 (0.011) & 1.901 & 0.150\\
+\hspace{1em}ranger-extratrees & 0.083 (0.007) & 0.710 (0.012) & 0.560 & 0.248\\
+\hspace{1em}cif-extension & 0.080 (0.006) & 0.709 (0.011) & 8.397 & 3.363\\
+\hspace{1em}glmnet-cox & 0.075 (0.016) & 0.711 (0.019) & 0.128 & 0.003\\
+\hspace{1em}xgboost-cox & 0.062 (0.013) & 0.701 (0.013) & 3.217 & 0.003\\
+\hspace{1em}nn-cox & -0.003 (0.003) & 0.508 (0.033) & 12.769 & 1.106\\
+\hspace{1em}xgboost-aft & --- & 0.706 (0.013) & 10.290 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Colon cancer; recurrence, n = 929, p = 12}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.099 (0.017) & 0.713 (0.016) & 0.224 & 0.049\\
-\hspace{1em}aorsf-cph & 0.098 (0.016) & 0.712 (0.015) & 0.625 & 0.051\\
-\hspace{1em}aorsf-net & 0.095 (0.017) & 0.713 (0.018) & 49.319 & 0.049\\
-\hspace{1em}aorsf-random & 0.091 (0.014) & 0.707 (0.014) & 0.916 & 0.043\\
-\hspace{1em}cif-standard & 0.090 (0.016) & 0.701 (0.017) & 0.742 & 3.624\\
-\hspace{1em}obliqueRSF-net & 0.087 (0.009) & 0.710 (0.016) & 253.863 & 16.623\\
-\hspace{1em}cif-rotate & 0.084 (0.021) & 0.695 (0.018) & 13.182 & 3.813\\
-\hspace{1em}cif-extension & 0.081 (0.009) & 0.706 (0.017) & 8.510 & 3.992\\
-\hspace{1em}rsf-standard & 0.080 (0.021) & 0.694 (0.015) & 1.794 & 0.153\\
-\hspace{1em}ranger-extratrees & 0.079 (0.011) & 0.699 (0.016) & 0.652 & 0.248\\
-\hspace{1em}glmnet-cox & 0.071 (0.018) & 0.704 (0.024) & 0.131 & 0.003\\
-\hspace{1em}xgboost-cox & 0.059 (0.011) & 0.694 (0.018) & 3.239 & 0.003\\
-\hspace{1em}nn-cox & -0.004 (0.006) & 0.534 (0.057) & 13.226 & 0.968\\
-\hspace{1em}xgboost-aft & --- & 0.701 (0.019) & 11.353 & 0.006\\
+\hspace{1em}aorsf-fast & 0.100 (0.017) & 0.713 (0.016) & 0.237 & 0.054\\
+\hspace{1em}aorsf-cph & 0.098 (0.017) & 0.712 (0.015) & 0.659 & 0.852\\
+\hspace{1em}aorsf-net & 0.095 (0.018) & 0.713 (0.017) & 47.589 & 0.049\\
+\hspace{1em}cif-standard & 0.091 (0.016) & 0.701 (0.017) & 0.717 & 3.703\\
+\hspace{1em}obliqueRSF-net & 0.087 (0.009) & 0.711 (0.015) & 249.790 & 16.701\\
+\hspace{1em}aorsf-random & 0.087 (0.012) & 0.702 (0.015) & 1.815 & 0.046\\
+\hspace{1em}cif-rotate & 0.084 (0.020) & 0.694 (0.017) & 13.154 & 3.977\\
+\hspace{1em}cif-extension & 0.081 (0.009) & 0.706 (0.017) & 8.446 & 4.066\\
+\hspace{1em}rsf-standard & 0.081 (0.020) & 0.694 (0.015) & 1.831 & 0.153\\
+\hspace{1em}ranger-extratrees & 0.079 (0.011) & 0.700 (0.016) & 0.636 & 0.254\\
+\hspace{1em}glmnet-cox & 0.073 (0.018) & 0.706 (0.024) & 0.125 & 0.003\\
+\hspace{1em}xgboost-cox & 0.059 (0.011) & 0.695 (0.018) & 3.136 & 0.003\\
+\hspace{1em}nn-cox & -0.005 (0.006) & 0.531 (0.054) & 13.107 & 0.969\\
+\hspace{1em}xgboost-aft & --- & 0.701 (0.019) & 11.227 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Early breast cancer; recurrence or death, n = 614, p = 1692}}}\\
 \hline
-\hspace{1em}obliqueRSF-net & 0.073 (0.023) & 0.750 (0.027) & 1891.188 & 14.040\\
-\hspace{1em}cif-rotate & 0.071 (0.017) & 0.746 (0.027) & 6486.110 & 362.912\\
-\hspace{1em}cif-standard & 0.068 (0.017) & 0.746 (0.028) & 8.618 & 4.191\\
-\hspace{1em}aorsf-cph & 0.066 (0.030) & 0.744 (0.022) & 1.248 & 0.184\\
-\hspace{1em}aorsf-fast & 0.065 (0.029) & 0.745 (0.023) & 0.720 & 0.177\\
-\hspace{1em}cif-extension & 0.065 (0.014) & 0.745 (0.025) & 43.951 & 6.509\\
-\hspace{1em}ranger-extratrees & 0.061 (0.022) & 0.741 (0.028) & 0.229 & 0.170\\
-\hspace{1em}glmnet-cox & 0.044 (0.032) & 0.724 (0.034) & 5.808 & 0.006\\
-\hspace{1em}xgboost-cox & 0.029 (0.032) & 0.740 (0.027) & 2.321 & 0.007\\
-\hspace{1em}aorsf-random & 0.027 (0.014) & 0.694 (0.038) & 1.222 & 0.174\\
-\hspace{1em}rsf-standard & 0.021 (0.039) & 0.692 (0.032) & 0.365 & 0.757\\
-\hspace{1em}aorsf-net & 0.011 (0.066) & 0.740 (0.022) & 466.042 & 0.176\\
-\hspace{1em}nn-cox & -0.012 (0.041) & 0.661 (0.077) & 19.480 & 1.798\\
-\hspace{1em}xgboost-aft & --- & 0.741 (0.023) & 9.720 & 0.010\\
+\hspace{1em}obliqueRSF-net & 0.072 (0.023) & 0.751 (0.029) & 1901.883 & 14.017\\
+\hspace{1em}cif-rotate & 0.070 (0.018) & 0.747 (0.027) & 6452.563 & 360.067\\
+\hspace{1em}cif-standard & 0.067 (0.019) & 0.747 (0.030) & 9.660 & 4.247\\
+\hspace{1em}aorsf-cph & 0.067 (0.029) & 0.747 (0.026) & 1.107 & 0.175\\
+\hspace{1em}aorsf-fast & 0.065 (0.028) & 0.747 (0.027) & 0.712 & 0.178\\
+\hspace{1em}cif-extension & 0.064 (0.016) & 0.746 (0.028) & 44.047 & 6.554\\
+\hspace{1em}ranger-extratrees & 0.061 (0.022) & 0.742 (0.031) & 0.228 & 0.169\\
+\hspace{1em}glmnet-cox & 0.041 (0.032) & 0.724 (0.036) & 5.780 & 0.006\\
+\hspace{1em}aorsf-random & 0.027 (0.015) & 0.696 (0.038) & 1.924 & 0.167\\
+\hspace{1em}xgboost-cox & 0.027 (0.034) & 0.741 (0.030) & 2.258 & 0.007\\
+\hspace{1em}rsf-standard & 0.024 (0.037) & 0.695 (0.033) & 0.366 & 0.743\\
+\hspace{1em}aorsf-net & 0.012 (0.062) & 0.740 (0.025) & 448.941 & 0.168\\
+\hspace{1em}nn-cox & -0.006 (0.043) & 0.669 (0.075) & 19.374 & 1.808\\
+\hspace{1em}xgboost-aft & --- & 0.744 (0.027) & 9.708 & 0.010\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{FCL; death, n = 541, p = 7}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.116 (0.029) & 0.787 (0.037) & 0.099 & 0.002\\
-\hspace{1em}aorsf-fast & 0.100 (0.040) & 0.768 (0.033) & 0.090 & 0.018\\
-\hspace{1em}aorsf-cph & 0.100 (0.041) & 0.769 (0.033) & 0.168 & 0.018\\
-\hspace{1em}aorsf-net & 0.096 (0.042) & 0.760 (0.035) & 12.670 & 0.018\\
-\hspace{1em}obliqueRSF-net & 0.090 (0.028) & 0.761 (0.037) & 96.851 & 5.382\\
-\hspace{1em}cif-extension & 0.086 (0.038) & 0.731 (0.036) & 5.266 & 2.434\\
-\hspace{1em}aorsf-random & 0.086 (0.031) & 0.757 (0.033) & 0.261 & 0.018\\
-\hspace{1em}cif-rotate & 0.085 (0.050) & 0.756 (0.028) & 6.092 & 2.025\\
-\hspace{1em}cif-standard & 0.085 (0.040) & 0.747 (0.035) & 0.360 & 1.154\\
-\hspace{1em}ranger-extratrees & 0.073 (0.017) & 0.742 (0.032) & 0.035 & 0.080\\
-\hspace{1em}rsf-standard & 0.071 (0.051) & 0.733 (0.036) & 0.161 & 0.040\\
-\hspace{1em}xgboost-cox & 0.033 (0.052) & 0.697 (0.109) & 0.396 & 0.002\\
-\hspace{1em}nn-cox & -0.004 (0.015) & 0.558 (0.114) & 11.530 & 0.419\\
-\hspace{1em}xgboost-aft & --- & 0.756 (0.039) & 6.754 & 0.005\\
+\hspace{1em}glmnet-cox & 0.117 (0.028) & 0.787 (0.037) & 0.098 & 0.002\\
+\hspace{1em}aorsf-cph & 0.100 (0.039) & 0.769 (0.033) & 0.159 & 0.018\\
+\hspace{1em}aorsf-fast & 0.100 (0.037) & 0.768 (0.032) & 0.078 & 0.018\\
+\hspace{1em}aorsf-net & 0.097 (0.040) & 0.760 (0.034) & 12.491 & 0.018\\
+\hspace{1em}obliqueRSF-net & 0.089 (0.027) & 0.758 (0.036) & 97.158 & 5.447\\
+\hspace{1em}cif-rotate & 0.087 (0.048) & 0.755 (0.027) & 6.083 & 1.964\\
+\hspace{1em}cif-extension & 0.087 (0.036) & 0.730 (0.034) & 5.256 & 2.514\\
+\hspace{1em}aorsf-random & 0.087 (0.029) & 0.757 (0.032) & 1.061 & 0.018\\
+\hspace{1em}cif-standard & 0.084 (0.038) & 0.743 (0.036) & 0.347 & 1.132\\
+\hspace{1em}ranger-extratrees & 0.073 (0.016) & 0.741 (0.037) & 0.043 & 0.078\\
+\hspace{1em}rsf-standard & 0.072 (0.048) & 0.732 (0.034) & 0.156 & 0.040\\
+\hspace{1em}xgboost-cox & 0.029 (0.050) & 0.679 (0.121) & 0.266 & 0.002\\
+\hspace{1em}nn-cox & -0.004 (0.014) & 0.549 (0.110) & 11.152 & 0.406\\
+\hspace{1em}xgboost-aft & --- & 0.754 (0.038) & 6.738 & 0.005\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{FCL; relapse, n = 541, p = 7}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.027 (0.018) & 0.619 (0.025) & 0.101 & 0.002\\
-\hspace{1em}ranger-extratrees & 0.016 (0.015) & 0.594 (0.025) & 0.036 & 0.082\\
-\hspace{1em}obliqueRSF-net & 0.011 (0.016) & 0.589 (0.023) & 218.830 & 6.235\\
-\hspace{1em}aorsf-random & 0.011 (0.018) & 0.594 (0.025) & 0.400 & 0.021\\
-\hspace{1em}xgboost-cox & 0.010 (0.016) & 0.596 (0.031) & 1.388 & 0.002\\
-\hspace{1em}aorsf-fast & 0.005 (0.020) & 0.592 (0.026) & 0.122 & 0.021\\
-\hspace{1em}aorsf-cph & 0.005 (0.021) & 0.593 (0.027) & 0.262 & 0.021\\
-\hspace{1em}cif-standard & 0.005 (0.020) & 0.591 (0.022) & 0.329 & 1.077\\
-\hspace{1em}aorsf-net & 0.005 (0.021) & 0.590 (0.027) & 18.836 & 0.022\\
-\hspace{1em}cif-extension & -0.007 (0.023) & 0.576 (0.028) & 6.215 & 2.269\\
-\hspace{1em}nn-cox & -0.008 (0.024) & 0.532 (0.056) & 12.279 & 0.465\\
-\hspace{1em}cif-rotate & -0.015 (0.025) & 0.580 (0.030) & 7.433 & 2.553\\
-\hspace{1em}rsf-standard & -0.030 (0.032) & 0.575 (0.025) & 1.144 & 0.088\\
-\hspace{1em}xgboost-aft & --- & 0.580 (0.035) & 6.260 & 0.005\\
+\hspace{1em}glmnet-cox & 0.029 (0.017) & 0.620 (0.024) & 0.100 & 0.002\\
+\hspace{1em}ranger-extratrees & 0.017 (0.016) & 0.596 (0.025) & 0.041 & 0.081\\
+\hspace{1em}obliqueRSF-net & 0.013 (0.016) & 0.593 (0.024) & 217.838 & 6.232\\
+\hspace{1em}aorsf-random & 0.013 (0.018) & 0.595 (0.024) & 1.166 & 0.020\\
+\hspace{1em}xgboost-cox & 0.010 (0.016) & 0.598 (0.031) & 1.331 & 0.002\\
+\hspace{1em}cif-standard & 0.008 (0.021) & 0.594 (0.023) & 0.315 & 1.056\\
+\hspace{1em}aorsf-cph & 0.007 (0.020) & 0.595 (0.026) & 0.256 & 0.022\\
+\hspace{1em}aorsf-fast & 0.007 (0.020) & 0.594 (0.026) & 0.114 & 0.021\\
+\hspace{1em}aorsf-net & 0.006 (0.020) & 0.592 (0.026) & 18.652 & 0.022\\
+\hspace{1em}cif-extension & -0.005 (0.023) & 0.580 (0.028) & 6.164 & 2.309\\
+\hspace{1em}nn-cox & -0.008 (0.023) & 0.526 (0.055) & 12.031 & 0.466\\
+\hspace{1em}cif-rotate & -0.012 (0.025) & 0.583 (0.030) & 7.411 & 2.486\\
+\hspace{1em}rsf-standard & -0.026 (0.032) & 0.577 (0.024) & 1.081 & 0.088\\
+\hspace{1em}xgboost-aft & --- & 0.582 (0.034) & 6.223 & 0.005\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{GBSG II; recurrence or death, n = 686, p = 10}}}\\
 \hline
-\hspace{1em}obliqueRSF-net & 0.124 (0.016) & 0.746 (0.018) & 287.168 & 6.883\\
-\hspace{1em}cif-standard & 0.123 (0.020) & 0.743 (0.020) & 0.536 & 2.266\\
-\hspace{1em}aorsf-net & 0.121 (0.024) & 0.739 (0.020) & 36.271 & 0.038\\
-\hspace{1em}rsf-standard & 0.120 (0.024) & 0.737 (0.020) & 1.433 & 0.115\\
-\hspace{1em}aorsf-cph & 0.120 (0.026) & 0.736 (0.018) & 0.412 & 0.039\\
-\hspace{1em}aorsf-fast & 0.117 (0.025) & 0.733 (0.017) & 0.168 & 0.037\\
-\hspace{1em}cif-extension & 0.115 (0.018) & 0.743 (0.020) & 7.436 & 2.965\\
-\hspace{1em}cif-rotate & 0.107 (0.024) & 0.729 (0.018) & 11.234 & 3.035\\
-\hspace{1em}aorsf-random & 0.105 (0.025) & 0.724 (0.026) & 0.790 & 0.037\\
-\hspace{1em}ranger-extratrees & 0.095 (0.018) & 0.738 (0.025) & 0.104 & 0.147\\
-\hspace{1em}glmnet-cox & 0.090 (0.018) & 0.728 (0.021) & 0.103 & 0.002\\
-\hspace{1em}xgboost-cox & 0.082 (0.017) & 0.730 (0.020) & 2.486 & 0.003\\
-\hspace{1em}nn-cox & -0.007 (0.013) & 0.509 (0.065) & 11.790 & 0.749\\
-\hspace{1em}xgboost-aft & --- & 0.730 (0.022) & 10.766 & 0.006\\
+\hspace{1em}obliqueRSF-net & 0.124 (0.016) & 0.746 (0.017) & 286.149 & 6.874\\
+\hspace{1em}cif-standard & 0.123 (0.020) & 0.743 (0.020) & 0.507 & 2.289\\
+\hspace{1em}rsf-standard & 0.120 (0.023) & 0.738 (0.019) & 1.437 & 0.115\\
+\hspace{1em}aorsf-net & 0.120 (0.024) & 0.738 (0.020) & 35.967 & 0.038\\
+\hspace{1em}aorsf-cph & 0.120 (0.025) & 0.736 (0.018) & 0.401 & 0.037\\
+\hspace{1em}aorsf-fast & 0.115 (0.024) & 0.733 (0.017) & 0.161 & 0.037\\
+\hspace{1em}cif-extension & 0.114 (0.017) & 0.743 (0.019) & 7.560 & 2.919\\
+\hspace{1em}cif-rotate & 0.107 (0.023) & 0.729 (0.017) & 11.241 & 3.023\\
+\hspace{1em}aorsf-random & 0.104 (0.023) & 0.724 (0.025) & 1.496 & 0.035\\
+\hspace{1em}ranger-extratrees & 0.094 (0.018) & 0.736 (0.025) & 0.102 & 0.143\\
+\hspace{1em}glmnet-cox & 0.090 (0.019) & 0.728 (0.021) & 0.106 & 0.002\\
+\hspace{1em}xgboost-cox & 0.083 (0.017) & 0.730 (0.020) & 2.538 & 0.003\\
+\hspace{1em}nn-cox & -0.007 (0.012) & 0.509 (0.061) & 11.658 & 0.746\\
+\hspace{1em}xgboost-aft & --- & 0.729 (0.021) & 10.625 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{GUIDE-IT; CVD death, n = 894, p = 59}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.076 (0.017) & 0.748 (0.028) & 0.152 & 0.035\\
-\hspace{1em}aorsf-net & 0.075 (0.017) & 0.746 (0.028) & 29.313 & 0.041\\
-\hspace{1em}aorsf-cph & 0.072 (0.018) & 0.744 (0.029) & 0.425 & 0.039\\
-\hspace{1em}glmnet-cox & 0.068 (0.040) & 0.721 (0.084) & 0.506 & 0.003\\
-\hspace{1em}obliqueRSF-net & 0.063 (0.013) & 0.742 (0.024) & 217.502 & 11.433\\
-\hspace{1em}cif-rotate & 0.060 (0.013) & 0.721 (0.027) & 35.240 & 4.921\\
-\hspace{1em}cif-standard & 0.059 (0.013) & 0.739 (0.023) & 1.518 & 3.330\\
-\hspace{1em}ranger-extratrees & 0.054 (0.012) & 0.740 (0.029) & 0.091 & 0.180\\
-\hspace{1em}cif-extension & 0.052 (0.011) & 0.730 (0.023) & 13.276 & 5.583\\
-\hspace{1em}rsf-standard & 0.048 (0.021) & 0.707 (0.026) & 0.177 & 0.064\\
-\hspace{1em}xgboost-cox & 0.046 (0.044) & 0.745 (0.019) & 3.848 & 0.003\\
-\hspace{1em}aorsf-random & 0.033 (0.013) & 0.700 (0.029) & 0.537 & 0.040\\
-\hspace{1em}nn-cox & 0.008 (0.018) & 0.632 (0.127) & 12.241 & 0.631\\
-\hspace{1em}xgboost-aft & --- & 0.733 (0.021) & 11.614 & 0.006\\
+\hspace{1em}aorsf-fast & 0.075 (0.018) & 0.745 (0.027) & 0.161 & 0.035\\
+\hspace{1em}aorsf-net & 0.074 (0.019) & 0.743 (0.027) & 25.934 & 0.038\\
+\hspace{1em}aorsf-cph & 0.071 (0.018) & 0.741 (0.028) & 0.375 & 0.035\\
+\hspace{1em}glmnet-cox & 0.063 (0.041) & 0.715 (0.091) & 0.502 & 0.002\\
+\hspace{1em}obliqueRSF-net & 0.063 (0.013) & 0.741 (0.023) & 221.806 & 11.417\\
+\hspace{1em}cif-rotate & 0.059 (0.016) & 0.721 (0.025) & 35.190 & 4.947\\
+\hspace{1em}cif-standard & 0.058 (0.014) & 0.738 (0.022) & 1.564 & 3.334\\
+\hspace{1em}ranger-extratrees & 0.054 (0.013) & 0.737 (0.029) & 0.118 & 0.176\\
+\hspace{1em}cif-extension & 0.052 (0.011) & 0.730 (0.022) & 13.507 & 5.567\\
+\hspace{1em}rsf-standard & 0.046 (0.023) & 0.705 (0.025) & 0.195 & 0.064\\
+\hspace{1em}xgboost-cox & 0.039 (0.051) & 0.747 (0.020) & 3.831 & 0.003\\
+\hspace{1em}aorsf-random & 0.033 (0.012) & 0.695 (0.030) & 0.427 & 0.037\\
+\hspace{1em}nn-cox & 0.008 (0.018) & 0.630 (0.123) & 12.211 & 0.596\\
+\hspace{1em}xgboost-aft & --- & 0.734 (0.020) & 11.525 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{GUIDE-IT; HF hospitalization, n = 894, p = 59}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.080 (0.017) & 0.721 (0.023) & 53.150 & 0.058\\
-\hspace{1em}aorsf-cph & 0.080 (0.018) & 0.721 (0.024) & 0.657 & 0.052\\
-\hspace{1em}aorsf-fast & 0.079 (0.019) & 0.721 (0.026) & 0.232 & 0.052\\
-\hspace{1em}obliqueRSF-net & 0.072 (0.011) & 0.720 (0.024) & 390.324 & 9.401\\
-\hspace{1em}ranger-extratrees & 0.072 (0.010) & 0.721 (0.023) & 0.107 & 0.196\\
-\hspace{1em}cif-standard & 0.069 (0.010) & 0.715 (0.024) & 1.430 & 3.258\\
-\hspace{1em}cif-rotate & 0.066 (0.019) & 0.706 (0.030) & 41.581 & 5.083\\
-\hspace{1em}cif-extension & 0.063 (0.009) & 0.713 (0.023) & 15.326 & 6.129\\
-\hspace{1em}glmnet-cox & 0.058 (0.020) & 0.699 (0.025) & 0.417 & 0.003\\
-\hspace{1em}rsf-standard & 0.055 (0.022) & 0.692 (0.026) & 1.491 & 0.121\\
-\hspace{1em}nn-cox & 0.053 (0.030) & 0.707 (0.034) & 12.990 & 0.604\\
-\hspace{1em}aorsf-random & 0.048 (0.010) & 0.682 (0.023) & 0.921 & 0.054\\
-\hspace{1em}xgboost-cox & 0.038 (0.017) & 0.697 (0.027) & 2.932 & 0.003\\
-\hspace{1em}xgboost-aft & --- & 0.695 (0.026) & 11.430 & 0.006\\
+\hspace{1em}aorsf-net & 0.082 (0.017) & 0.722 (0.023) & 50.238 & 0.056\\
+\hspace{1em}aorsf-cph & 0.081 (0.018) & 0.722 (0.023) & 0.668 & 0.051\\
+\hspace{1em}aorsf-fast & 0.080 (0.020) & 0.722 (0.025) & 0.248 & 0.051\\
+\hspace{1em}ranger-extratrees & 0.073 (0.010) & 0.722 (0.022) & 0.137 & 0.198\\
+\hspace{1em}obliqueRSF-net & 0.073 (0.010) & 0.721 (0.023) & 389.465 & 9.365\\
+\hspace{1em}cif-standard & 0.070 (0.010) & 0.716 (0.023) & 1.468 & 3.315\\
+\hspace{1em}cif-rotate & 0.067 (0.019) & 0.708 (0.029) & 41.655 & 5.185\\
+\hspace{1em}cif-extension & 0.064 (0.009) & 0.714 (0.022) & 15.396 & 6.113\\
+\hspace{1em}glmnet-cox & 0.058 (0.020) & 0.699 (0.025) & 0.416 & 0.003\\
+\hspace{1em}rsf-standard & 0.058 (0.022) & 0.694 (0.026) & 1.515 & 0.121\\
+\hspace{1em}nn-cox & 0.053 (0.028) & 0.706 (0.032) & 12.912 & 0.599\\
+\hspace{1em}aorsf-random & 0.049 (0.010) & 0.682 (0.023) & 0.803 & 0.051\\
+\hspace{1em}xgboost-cox & 0.038 (0.017) & 0.698 (0.027) & 2.955 & 0.003\\
+\hspace{1em}xgboost-aft & --- & 0.697 (0.025) & 11.409 & 0.006\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{JHS; coronary heart disease, n = 3501, p = 80}}}\\
+\hline
+\hspace{1em}aorsf-cph & 0.040 (0.008) & 0.778 (0.015) & 2.036 & 0.153\\
+\hspace{1em}obliqueRSF-net & 0.039 (0.007) & 0.780 (0.015) & 185.659 & 130.539\\
+\hspace{1em}aorsf-fast & 0.039 (0.007) & 0.776 (0.014) & 0.586 & 0.151\\
+\hspace{1em}aorsf-net & 0.039 (0.009) & 0.777 (0.016) & 76.845 & 0.149\\
+\hspace{1em}cif-standard & 0.038 (0.006) & 0.779 (0.017) & 10.065 & 30.887\\
+\hspace{1em}cif-extension & 0.036 (0.004) & 0.781 (0.019) & 54.976 & 20.544\\
+\hspace{1em}ranger-extratrees & 0.035 (0.005) & 0.777 (0.017) & 3.892 & 1.677\\
+\hspace{1em}cif-rotate & 0.034 (0.010) & 0.769 (0.018) & 187.949 & 22.910\\
+\hspace{1em}glmnet-cox & 0.031 (0.010) & 0.774 (0.020) & 1.723 & 0.004\\
+\hspace{1em}rsf-standard & 0.031 (0.011) & 0.752 (0.016) & 2.099 & 0.226\\
+\hspace{1em}nn-cox & 0.030 (0.012) & 0.759 (0.021) & 10.787 & 5.787\\
+\hspace{1em}aorsf-random & 0.027 (0.004) & 0.763 (0.019) & 1.213 & 0.152\\
+\hspace{1em}xgboost-cox & 0.010 (0.023) & 0.785 (0.022) & 3.676 & 0.005\\
+\hspace{1em}xgboost-aft & --- & 0.782 (0.017) & 13.342 & 0.006\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{JHS; stroke, n = 3639, p = 80}}}\\
+\hline
+\hspace{1em}aorsf-cph & 0.036 (0.006) & 0.806 (0.016) & 2.012 & 0.149\\
+\hspace{1em}aorsf-net & 0.035 (0.008) & 0.807 (0.016) & 70.506 & 0.144\\
+\hspace{1em}aorsf-fast & 0.035 (0.007) & 0.806 (0.017) & 0.581 & 0.147\\
+\hspace{1em}obliqueRSF-net & 0.030 (0.006) & 0.807 (0.016) & 161.865 & 165.270\\
+\hspace{1em}glmnet-cox & 0.028 (0.008) & 0.798 (0.017) & 2.325 & 0.004\\
+\hspace{1em}cif-standard & 0.028 (0.005) & 0.803 (0.016) & 10.613 & 32.291\\
+\hspace{1em}rsf-standard & 0.027 (0.010) & 0.782 (0.018) & 1.210 & 0.190\\
+\hspace{1em}cif-extension & 0.025 (0.003) & 0.797 (0.018) & 55.652 & 21.758\\
+\hspace{1em}ranger-extratrees & 0.023 (0.005) & 0.791 (0.016) & 2.997 & 2.557\\
+\hspace{1em}cif-rotate & 0.023 (0.009) & 0.785 (0.017) & 188.792 & 24.524\\
+\hspace{1em}aorsf-random & 0.022 (0.004) & 0.775 (0.018) & 1.115 & 0.153\\
+\hspace{1em}nn-cox & 0.016 (0.027) & 0.772 (0.021) & 10.445 & 6.338\\
+\hspace{1em}xgboost-cox & 0.001 (0.030) & 0.776 (0.021) & 2.953 & 0.005\\
+\hspace{1em}xgboost-aft & --- & 0.784 (0.018) & 13.017 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Lung cancer; death, n = 442, p = 24}}}\\
 \hline
-\hspace{1em}aorsf-cph & 0.062 (0.033) & 0.689 (0.020) & 0.328 & 0.030\\
-\hspace{1em}aorsf-net & 0.060 (0.031) & 0.684 (0.020) & 31.763 & 0.032\\
-\hspace{1em}aorsf-fast & 0.058 (0.034) & 0.688 (0.019) & 0.127 & 0.030\\
-\hspace{1em}obliqueRSF-net & 0.058 (0.020) & 0.678 (0.021) & 296.605 & 3.004\\
-\hspace{1em}rsf-standard & 0.049 (0.036) & 0.672 (0.024) & 0.909 & 0.073\\
-\hspace{1em}cif-standard & 0.049 (0.023) & 0.666 (0.023) & 0.312 & 0.880\\
-\hspace{1em}cif-extension & 0.049 (0.018) & 0.667 (0.020) & 9.108 & 3.377\\
-\hspace{1em}ranger-extratrees & 0.049 (0.016) & 0.676 (0.020) & 0.037 & 0.066\\
-\hspace{1em}cif-rotate & 0.047 (0.026) & 0.664 (0.022) & 17.552 & 3.140\\
-\hspace{1em}aorsf-random & 0.039 (0.022) & 0.651 (0.024) & 0.535 & 0.026\\
-\hspace{1em}glmnet-cox & 0.038 (0.025) & 0.661 (0.034) & 0.124 & 0.002\\
-\hspace{1em}nn-cox & 0.035 (0.026) & 0.648 (0.030) & 12.852 & 0.363\\
-\hspace{1em}xgboost-cox & 0.018 (0.019) & 0.645 (0.028) & 1.653 & 0.002\\
-\hspace{1em}xgboost-aft & --- & 0.649 (0.025) & 9.102 & 0.006\\
+\hspace{1em}aorsf-cph & 0.063 (0.032) & 0.691 (0.019) & 0.312 & 0.030\\
+\hspace{1em}aorsf-net & 0.061 (0.030) & 0.685 (0.019) & 30.349 & 0.031\\
+\hspace{1em}aorsf-fast & 0.059 (0.033) & 0.690 (0.019) & 0.124 & 0.029\\
+\hspace{1em}obliqueRSF-net & 0.058 (0.020) & 0.678 (0.020) & 294.626 & 2.961\\
+\hspace{1em}cif-extension & 0.050 (0.018) & 0.667 (0.019) & 9.104 & 3.317\\
+\hspace{1em}rsf-standard & 0.050 (0.035) & 0.673 (0.023) & 0.941 & 0.073\\
+\hspace{1em}cif-standard & 0.050 (0.023) & 0.667 (0.022) & 0.315 & 0.846\\
+\hspace{1em}ranger-extratrees & 0.049 (0.016) & 0.675 (0.019) & 0.037 & 0.065\\
+\hspace{1em}cif-rotate & 0.047 (0.026) & 0.664 (0.021) & 17.129 & 3.089\\
+\hspace{1em}glmnet-cox & 0.041 (0.024) & 0.664 (0.034) & 0.123 & 0.002\\
+\hspace{1em}aorsf-random & 0.040 (0.022) & 0.651 (0.023) & 0.507 & 0.026\\
+\hspace{1em}nn-cox & 0.033 (0.025) & 0.647 (0.029) & 12.472 & 0.368\\
+\hspace{1em}xgboost-cox & 0.018 (0.019) & 0.647 (0.027) & 1.541 & 0.002\\
+\hspace{1em}xgboost-aft & --- & 0.652 (0.026) & 8.410 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{MESA; coronary heart disease, n = 6785, p = 48}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.064 (0.009) & 0.807 (0.010) & 1.225 & 0.354\\
-\hspace{1em}aorsf-net & 0.063 (0.010) & 0.804 (0.010) & 177.895 & 0.390\\
-\hspace{1em}obliqueRSF-net & 0.063 (0.007) & 0.808 (0.009) & 490.047 & 265.054\\
-\hspace{1em}aorsf-cph & 0.061 (0.009) & 0.801 (0.011) & 5.932 & 0.387\\
-\hspace{1em}cif-standard & 0.059 (0.006) & 0.803 (0.010) & 24.594 & 99.165\\
-\hspace{1em}cif-rotate & 0.059 (0.007) & 0.802 (0.010) & 284.755 & 37.548\\
-\hspace{1em}rsf-standard & 0.058 (0.011) & 0.794 (0.011) & 3.402 & 1.182\\
-\hspace{1em}ranger-extratrees & 0.047 (0.004) & 0.794 (0.010) & 7.316 & 6.391\\
-\hspace{1em}cif-extension & 0.047 (0.003) & 0.805 (0.010) & 97.261 & 28.564\\
-\hspace{1em}nn-cox & 0.041 (0.012) & 0.770 (0.015) & 19.319 & 17.152\\
-\hspace{1em}glmnet-cox & 0.039 (0.016) & 0.775 (0.015) & 4.925 & 0.007\\
-\hspace{1em}aorsf-random & 0.031 (0.005) & 0.734 (0.015) & 2.971 & 0.397\\
-\hspace{1em}xgboost-cox & 0.016 (0.022) & 0.804 (0.010) & 4.776 & 0.014\\
-\hspace{1em}xgboost-aft & --- & 0.803 (0.010) & 18.480 & 0.010\\
+\hspace{1em}aorsf-fast & 0.064 (0.009) & 0.807 (0.010) & 1.333 & 0.340\\
+\hspace{1em}aorsf-net & 0.062 (0.010) & 0.805 (0.012) & 169.694 & 0.379\\
+\hspace{1em}obliqueRSF-net & 0.062 (0.008) & 0.808 (0.012) & 488.662 & 265.171\\
+\hspace{1em}aorsf-cph & 0.060 (0.010) & 0.801 (0.012) & 4.935 & 0.352\\
+\hspace{1em}cif-standard & 0.059 (0.007) & 0.803 (0.013) & 24.446 & 98.767\\
+\hspace{1em}cif-rotate & 0.058 (0.009) & 0.802 (0.013) & 284.668 & 37.340\\
+\hspace{1em}rsf-standard & 0.057 (0.012) & 0.795 (0.013) & 3.426 & 1.202\\
+\hspace{1em}ranger-extratrees & 0.047 (0.004) & 0.794 (0.011) & 7.360 & 6.260\\
+\hspace{1em}cif-extension & 0.047 (0.003) & 0.805 (0.013) & 98.278 & 28.773\\
+\hspace{1em}glmnet-cox & 0.038 (0.017) & 0.775 (0.016) & 4.907 & 0.007\\
+\hspace{1em}nn-cox & 0.038 (0.017) & 0.767 (0.021) & 18.380 & 16.712\\
+\hspace{1em}aorsf-random & 0.031 (0.005) & 0.735 (0.015) & 2.853 & 0.387\\
+\hspace{1em}xgboost-cox & 0.015 (0.028) & 0.802 (0.013) & 4.763 & 0.009\\
+\hspace{1em}xgboost-aft & --- & 0.802 (0.012) & 18.127 & 0.009\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{MESA; death, n = 6793, p = 48}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.145 (0.008) & 0.792 (0.009) & 315.837 & 0.544\\
-\hspace{1em}aorsf-fast & 0.145 (0.009) & 0.792 (0.009) & 1.683 & 0.502\\
-\hspace{1em}aorsf-cph & 0.143 (0.008) & 0.791 (0.009) & 7.027 & 0.524\\
-\hspace{1em}rsf-standard & 0.141 (0.008) & 0.784 (0.009) & 4.459 & 0.507\\
-\hspace{1em}obliqueRSF-net & 0.139 (0.007) & 0.791 (0.010) & 1171.038 & 156.213\\
-\hspace{1em}cif-standard & 0.134 (0.007) & 0.788 (0.009) & 23.159 & 100.235\\
-\hspace{1em}glmnet-cox & 0.129 (0.027) & 0.789 (0.012) & 1.593 & 0.008\\
-\hspace{1em}cif-rotate & 0.126 (0.007) & 0.784 (0.010) & 320.662 & 37.633\\
-\hspace{1em}nn-cox & 0.125 (0.021) & 0.783 (0.017) & 29.072 & 17.279\\
-\hspace{1em}ranger-extratrees & 0.114 (0.004) & 0.784 (0.008) & 9.023 & 6.451\\
-\hspace{1em}cif-extension & 0.092 (0.003) & 0.781 (0.009) & 111.165 & 32.006\\
-\hspace{1em}aorsf-random & 0.069 (0.004) & 0.725 (0.008) & 5.846 & 0.569\\
-\hspace{1em}xgboost-cox & 0.056 (0.029) & 0.794 (0.009) & 8.062 & 0.009\\
-\hspace{1em}xgboost-aft & --- & 0.793 (0.009) & 20.752 & 0.010\\
+\hspace{1em}aorsf-fast & 0.145 (0.008) & 0.792 (0.008) & 1.868 & 0.487\\
+\hspace{1em}aorsf-net & 0.144 (0.008) & 0.792 (0.009) & 293.640 & 0.547\\
+\hspace{1em}aorsf-cph & 0.143 (0.008) & 0.791 (0.009) & 6.625 & 0.504\\
+\hspace{1em}rsf-standard & 0.140 (0.008) & 0.784 (0.009) & 4.818 & 0.502\\
+\hspace{1em}obliqueRSF-net & 0.139 (0.007) & 0.791 (0.009) & 1176.365 & 156.871\\
+\hspace{1em}cif-standard & 0.134 (0.007) & 0.788 (0.009) & 23.671 & 101.207\\
+\hspace{1em}glmnet-cox & 0.131 (0.026) & 0.789 (0.012) & 1.560 & 0.007\\
+\hspace{1em}nn-cox & 0.127 (0.020) & 0.784 (0.016) & 29.272 & 17.344\\
+\hspace{1em}cif-rotate & 0.126 (0.007) & 0.783 (0.010) & 319.953 & 37.290\\
+\hspace{1em}ranger-extratrees & 0.113 (0.004) & 0.784 (0.008) & 9.060 & 6.474\\
+\hspace{1em}cif-extension & 0.092 (0.003) & 0.781 (0.009) & 111.068 & 32.105\\
+\hspace{1em}aorsf-random & 0.068 (0.005) & 0.725 (0.008) & 5.755 & 0.541\\
+\hspace{1em}xgboost-cox & 0.056 (0.029) & 0.794 (0.009) & 8.021 & 0.009\\
+\hspace{1em}xgboost-aft & --- & 0.793 (0.009) & 20.287 & 0.010\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{MESA; heart failure, n = 6785, p = 48}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.114 (0.010) & 0.867 (0.012) & 1.088 & 0.312\\
-\hspace{1em}aorsf-net & 0.113 (0.011) & 0.864 (0.013) & 149.420 & 0.339\\
-\hspace{1em}aorsf-cph & 0.109 (0.011) & 0.860 (0.014) & 4.866 & 0.326\\
-\hspace{1em}rsf-standard & 0.108 (0.011) & 0.857 (0.010) & 3.033 & 1.144\\
-\hspace{1em}obliqueRSF-net & 0.107 (0.008) & 0.870 (0.010) & 392.718 & 336.768\\
-\hspace{1em}cif-rotate & 0.104 (0.010) & 0.870 (0.012) & 259.973 & 38.041\\
-\hspace{1em}cif-standard & 0.102 (0.009) & 0.865 (0.012) & 24.178 & 101.649\\
-\hspace{1em}cif-extension & 0.076 (0.005) & 0.865 (0.011) & 94.446 & 30.533\\
-\hspace{1em}ranger-extratrees & 0.075 (0.005) & 0.849 (0.015) & 7.402 & 6.981\\
-\hspace{1em}nn-cox & 0.069 (0.023) & 0.826 (0.017) & 15.826 & 17.462\\
-\hspace{1em}aorsf-random & 0.063 (0.006) & 0.795 (0.015) & 2.571 & 0.369\\
-\hspace{1em}glmnet-cox & 0.044 (0.044) & 0.761 (0.146) & 3.688 & 0.006\\
-\hspace{1em}xgboost-cox & -0.010 (0.020) & 0.871 (0.009) & 6.800 & 0.009\\
-\hspace{1em}xgboost-aft & --- & 0.872 (0.012) & 19.749 & 0.010\\
+\hspace{1em}aorsf-fast & 0.115 (0.011) & 0.865 (0.012) & 1.218 & 0.301\\
+\hspace{1em}aorsf-net & 0.114 (0.011) & 0.863 (0.013) & 147.441 & 0.338\\
+\hspace{1em}aorsf-cph & 0.109 (0.011) & 0.858 (0.014) & 4.549 & 0.315\\
+\hspace{1em}rsf-standard & 0.108 (0.012) & 0.856 (0.012) & 3.125 & 1.151\\
+\hspace{1em}obliqueRSF-net & 0.108 (0.008) & 0.869 (0.011) & 393.285 & 338.322\\
+\hspace{1em}cif-rotate & 0.105 (0.010) & 0.869 (0.013) & 260.914 & 38.177\\
+\hspace{1em}cif-standard & 0.102 (0.009) & 0.864 (0.013) & 24.344 & 101.534\\
+\hspace{1em}cif-extension & 0.077 (0.005) & 0.864 (0.011) & 94.628 & 30.361\\
+\hspace{1em}ranger-extratrees & 0.075 (0.005) & 0.849 (0.015) & 7.492 & 6.923\\
+\hspace{1em}nn-cox & 0.071 (0.024) & 0.826 (0.016) & 15.797 & 17.312\\
+\hspace{1em}aorsf-random & 0.064 (0.006) & 0.795 (0.014) & 2.377 & 0.355\\
+\hspace{1em}glmnet-cox & 0.043 (0.044) & 0.767 (0.139) & 3.777 & 0.006\\
+\hspace{1em}xgboost-cox & -0.008 (0.019) & 0.869 (0.011) & 6.764 & 0.009\\
+\hspace{1em}xgboost-aft & --- & 0.870 (0.012) & 18.620 & 0.010\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{MESA; stroke, n = 6783, p = 48}}}\\
 \hline
-\hspace{1em}cif-rotate & 0.025 (0.005) & 0.762 (0.017) & 268.039 & 38.096\\
-\hspace{1em}obliqueRSF-net & 0.025 (0.004) & 0.765 (0.016) & 357.556 & 299.852\\
-\hspace{1em}cif-standard & 0.025 (0.004) & 0.760 (0.017) & 23.353 & 97.977\\
-\hspace{1em}aorsf-fast & 0.024 (0.006) & 0.762 (0.015) & 1.065 & 0.305\\
-\hspace{1em}aorsf-net & 0.023 (0.006) & 0.758 (0.017) & 138.258 & 0.332\\
-\hspace{1em}aorsf-cph & 0.023 (0.005) & 0.756 (0.016) & 4.261 & 0.315\\
-\hspace{1em}ranger-extratrees & 0.022 (0.003) & 0.757 (0.015) & 7.619 & 6.752\\
-\hspace{1em}glmnet-cox & 0.021 (0.010) & 0.764 (0.018) & 3.844 & 0.006\\
-\hspace{1em}cif-extension & 0.021 (0.002) & 0.767 (0.018) & 93.730 & 29.642\\
-\hspace{1em}rsf-standard & 0.019 (0.009) & 0.744 (0.018) & 3.248 & 1.215\\
-\hspace{1em}nn-cox & 0.017 (0.007) & 0.743 (0.029) & 16.247 & 19.311\\
-\hspace{1em}aorsf-random & 0.013 (0.003) & 0.711 (0.023) & 2.409 & 0.339\\
-\hspace{1em}xgboost-cox & -0.001 (0.025) & 0.761 (0.019) & 4.264 & 0.008\\
-\hspace{1em}xgboost-aft & --- & 0.763 (0.016) & 16.695 & 0.009\\
+\hspace{1em}obliqueRSF-net & 0.025 (0.004) & 0.767 (0.016) & 357.039 & 299.786\\
+\hspace{1em}cif-rotate & 0.025 (0.004) & 0.764 (0.017) & 268.402 & 37.899\\
+\hspace{1em}cif-standard & 0.025 (0.004) & 0.762 (0.017) & 23.450 & 98.166\\
+\hspace{1em}aorsf-fast & 0.025 (0.006) & 0.764 (0.016) & 1.186 & 0.296\\
+\hspace{1em}aorsf-net & 0.024 (0.006) & 0.759 (0.017) & 134.136 & 0.330\\
+\hspace{1em}aorsf-cph & 0.023 (0.005) & 0.758 (0.016) & 4.128 & 0.305\\
+\hspace{1em}ranger-extratrees & 0.022 (0.003) & 0.759 (0.016) & 7.610 & 6.738\\
+\hspace{1em}glmnet-cox & 0.021 (0.009) & 0.765 (0.017) & 3.876 & 0.007\\
+\hspace{1em}cif-extension & 0.021 (0.002) & 0.768 (0.017) & 94.913 & 29.730\\
+\hspace{1em}rsf-standard & 0.019 (0.009) & 0.745 (0.018) & 3.221 & 1.242\\
+\hspace{1em}nn-cox & 0.018 (0.007) & 0.746 (0.028) & 16.152 & 17.979\\
+\hspace{1em}aorsf-random & 0.013 (0.003) & 0.714 (0.022) & 2.275 & 0.330\\
+\hspace{1em}xgboost-cox & 0.000 (0.025) & 0.762 (0.018) & 4.347 & 0.008\\
+\hspace{1em}xgboost-aft & --- & 0.764 (0.015) & 16.257 & 0.009\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Monoclonal gammopathy; death, n = 1384, p = 8}}}\\
 \hline
-\hspace{1em}cif-rotate & 0.159 (0.019) & 0.744 (0.015) & 15.212 & 4.868\\
-\hspace{1em}aorsf-cph & 0.157 (0.016) & 0.742 (0.011) & 1.168 & 0.084\\
-\hspace{1em}aorsf-fast & 0.156 (0.016) & 0.742 (0.011) & 0.407 & 0.088\\
-\hspace{1em}obliqueRSF-net & 0.155 (0.013) & 0.743 (0.011) & 233.651 & 12.963\\
-\hspace{1em}aorsf-net & 0.154 (0.015) & 0.741 (0.011) & 85.581 & 0.086\\
-\hspace{1em}cif-standard & 0.150 (0.015) & 0.738 (0.012) & 1.510 & 5.832\\
-\hspace{1em}rsf-standard & 0.150 (0.017) & 0.736 (0.011) & 2.334 & 0.192\\
-\hspace{1em}aorsf-random & 0.145 (0.014) & 0.734 (0.012) & 1.778 & 0.085\\
-\hspace{1em}cif-extension & 0.143 (0.010) & 0.747 (0.013) & 11.340 & 4.784\\
-\hspace{1em}glmnet-cox & 0.139 (0.021) & 0.728 (0.014) & 0.153 & 0.003\\
-\hspace{1em}xgboost-cox & 0.123 (0.012) & 0.733 (0.012) & 4.018 & 0.003\\
-\hspace{1em}ranger-extratrees & 0.115 (0.005) & 0.744 (0.012) & 0.066 & 0.187\\
-\hspace{1em}nn-cox & 0.033 (0.056) & 0.596 (0.114) & 16.688 & 0.691\\
-\hspace{1em}xgboost-aft & --- & 0.733 (0.013) & 12.211 & 0.006\\
+\hspace{1em}cif-rotate & 0.159 (0.019) & 0.744 (0.014) & 15.123 & 4.858\\
+\hspace{1em}aorsf-cph & 0.158 (0.016) & 0.743 (0.011) & 2.035 & 0.087\\
+\hspace{1em}aorsf-fast & 0.157 (0.016) & 0.743 (0.011) & 1.266 & 0.086\\
+\hspace{1em}aorsf-net & 0.155 (0.016) & 0.741 (0.011) & 84.984 & 0.088\\
+\hspace{1em}obliqueRSF-net & 0.155 (0.013) & 0.743 (0.011) & 232.467 & 12.924\\
+\hspace{1em}cif-standard & 0.151 (0.015) & 0.738 (0.012) & 1.537 & 5.829\\
+\hspace{1em}rsf-standard & 0.151 (0.017) & 0.737 (0.011) & 2.281 & 0.194\\
+\hspace{1em}aorsf-random & 0.146 (0.013) & 0.735 (0.011) & 2.457 & 0.082\\
+\hspace{1em}cif-extension & 0.143 (0.009) & 0.747 (0.013) & 11.222 & 4.744\\
+\hspace{1em}glmnet-cox & 0.137 (0.021) & 0.726 (0.014) & 0.136 & 0.003\\
+\hspace{1em}xgboost-cox & 0.122 (0.012) & 0.733 (0.012) & 3.919 & 0.003\\
+\hspace{1em}ranger-extratrees & 0.115 (0.005) & 0.744 (0.012) & 0.064 & 0.181\\
+\hspace{1em}nn-cox & 0.034 (0.057) & 0.599 (0.112) & 16.529 & 0.689\\
+\hspace{1em}xgboost-aft & --- & 0.733 (0.013) & 12.094 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Monoclonal gammopathy; malignancy, n = 1384, p = 8}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.015 (0.012) & 0.648 (0.058) & 0.118 & 0.003\\
-\hspace{1em}aorsf-cph & 0.010 (0.011) & 0.644 (0.033) & 0.578 & 0.040\\
-\hspace{1em}aorsf-fast & 0.010 (0.012) & 0.640 (0.033) & 0.203 & 0.041\\
-\hspace{1em}ranger-extratrees & 0.008 (0.006) & 0.642 (0.031) & 0.103 & 0.183\\
-\hspace{1em}cif-extension & 0.008 (0.008) & 0.625 (0.025) & 9.330 & 4.782\\
-\hspace{1em}aorsf-net & 0.007 (0.012) & 0.641 (0.031) & 22.494 & 0.041\\
-\hspace{1em}obliqueRSF-net & 0.007 (0.008) & 0.628 (0.030) & 42.473 & 17.026\\
-\hspace{1em}aorsf-random & 0.007 (0.013) & 0.634 (0.032) & 0.516 & 0.041\\
-\hspace{1em}cif-standard & 0.006 (0.009) & 0.625 (0.028) & 1.554 & 5.640\\
-\hspace{1em}xgboost-cox & 0.005 (0.017) & 0.638 (0.038) & 1.728 & 0.003\\
-\hspace{1em}nn-cox & -0.004 (0.005) & 0.509 (0.033) & 11.332 & 0.596\\
-\hspace{1em}rsf-standard & -0.010 (0.015) & 0.614 (0.029) & 0.811 & 0.073\\
-\hspace{1em}cif-rotate & -0.024 (0.022) & 0.550 (0.032) & 13.105 & 4.605\\
-\hspace{1em}xgboost-aft & --- & 0.627 (0.039) & 10.903 & 0.006\\
+\hspace{1em}glmnet-cox & 0.015 (0.011) & 0.651 (0.055) & 0.118 & 0.003\\
+\hspace{1em}aorsf-cph & 0.011 (0.013) & 0.644 (0.036) & 0.568 & 0.040\\
+\hspace{1em}aorsf-fast & 0.010 (0.014) & 0.642 (0.036) & 0.193 & 0.040\\
+\hspace{1em}ranger-extratrees & 0.008 (0.006) & 0.642 (0.030) & 0.095 & 0.177\\
+\hspace{1em}cif-extension & 0.008 (0.010) & 0.625 (0.028) & 9.141 & 4.788\\
+\hspace{1em}obliqueRSF-net & 0.007 (0.010) & 0.628 (0.033) & 41.856 & 16.910\\
+\hspace{1em}aorsf-net & 0.007 (0.014) & 0.641 (0.034) & 22.236 & 0.041\\
+\hspace{1em}aorsf-random & 0.007 (0.013) & 0.633 (0.033) & 1.329 & 0.039\\
+\hspace{1em}xgboost-cox & 0.007 (0.017) & 0.639 (0.039) & 1.783 & 0.003\\
+\hspace{1em}cif-standard & 0.006 (0.011) & 0.628 (0.033) & 1.689 & 5.603\\
+\hspace{1em}nn-cox & -0.003 (0.005) & 0.510 (0.032) & 11.229 & 0.597\\
+\hspace{1em}rsf-standard & -0.009 (0.018) & 0.616 (0.036) & 0.824 & 0.073\\
+\hspace{1em}cif-rotate & -0.024 (0.023) & 0.553 (0.035) & 12.975 & 4.603\\
+\hspace{1em}xgboost-aft & --- & 0.629 (0.039) & 10.748 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Movies released in 2015-2018; gross 1M USD, n = 551, p = 46}}}\\
 \hline
-\hspace{1em}cif-rotate & 0.635 (0.025) & 0.943 (0.007) & 19.888 & 3.607\\
-\hspace{1em}glmnet-cox & 0.616 (0.036) & 0.940 (0.009) & 0.216 & 0.002\\
-\hspace{1em}nn-cox & 0.530 (0.076) & 0.909 (0.028) & 17.702 & 0.664\\
-\hspace{1em}aorsf-net & 0.529 (0.029) & 0.928 (0.011) & 50.661 & 0.043\\
-\hspace{1em}aorsf-cph & 0.520 (0.024) & 0.925 (0.011) & 0.786 & 0.041\\
-\hspace{1em}rsf-standard & 0.518 (0.022) & 0.922 (0.011) & 1.566 & 0.106\\
-\hspace{1em}aorsf-fast & 0.514 (0.028) & 0.922 (0.013) & 0.214 & 0.041\\
-\hspace{1em}xgboost-cox & 0.514 (0.029) & 0.932 (0.009) & 14.136 & 0.004\\
-\hspace{1em}cif-standard & 0.469 (0.028) & 0.901 (0.018) & 0.461 & 1.883\\
-\hspace{1em}cif-extension & 0.452 (0.026) & 0.919 (0.013) & 8.826 & 3.904\\
-\hspace{1em}ranger-extratrees & 0.428 (0.026) & 0.898 (0.019) & 0.061 & 0.106\\
-\hspace{1em}obliqueRSF-net & 0.318 (0.023) & 0.908 (0.018) & 159.219 & 9.009\\
-\hspace{1em}aorsf-random & 0.299 (0.033) & 0.849 (0.029) & 0.865 & 0.039\\
-\hspace{1em}xgboost-aft & --- & 0.927 (0.010) & 35.838 & 0.008\\
+\hspace{1em}cif-rotate & 0.636 (0.024) & 0.943 (0.007) & 19.879 & 3.571\\
+\hspace{1em}glmnet-cox & 0.618 (0.034) & 0.940 (0.009) & 0.204 & 0.002\\
+\hspace{1em}nn-cox & 0.534 (0.072) & 0.910 (0.027) & 17.266 & 0.663\\
+\hspace{1em}aorsf-net & 0.530 (0.028) & 0.928 (0.010) & 50.081 & 0.045\\
+\hspace{1em}aorsf-cph & 0.522 (0.024) & 0.925 (0.011) & 1.645 & 0.043\\
+\hspace{1em}rsf-standard & 0.519 (0.022) & 0.922 (0.010) & 1.631 & 0.106\\
+\hspace{1em}aorsf-fast & 0.517 (0.027) & 0.923 (0.012) & 1.090 & 0.042\\
+\hspace{1em}xgboost-cox & 0.512 (0.029) & 0.932 (0.009) & 13.972 & 0.004\\
+\hspace{1em}cif-standard & 0.472 (0.029) & 0.902 (0.018) & 0.453 & 1.910\\
+\hspace{1em}cif-extension & 0.454 (0.025) & 0.920 (0.013) & 8.854 & 3.924\\
+\hspace{1em}ranger-extratrees & 0.430 (0.025) & 0.900 (0.019) & 0.049 & 0.103\\
+\hspace{1em}obliqueRSF-net & 0.319 (0.022) & 0.909 (0.017) & 155.421 & 8.847\\
+\hspace{1em}aorsf-random & 0.300 (0.032) & 0.849 (0.027) & 1.681 & 0.039\\
+\hspace{1em}xgboost-aft & --- & 0.927 (0.010) & 33.545 & 0.008\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{NCCTG Lung Cancer; death, n = 228, p = 9}}}\\
 \hline
-\hspace{1em}aorsf-random & 0.077 (0.031) & 0.687 (0.027) & 0.302 & 0.016\\
-\hspace{1em}ranger-extratrees & 0.064 (0.025) & 0.678 (0.032) & 0.023 & 0.031\\
-\hspace{1em}aorsf-fast & 0.064 (0.038) & 0.674 (0.025) & 0.067 & 0.016\\
-\hspace{1em}aorsf-cph & 0.060 (0.038) & 0.671 (0.023) & 0.150 & 0.016\\
-\hspace{1em}obliqueRSF-net & 0.060 (0.024) & 0.680 (0.028) & 105.496 & 1.476\\
-\hspace{1em}cif-standard & 0.057 (0.030) & 0.673 (0.029) & 0.130 & 0.252\\
-\hspace{1em}cif-extension & 0.052 (0.030) & 0.666 (0.027) & 3.794 & 1.500\\
-\hspace{1em}aorsf-net & 0.048 (0.040) & 0.670 (0.026) & 16.050 & 0.016\\
-\hspace{1em}glmnet-cox & 0.032 (0.032) & 0.636 (0.063) & 0.080 & 0.002\\
-\hspace{1em}rsf-standard & 0.024 (0.038) & 0.641 (0.025) & 0.087 & 0.037\\
-\hspace{1em}cif-rotate & 0.019 (0.039) & 0.633 (0.032) & 4.675 & 1.595\\
-\hspace{1em}xgboost-cox & 0.012 (0.022) & 0.651 (0.029) & 0.711 & 0.002\\
-\hspace{1em}nn-cox & -0.018 (0.020) & 0.512 (0.087) & 10.550 & 0.209\\
-\hspace{1em}xgboost-aft & --- & 0.640 (0.032) & 6.331 & 0.005\\
+\hspace{1em}aorsf-random & 0.076 (0.030) & 0.686 (0.026) & 1.162 & 0.016\\
+\hspace{1em}ranger-extratrees & 0.062 (0.028) & 0.675 (0.033) & 0.023 & 0.031\\
+\hspace{1em}aorsf-fast & 0.061 (0.043) & 0.672 (0.025) & 0.066 & 0.016\\
+\hspace{1em}obliqueRSF-net & 0.058 (0.026) & 0.676 (0.029) & 106.084 & 1.468\\
+\hspace{1em}aorsf-cph & 0.058 (0.041) & 0.670 (0.024) & 0.153 & 0.016\\
+\hspace{1em}cif-standard & 0.055 (0.032) & 0.670 (0.030) & 0.130 & 0.252\\
+\hspace{1em}cif-extension & 0.051 (0.032) & 0.664 (0.029) & 3.799 & 1.502\\
+\hspace{1em}aorsf-net & 0.047 (0.040) & 0.668 (0.026) & 16.124 & 0.017\\
+\hspace{1em}glmnet-cox & 0.033 (0.031) & 0.638 (0.059) & 0.081 & 0.002\\
+\hspace{1em}rsf-standard & 0.023 (0.039) & 0.642 (0.025) & 0.087 & 0.037\\
+\hspace{1em}cif-rotate & 0.017 (0.041) & 0.632 (0.032) & 4.687 & 1.897\\
+\hspace{1em}xgboost-cox & 0.011 (0.023) & 0.648 (0.032) & 0.721 & 0.002\\
+\hspace{1em}nn-cox & -0.051 (0.163) & 0.512 (0.082) & 10.516 & 0.209\\
+\hspace{1em}xgboost-aft & --- & 0.637 (0.034) & 6.271 & 0.005\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{NKI 70 gene signature; death or metastasis, n = 144, p = 77}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.149 (0.052) & 0.813 (0.052) & 10.759 & 0.014\\
-\hspace{1em}aorsf-cph & 0.128 (0.046) & 0.809 (0.049) & 0.078 & 0.013\\
-\hspace{1em}aorsf-fast & 0.125 (0.051) & 0.809 (0.052) & 0.053 & 0.014\\
-\hspace{1em}cif-rotate & 0.123 (0.060) & 0.791 (0.050) & 27.421 & 3.557\\
-\hspace{1em}obliqueRSF-net & 0.110 (0.052) & 0.798 (0.063) & 79.130 & 0.555\\
-\hspace{1em}cif-extension & 0.103 (0.055) & 0.807 (0.060) & 8.591 & 3.547\\
-\hspace{1em}cif-standard & 0.092 (0.052) & 0.787 (0.067) & 0.145 & 0.148\\
-\hspace{1em}rsf-standard & 0.091 (0.049) & 0.761 (0.050) & 0.069 & 0.025\\
-\hspace{1em}ranger-extratrees & 0.068 (0.043) & 0.780 (0.055) & 0.025 & 0.031\\
-\hspace{1em}nn-cox & 0.059 (0.098) & 0.723 (0.096) & 12.503 & 0.121\\
-\hspace{1em}glmnet-cox & 0.057 (0.063) & 0.740 (0.081) & 0.268 & 0.002\\
-\hspace{1em}aorsf-random & 0.055 (0.045) & 0.744 (0.063) & 0.183 & 0.015\\
-\hspace{1em}xgboost-cox & -0.027 (0.029) & 0.569 (0.098) & 0.118 & 0.002\\
-\hspace{1em}xgboost-aft & --- & 0.771 (0.058) & 4.909 & 0.005\\
+\hspace{1em}aorsf-net & 0.142 (0.056) & 0.804 (0.056) & 10.521 & 0.014\\
+\hspace{1em}aorsf-cph & 0.124 (0.049) & 0.802 (0.051) & 0.076 & 0.013\\
+\hspace{1em}aorsf-fast & 0.121 (0.052) & 0.802 (0.054) & 0.049 & 0.014\\
+\hspace{1em}cif-rotate & 0.118 (0.059) & 0.787 (0.049) & 27.382 & 3.379\\
+\hspace{1em}obliqueRSF-net & 0.106 (0.051) & 0.792 (0.061) & 79.059 & 0.558\\
+\hspace{1em}cif-extension & 0.098 (0.055) & 0.799 (0.061) & 8.595 & 3.554\\
+\hspace{1em}cif-standard & 0.088 (0.051) & 0.781 (0.065) & 0.145 & 0.149\\
+\hspace{1em}rsf-standard & 0.087 (0.048) & 0.755 (0.050) & 0.067 & 0.025\\
+\hspace{1em}ranger-extratrees & 0.064 (0.044) & 0.774 (0.054) & 0.024 & 0.030\\
+\hspace{1em}aorsf-random & 0.053 (0.045) & 0.741 (0.060) & 0.136 & 0.014\\
+\hspace{1em}nn-cox & 0.051 (0.102) & 0.715 (0.100) & 11.692 & 0.121\\
+\hspace{1em}glmnet-cox & 0.049 (0.064) & 0.726 (0.090) & 0.265 & 0.002\\
+\hspace{1em}xgboost-cox & -0.028 (0.029) & 0.566 (0.093) & 0.118 & 0.002\\
+\hspace{1em}xgboost-aft & --- & 0.770 (0.056) & 4.896 & 0.005\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Non-alcohol fatty liver disease; death, n = 17549, p = 24}}}\\
 \hline
-\hspace{1em}aorsf-cph & 0.214 (0.008) & 0.869 (0.005) & 17.834 & 1.234\\
-\hspace{1em}aorsf-fast & 0.213 (0.008) & 0.870 (0.005) & 4.893 & 1.278\\
-\hspace{1em}aorsf-net & 0.211 (0.007) & 0.865 (0.006) & 477.818 & 1.278\\
-\hspace{1em}obliqueRSF-net & 0.210 (0.008) & 0.869 (0.005) & 1431.078 & 1041.650\\
-\hspace{1em}rsf-standard & 0.208 (0.009) & 0.860 (0.005) & 10.469 & 1.190\\
-\hspace{1em}glmnet-cox & 0.207 (0.010) & 0.861 (0.005) & 1.330 & 0.012\\
-\hspace{1em}cif-standard & 0.206 (0.007) & 0.864 (0.006) & 69.588 & 621.383\\
-\hspace{1em}cif-rotate & 0.191 (0.007) & 0.866 (0.005) & 262.907 & 63.258\\
-\hspace{1em}ranger-extratrees & 0.181 (0.007) & 0.861 (0.005) & 39.033 & 79.272\\
-\hspace{1em}cif-extension & 0.167 (0.003) & 0.867 (0.006) & 125.747 & 53.426\\
-\hspace{1em}aorsf-random & 0.141 (0.007) & 0.840 (0.006) & 8.926 & 1.339\\
-\hspace{1em}xgboost-cox & 0.021 (0.015) & 0.877 (0.005) & 9.138 & 0.017\\
-\hspace{1em}nn-cox & -0.002 (0.009) & 0.568 (0.095) & 20.964 & 104.242\\
-\hspace{1em}xgboost-aft & --- & 0.875 (0.005) & 29.118 & 0.014\\
+\hspace{1em}aorsf-cph & 0.213 (0.008) & 0.868 (0.005) & 16.251 & 2.106\\
+\hspace{1em}aorsf-fast & 0.212 (0.008) & 0.868 (0.005) & 4.412 & 2.014\\
+\hspace{1em}aorsf-net & 0.210 (0.008) & 0.864 (0.006) & 433.878 & 1.276\\
+\hspace{1em}obliqueRSF-net & 0.209 (0.008) & 0.868 (0.006) & 1428.698 & 1042.701\\
+\hspace{1em}rsf-standard & 0.207 (0.009) & 0.860 (0.005) & 10.516 & 1.205\\
+\hspace{1em}glmnet-cox & 0.207 (0.011) & 0.860 (0.005) & 1.345 & 0.012\\
+\hspace{1em}cif-standard & 0.205 (0.007) & 0.863 (0.006) & 67.597 & 624.624\\
+\hspace{1em}cif-rotate & 0.190 (0.008) & 0.865 (0.005) & 263.660 & 62.919\\
+\hspace{1em}ranger-extratrees & 0.181 (0.007) & 0.860 (0.005) & 39.632 & 80.768\\
+\hspace{1em}cif-extension & 0.166 (0.003) & 0.866 (0.006) & 125.288 & 53.237\\
+\hspace{1em}aorsf-random & 0.140 (0.006) & 0.838 (0.007) & 8.961 & 1.333\\
+\hspace{1em}xgboost-cox & 0.020 (0.015) & 0.876 (0.005) & 8.907 & 0.017\\
+\hspace{1em}nn-cox & -0.002 (0.009) & 0.565 (0.092) & 20.937 & 106.131\\
+\hspace{1em}xgboost-aft & --- & 0.875 (0.005) & 27.908 & 0.015\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Primary biliary cholangitis; death, n = 276, p = 19}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.431 (0.033) & 0.907 (0.022) & 0.081 & 0.019\\
-\hspace{1em}aorsf-cph & 0.419 (0.034) & 0.905 (0.022) & 0.162 & 0.018\\
-\hspace{1em}aorsf-net & 0.414 (0.037) & 0.905 (0.022) & 14.040 & 0.019\\
-\hspace{1em}cif-rotate & 0.403 (0.042) & 0.897 (0.022) & 10.148 & 1.976\\
-\hspace{1em}rsf-standard & 0.393 (0.036) & 0.894 (0.024) & 0.123 & 0.037\\
-\hspace{1em}obliqueRSF-net & 0.369 (0.034) & 0.905 (0.023) & 111.487 & 1.799\\
-\hspace{1em}aorsf-random & 0.356 (0.029) & 0.894 (0.021) & 0.331 & 0.021\\
-\hspace{1em}cif-standard & 0.351 (0.035) & 0.902 (0.026) & 0.210 & 0.362\\
-\hspace{1em}cif-extension & 0.348 (0.035) & 0.899 (0.024) & 5.649 & 2.230\\
-\hspace{1em}glmnet-cox & 0.340 (0.047) & 0.885 (0.029) & 0.117 & 0.002\\
-\hspace{1em}ranger-extratrees & 0.275 (0.028) & 0.893 (0.027) & 0.028 & 0.039\\
-\hspace{1em}xgboost-cox & 0.249 (0.106) & 0.878 (0.026) & 5.049 & 0.003\\
-\hspace{1em}nn-cox & -0.017 (0.019) & 0.573 (0.129) & 11.780 & 0.246\\
-\hspace{1em}xgboost-aft & --- & 0.882 (0.024) & 9.706 & 0.006\\
+\hspace{1em}aorsf-fast & 0.430 (0.032) & 0.908 (0.021) & 0.067 & 0.018\\
+\hspace{1em}aorsf-cph & 0.418 (0.034) & 0.906 (0.021) & 0.149 & 0.018\\
+\hspace{1em}aorsf-net & 0.413 (0.035) & 0.905 (0.021) & 14.298 & 0.020\\
+\hspace{1em}cif-rotate & 0.405 (0.040) & 0.899 (0.022) & 10.102 & 1.933\\
+\hspace{1em}rsf-standard & 0.392 (0.034) & 0.895 (0.023) & 0.113 & 0.038\\
+\hspace{1em}obliqueRSF-net & 0.369 (0.032) & 0.907 (0.022) & 111.656 & 1.787\\
+\hspace{1em}aorsf-random & 0.354 (0.031) & 0.893 (0.020) & 1.093 & 0.018\\
+\hspace{1em}cif-standard & 0.352 (0.034) & 0.904 (0.025) & 0.206 & 0.363\\
+\hspace{1em}cif-extension & 0.348 (0.033) & 0.901 (0.023) & 5.775 & 2.199\\
+\hspace{1em}glmnet-cox & 0.342 (0.044) & 0.886 (0.028) & 0.116 & 0.002\\
+\hspace{1em}ranger-extratrees & 0.277 (0.027) & 0.894 (0.027) & 0.029 & 0.038\\
+\hspace{1em}xgboost-cox & 0.256 (0.103) & 0.881 (0.027) & 4.960 & 0.003\\
+\hspace{1em}nn-cox & -0.017 (0.018) & 0.563 (0.124) & 11.751 & 0.247\\
+\hspace{1em}xgboost-aft & --- & 0.883 (0.024) & 9.644 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Rotterdam tumor bank; death, n = 2982, p = 11}}}\\
 \hline
-\hspace{1em}aorsf-net & 0.165 (0.012) & 0.761 (0.009) & 147.667 & 0.185\\
-\hspace{1em}obliqueRSF-net & 0.162 (0.010) & 0.760 (0.009) & 436.769 & 37.366\\
-\hspace{1em}aorsf-cph & 0.162 (0.012) & 0.758 (0.009) & 2.545 & 0.201\\
-\hspace{1em}aorsf-fast & 0.159 (0.013) & 0.756 (0.009) & 0.850 & 0.202\\
-\hspace{1em}cif-standard & 0.159 (0.011) & 0.758 (0.009) & 4.557 & 22.504\\
-\hspace{1em}rsf-standard & 0.157 (0.014) & 0.755 (0.009) & 3.093 & 1.004\\
-\hspace{1em}aorsf-random & 0.153 (0.011) & 0.751 (0.010) & 2.819 & 0.180\\
-\hspace{1em}cif-rotate & 0.148 (0.012) & 0.751 (0.012) & 34.410 & 8.582\\
-\hspace{1em}ranger-extratrees & 0.138 (0.006) & 0.748 (0.009) & 3.595 & 2.173\\
-\hspace{1em}xgboost-cox & 0.131 (0.013) & 0.753 (0.010) & 4.077 & 0.004\\
-\hspace{1em}cif-extension & 0.130 (0.004) & 0.751 (0.009) & 22.754 & 8.908\\
-\hspace{1em}glmnet-cox & 0.118 (0.008) & 0.732 (0.009) & 0.285 & 0.004\\
-\hspace{1em}nn-cox & -0.010 (0.045) & 0.529 (0.052) & 16.922 & 8.881\\
-\hspace{1em}xgboost-aft & --- & 0.760 (0.009) & 15.169 & 0.006\\
+\hspace{1em}aorsf-net & 0.166 (0.012) & 0.762 (0.009) & 145.278 & 0.191\\
+\hspace{1em}obliqueRSF-net & 0.163 (0.010) & 0.761 (0.009) & 439.210 & 37.683\\
+\hspace{1em}aorsf-cph & 0.163 (0.012) & 0.759 (0.009) & 3.388 & 0.195\\
+\hspace{1em}aorsf-fast & 0.160 (0.013) & 0.757 (0.010) & 1.684 & 0.194\\
+\hspace{1em}cif-standard & 0.159 (0.010) & 0.759 (0.009) & 4.629 & 22.523\\
+\hspace{1em}rsf-standard & 0.159 (0.014) & 0.756 (0.009) & 3.066 & 0.967\\
+\hspace{1em}aorsf-random & 0.153 (0.010) & 0.752 (0.010) & 3.554 & 0.181\\
+\hspace{1em}cif-rotate & 0.147 (0.011) & 0.751 (0.011) & 34.328 & 8.629\\
+\hspace{1em}ranger-extratrees & 0.139 (0.006) & 0.749 (0.009) & 3.498 & 2.152\\
+\hspace{1em}xgboost-cox & 0.130 (0.014) & 0.753 (0.010) & 4.068 & 0.004\\
+\hspace{1em}cif-extension & 0.129 (0.004) & 0.751 (0.008) & 22.740 & 8.982\\
+\hspace{1em}glmnet-cox & 0.118 (0.008) & 0.731 (0.009) & 0.278 & 0.004\\
+\hspace{1em}nn-cox & -0.009 (0.042) & 0.531 (0.050) & 16.635 & 8.901\\
+\hspace{1em}xgboost-aft & --- & 0.761 (0.009) & 14.813 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Rotterdam tumor bank; recurrence, n = 2982, p = 11}}}\\
 \hline
-\hspace{1em}obliqueRSF-net & 0.148 (0.011) & 0.737 (0.010) & 521.852 & 40.115\\
-\hspace{1em}aorsf-net & 0.146 (0.012) & 0.735 (0.009) & 160.971 & 0.191\\
-\hspace{1em}cif-standard & 0.144 (0.011) & 0.734 (0.009) & 4.827 & 23.122\\
-\hspace{1em}aorsf-cph & 0.144 (0.012) & 0.734 (0.009) & 2.680 & 0.205\\
-\hspace{1em}aorsf-fast & 0.143 (0.012) & 0.733 (0.009) & 0.852 & 0.207\\
-\hspace{1em}aorsf-random & 0.141 (0.011) & 0.730 (0.009) & 3.195 & 0.185\\
-\hspace{1em}rsf-standard & 0.138 (0.012) & 0.731 (0.009) & 3.004 & 0.971\\
-\hspace{1em}ranger-extratrees & 0.135 (0.007) & 0.734 (0.009) & 3.594 & 2.718\\
-\hspace{1em}cif-rotate & 0.129 (0.010) & 0.725 (0.009) & 36.499 & 8.557\\
-\hspace{1em}cif-extension & 0.119 (0.006) & 0.731 (0.009) & 23.111 & 8.877\\
-\hspace{1em}glmnet-cox & 0.117 (0.008) & 0.727 (0.009) & 0.275 & 0.004\\
-\hspace{1em}xgboost-cox & 0.114 (0.008) & 0.729 (0.009) & 3.650 & 0.004\\
-\hspace{1em}nn-cox & -0.008 (0.028) & 0.514 (0.047) & 18.007 & 8.402\\
-\hspace{1em}xgboost-aft & --- & 0.735 (0.009) & 14.660 & 0.006\\
+\hspace{1em}obliqueRSF-net & 0.148 (0.010) & 0.737 (0.009) & 520.813 & 39.774\\
+\hspace{1em}aorsf-net & 0.146 (0.011) & 0.735 (0.009) & 155.933 & 0.198\\
+\hspace{1em}aorsf-cph & 0.145 (0.012) & 0.734 (0.008) & 3.589 & 0.206\\
+\hspace{1em}cif-standard & 0.144 (0.011) & 0.734 (0.009) & 4.807 & 23.027\\
+\hspace{1em}aorsf-fast & 0.143 (0.011) & 0.733 (0.009) & 1.760 & 0.204\\
+\hspace{1em}aorsf-random & 0.140 (0.010) & 0.730 (0.008) & 3.803 & 0.185\\
+\hspace{1em}rsf-standard & 0.139 (0.012) & 0.731 (0.008) & 3.003 & 1.000\\
+\hspace{1em}ranger-extratrees & 0.135 (0.007) & 0.734 (0.009) & 3.564 & 2.555\\
+\hspace{1em}cif-rotate & 0.129 (0.010) & 0.725 (0.009) & 36.519 & 8.483\\
+\hspace{1em}cif-extension & 0.119 (0.006) & 0.731 (0.008) & 23.055 & 8.825\\
+\hspace{1em}glmnet-cox & 0.117 (0.008) & 0.727 (0.008) & 0.258 & 0.004\\
+\hspace{1em}xgboost-cox & 0.113 (0.008) & 0.729 (0.009) & 3.628 & 0.004\\
+\hspace{1em}nn-cox & -0.007 (0.027) & 0.511 (0.045) & 17.722 & 7.825\\
+\hspace{1em}xgboost-aft & --- & 0.735 (0.009) & 14.317 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Serum free light chain; death, n = 7874, p = 10}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.250 (0.014) & 0.826 (0.008) & 2.013 & 0.589\\
-\hspace{1em}aorsf-cph & 0.250 (0.014) & 0.825 (0.008) & 6.411 & 0.580\\
-\hspace{1em}aorsf-net & 0.250 (0.013) & 0.823 (0.008) & 278.298 & 0.560\\
-\hspace{1em}glmnet-cox & 0.247 (0.012) & 0.820 (0.007) & 0.551 & 0.006\\
-\hspace{1em}obliqueRSF-net & 0.247 (0.012) & 0.821 (0.008) & 1105.436 & 151.574\\
-\hspace{1em}ranger-extratrees & 0.243 (0.009) & 0.820 (0.007) & 12.701 & 12.470\\
-\hspace{1em}rsf-standard & 0.243 (0.014) & 0.815 (0.008) & 5.245 & 0.573\\
-\hspace{1em}cif-standard & 0.243 (0.011) & 0.818 (0.008) & 19.627 & 119.032\\
-\hspace{1em}aorsf-random & 0.232 (0.012) & 0.817 (0.008) & 6.732 & 0.569\\
-\hspace{1em}cif-rotate & 0.227 (0.008) & 0.819 (0.007) & 65.626 & 21.236\\
-\hspace{1em}cif-extension & 0.201 (0.005) & 0.820 (0.008) & 40.750 & 20.844\\
-\hspace{1em}xgboost-cox & 0.094 (0.040) & 0.823 (0.008) & 5.955 & 0.008\\
-\hspace{1em}nn-cox & 0.002 (0.005) & 0.608 (0.121) & 26.566 & 27.386\\
-\hspace{1em}xgboost-aft & --- & 0.823 (0.008) & 18.556 & 0.009\\
+\hspace{1em}aorsf-fast & 0.250 (0.014) & 0.825 (0.007) & 2.956 & 0.566\\
+\hspace{1em}aorsf-cph & 0.250 (0.013) & 0.825 (0.008) & 7.220 & 0.575\\
+\hspace{1em}aorsf-net & 0.250 (0.012) & 0.823 (0.008) & 267.989 & 0.565\\
+\hspace{1em}glmnet-cox & 0.248 (0.012) & 0.820 (0.007) & 0.539 & 0.006\\
+\hspace{1em}obliqueRSF-net & 0.247 (0.011) & 0.821 (0.008) & 1113.284 & 151.041\\
+\hspace{1em}ranger-extratrees & 0.243 (0.009) & 0.820 (0.007) & 12.743 & 12.085\\
+\hspace{1em}cif-standard & 0.243 (0.011) & 0.818 (0.008) & 19.565 & 120.023\\
+\hspace{1em}rsf-standard & 0.243 (0.013) & 0.815 (0.008) & 5.399 & 0.585\\
+\hspace{1em}aorsf-random & 0.231 (0.012) & 0.816 (0.008) & 6.409 & 0.562\\
+\hspace{1em}cif-rotate & 0.228 (0.009) & 0.819 (0.007) & 65.379 & 21.402\\
+\hspace{1em}cif-extension & 0.201 (0.005) & 0.820 (0.008) & 41.381 & 20.976\\
+\hspace{1em}xgboost-cox & 0.094 (0.038) & 0.824 (0.007) & 5.927 & 0.008\\
+\hspace{1em}nn-cox & 0.002 (0.005) & 0.616 (0.122) & 26.319 & 26.895\\
+\hspace{1em}xgboost-aft & --- & 0.823 (0.008) & 18.504 & 0.009\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{SPRINT; CVD death, n = 9361, p = 174}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.070 (0.011) & 0.794 (0.010) & 13.455 & 0.012\\
-\hspace{1em}aorsf-net & 0.070 (0.007) & 0.796 (0.011) & 336.970 & 0.642\\
-\hspace{1em}aorsf-fast & 0.069 (0.006) & 0.796 (0.011) & 2.518 & 0.629\\
-\hspace{1em}aorsf-cph & 0.069 (0.006) & 0.796 (0.011) & 9.006 & 0.589\\
-\hspace{1em}obliqueRSF-net & 0.067 (0.005) & 0.797 (0.012) & 1018.392 & 423.791\\
-\hspace{1em}rsf-standard & 0.064 (0.007) & 0.787 (0.014) & 3.884 & 1.263\\
-\hspace{1em}cif-standard & 0.061 (0.004) & 0.797 (0.011) & 50.914 & 182.202\\
-\hspace{1em}cif-rotate & 0.061 (0.005) & 0.789 (0.012) & 929.822 & 112.740\\
-\hspace{1em}ranger-extratrees & 0.054 (0.003) & 0.791 (0.012) & 7.349 & 8.127\\
-\hspace{1em}nn-cox & 0.039 (0.019) & 0.763 (0.029) & 21.097 & 24.235\\
-\hspace{1em}cif-extension & 0.034 (0.002) & 0.788 (0.011) & 122.978 & 33.619\\
-\hspace{1em}aorsf-random & 0.026 (0.003) & 0.746 (0.017) & 5.840 & 0.731\\
-\hspace{1em}xgboost-cox & 0.007 (0.018) & 0.798 (0.011) & 6.987 & 0.013\\
-\hspace{1em}xgboost-aft & --- & 0.794 (0.012) & 20.162 & 0.012\\
+\hspace{1em}glmnet-cox & 0.071 (0.011) & 0.795 (0.011) & 13.850 & 0.011\\
+\hspace{1em}aorsf-net & 0.070 (0.007) & 0.796 (0.011) & 330.532 & 0.613\\
+\hspace{1em}aorsf-fast & 0.070 (0.006) & 0.797 (0.010) & 2.561 & 0.604\\
+\hspace{1em}aorsf-cph & 0.069 (0.006) & 0.797 (0.011) & 8.283 & 0.620\\
+\hspace{1em}obliqueRSF-net & 0.068 (0.005) & 0.798 (0.012) & 1017.350 & 425.134\\
+\hspace{1em}rsf-standard & 0.065 (0.007) & 0.788 (0.014) & 3.894 & 1.314\\
+\hspace{1em}cif-standard & 0.061 (0.003) & 0.798 (0.011) & 50.694 & 181.616\\
+\hspace{1em}cif-rotate & 0.060 (0.005) & 0.791 (0.012) & 930.893 & 113.261\\
+\hspace{1em}ranger-extratrees & 0.054 (0.003) & 0.791 (0.012) & 7.314 & 7.943\\
+\hspace{1em}nn-cox & 0.039 (0.018) & 0.764 (0.027) & 20.414 & 24.555\\
+\hspace{1em}cif-extension & 0.034 (0.002) & 0.789 (0.011) & 122.779 & 33.342\\
+\hspace{1em}aorsf-random & 0.026 (0.002) & 0.747 (0.016) & 5.282 & 0.708\\
+\hspace{1em}xgboost-cox & 0.006 (0.017) & 0.799 (0.011) & 6.888 & 0.013\\
+\hspace{1em}xgboost-aft & --- & 0.796 (0.012) & 20.126 & 0.012\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{SPRINT; death, n = 9361, p = 174}}}\\
 \hline
-\hspace{1em}glmnet-cox & 0.122 (0.011) & 0.770 (0.010) & 5.445 & 0.011\\
-\hspace{1em}aorsf-cph & 0.116 (0.008) & 0.770 (0.009) & 12.906 & 1.531\\
-\hspace{1em}aorsf-fast & 0.116 (0.008) & 0.770 (0.008) & 3.624 & 1.491\\
-\hspace{1em}aorsf-net & 0.113 (0.009) & 0.768 (0.009) & 587.703 & 0.926\\
-\hspace{1em}obliqueRSF-net & 0.112 (0.007) & 0.767 (0.008) & 2672.537 & 233.957\\
-\hspace{1em}rsf-standard & 0.110 (0.007) & 0.762 (0.009) & 6.175 & 0.658\\
-\hspace{1em}cif-standard & 0.106 (0.006) & 0.764 (0.008) & 51.175 & 188.448\\
-\hspace{1em}ranger-extratrees & 0.096 (0.005) & 0.756 (0.009) & 12.312 & 9.289\\
-\hspace{1em}nn-cox & 0.096 (0.010) & 0.756 (0.010) & 35.162 & 40.016\\
-\hspace{1em}cif-rotate & 0.090 (0.006) & 0.745 (0.009) & 1120.987 & 112.752\\
-\hspace{1em}cif-extension & 0.055 (0.002) & 0.746 (0.009) & 137.209 & 33.831\\
-\hspace{1em}aorsf-random & 0.052 (0.003) & 0.719 (0.009) & 9.547 & 1.043\\
-\hspace{1em}xgboost-cox & 0.030 (0.024) & 0.772 (0.008) & 9.205 & 0.014\\
-\hspace{1em}xgboost-aft & --- & 0.771 (0.008) & 23.395 & 0.013\\
+\hspace{1em}glmnet-cox & 0.123 (0.012) & 0.771 (0.009) & 5.422 & 0.010\\
+\hspace{1em}aorsf-cph & 0.117 (0.008) & 0.770 (0.008) & 11.811 & 1.833\\
+\hspace{1em}aorsf-fast & 0.115 (0.009) & 0.769 (0.008) & 3.826 & 1.817\\
+\hspace{1em}aorsf-net & 0.113 (0.009) & 0.769 (0.009) & 587.892 & 0.933\\
+\hspace{1em}obliqueRSF-net & 0.112 (0.007) & 0.767 (0.008) & 2630.588 & 231.667\\
+\hspace{1em}rsf-standard & 0.110 (0.008) & 0.763 (0.009) & 6.407 & 0.663\\
+\hspace{1em}cif-standard & 0.106 (0.006) & 0.764 (0.008) & 49.842 & 190.804\\
+\hspace{1em}nn-cox & 0.097 (0.010) & 0.757 (0.009) & 34.063 & 33.278\\
+\hspace{1em}ranger-extratrees & 0.096 (0.005) & 0.756 (0.009) & 11.323 & 9.400\\
+\hspace{1em}cif-rotate & 0.090 (0.007) & 0.745 (0.009) & 1109.925 & 112.893\\
+\hspace{1em}cif-extension & 0.055 (0.002) & 0.747 (0.009) & 137.470 & 34.230\\
+\hspace{1em}aorsf-random & 0.052 (0.003) & 0.720 (0.010) & 8.360 & 0.992\\
+\hspace{1em}xgboost-cox & 0.030 (0.023) & 0.772 (0.008) & 9.057 & 0.014\\
+\hspace{1em}xgboost-aft & --- & 0.772 (0.007) & 23.335 & 0.013\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Systolic Heart Failure; death, n = 2231, p = 41}}}\\
 \hline
-\hspace{1em}obliqueRSF-net & 0.114 (0.012) & 0.748 (0.012) & 383.319 & 25.716\\
-\hspace{1em}glmnet-cox & 0.114 (0.013) & 0.747 (0.012) & 0.265 & 0.004\\
-\hspace{1em}cif-rotate & 0.114 (0.013) & 0.742 (0.011) & 71.687 & 10.493\\
-\hspace{1em}aorsf-net & 0.113 (0.013) & 0.745 (0.012) & 117.827 & 0.158\\
-\hspace{1em}aorsf-cph & 0.112 (0.014) & 0.746 (0.012) & 1.907 & 0.147\\
-\hspace{1em}cif-standard & 0.110 (0.011) & 0.745 (0.012) & 3.952 & 16.282\\
-\hspace{1em}aorsf-fast & 0.110 (0.016) & 0.745 (0.011) & 0.587 & 0.146\\
-\hspace{1em}rsf-standard & 0.106 (0.011) & 0.737 (0.010) & 2.470 & 0.250\\
-\hspace{1em}cif-extension & 0.095 (0.005) & 0.745 (0.012) & 29.774 & 10.136\\
-\hspace{1em}ranger-extratrees & 0.092 (0.008) & 0.739 (0.013) & 3.039 & 1.320\\
-\hspace{1em}xgboost-cox & 0.091 (0.009) & 0.746 (0.010) & 4.251 & 0.004\\
-\hspace{1em}aorsf-random & 0.082 (0.005) & 0.733 (0.012) & 2.434 & 0.152\\
-\hspace{1em}nn-cox & 0.077 (0.026) & 0.709 (0.032) & 19.024 & 4.850\\
-\hspace{1em}xgboost-aft & --- & 0.743 (0.009) & 13.262 & 0.006\\
+\hspace{1em}obliqueRSF-net & 0.114 (0.012) & 0.747 (0.012) & 381.891 & 25.692\\
+\hspace{1em}glmnet-cox & 0.113 (0.013) & 0.745 (0.012) & 0.276 & 0.004\\
+\hspace{1em}cif-rotate & 0.113 (0.013) & 0.741 (0.011) & 71.714 & 10.523\\
+\hspace{1em}aorsf-net & 0.112 (0.013) & 0.743 (0.012) & 114.909 & 0.160\\
+\hspace{1em}aorsf-cph & 0.112 (0.013) & 0.744 (0.012) & 1.931 & 0.145\\
+\hspace{1em}cif-standard & 0.110 (0.011) & 0.744 (0.011) & 4.079 & 16.213\\
+\hspace{1em}aorsf-fast & 0.109 (0.015) & 0.743 (0.012) & 0.618 & 0.142\\
+\hspace{1em}rsf-standard & 0.105 (0.011) & 0.735 (0.011) & 2.510 & 0.252\\
+\hspace{1em}cif-extension & 0.094 (0.006) & 0.744 (0.012) & 29.918 & 10.109\\
+\hspace{1em}ranger-extratrees & 0.091 (0.008) & 0.738 (0.012) & 3.266 & 1.328\\
+\hspace{1em}xgboost-cox & 0.090 (0.009) & 0.744 (0.010) & 4.229 & 0.004\\
+\hspace{1em}aorsf-random & 0.080 (0.006) & 0.731 (0.013) & 2.025 & 0.143\\
+\hspace{1em}nn-cox & 0.074 (0.028) & 0.705 (0.036) & 18.945 & 5.181\\
+\hspace{1em}xgboost-aft & --- & 0.741 (0.009) & 13.087 & 0.006\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{VA lung cancer trial; death, n = 137, p = 8}}}\\
 \hline
-\hspace{1em}aorsf-fast & 0.197 (0.050) & 0.794 (0.033) & 0.082 & 0.014\\
-\hspace{1em}aorsf-net & 0.197 (0.050) & 0.796 (0.034) & 9.601 & 0.011\\
-\hspace{1em}aorsf-cph & 0.194 (0.053) & 0.793 (0.035) & 0.104 & 0.011\\
-\hspace{1em}cif-rotate & 0.192 (0.066) & 0.786 (0.037) & 4.488 & 1.313\\
-\hspace{1em}rsf-standard & 0.172 (0.049) & 0.786 (0.038) & 0.070 & 0.025\\
-\hspace{1em}cif-extension & 0.169 (0.048) & 0.793 (0.032) & 3.704 & 1.201\\
-\hspace{1em}glmnet-cox & 0.157 (0.032) & 0.786 (0.038) & 0.086 & 0.002\\
-\hspace{1em}aorsf-random & 0.151 (0.046) & 0.779 (0.037) & 0.213 & 0.012\\
-\hspace{1em}cif-standard & 0.124 (0.040) & 0.767 (0.035) & 0.103 & 0.120\\
-\hspace{1em}obliqueRSF-net & 0.123 (0.034) & 0.794 (0.028) & 63.347 & 0.662\\
-\hspace{1em}ranger-extratrees & 0.089 (0.033) & 0.777 (0.036) & 0.021 & 0.027\\
-\hspace{1em}xgboost-cox & 0.057 (0.076) & 0.748 (0.048) & 1.179 & 0.002\\
-\hspace{1em}xgboost-aft & --- & 0.755 (0.045) & 5.361 & 0.005\\
-\hspace{1em}nn-cox & -0.025 (0.034) & 0.513 (0.109) & 11.395 & 0.138\\*
+\hspace{1em}aorsf-net & 0.201 (0.050) & 0.797 (0.035) & 9.901 & 0.012\\
+\hspace{1em}aorsf-fast & 0.200 (0.049) & 0.795 (0.034) & 0.047 & 0.012\\
+\hspace{1em}cif-rotate & 0.198 (0.065) & 0.789 (0.036) & 4.476 & 1.284\\
+\hspace{1em}aorsf-cph & 0.198 (0.052) & 0.794 (0.035) & 0.094 & 0.012\\
+\hspace{1em}rsf-standard & 0.176 (0.048) & 0.787 (0.037) & 0.078 & 0.025\\
+\hspace{1em}cif-extension & 0.174 (0.048) & 0.795 (0.034) & 3.676 & 1.195\\
+\hspace{1em}glmnet-cox & 0.160 (0.036) & 0.788 (0.037) & 0.087 & 0.002\\
+\hspace{1em}aorsf-random & 0.154 (0.044) & 0.780 (0.037) & 1.060 & 0.011\\
+\hspace{1em}cif-standard & 0.128 (0.040) & 0.770 (0.037) & 0.105 & 0.120\\
+\hspace{1em}obliqueRSF-net & 0.126 (0.034) & 0.796 (0.029) & 62.935 & 0.664\\
+\hspace{1em}ranger-extratrees & 0.092 (0.033) & 0.778 (0.038) & 0.020 & 0.026\\
+\hspace{1em}xgboost-cox & 0.067 (0.078) & 0.750 (0.046) & 1.408 & 0.002\\
+\hspace{1em}xgboost-aft & --- & 0.754 (0.047) & 5.530 & 0.005\\
+\hspace{1em}nn-cox & -0.023 (0.033) & 0.517 (0.114) & 11.344 & 0.133\\*
 \end{longtable}
 
 \end{knitrout}
@@ -1301,64 +1355,63 @@ Max correlation & No. observations & Negation & ANOVA & Permutation & SHAP & Gai
 \endfoot
 \bottomrule
 \endlastfoot
-Overall & Overall & 76.0 & 74.0 & 73.2 & 69.7 & 64.7 & 67.8\\
+Overall & Overall & 75.9 & 73.9 & 73.2 & 69.6 & 64.6 & 67.7\\
 \addlinespace[0.3em]
 \multicolumn{8}{l}{\textit{\textbf{Interactions}}}\\
 \hline
-\hspace{1em}Overall & Overall & 57.9 & 57.8 & 58.1 & 54.7 & 49.4 & 57.1\\
-\hspace{1em}30 & 500 & 54.3 & 54.5 & 54.7 & 48.2 & 42.6 & 54.8\\
-\hspace{1em}30 & 1,000 & 57.0 & 56.6 & 57.9 & 53.5 & 48.7 & 56.5\\
-\hspace{1em}30 & 2,500 & 61.9 & 59.2 & 64.2 & 61.9 & 61.2 & 60.3\\
-\hspace{1em}15 & 500 & 53.4 & 53.6 & 53.1 & 47.0 & 40.9 & 54.5\\
-\hspace{1em}15 & 1,000 & 56.5 & 55.7 & 57.1 & 52.2 & 45.9 & 55.5\\
-\hspace{1em}15 & 2,500 & 61.3 & 59.0 & 62.6 & 61.1 & 59.0 & 60.8\\
-\hspace{1em}0 & 500 & 52.6 & 54.8 & 53.2 & 44.6 & 40.8 & 53.6\\
-\hspace{1em}0 & 1,000 & 56.9 & 58.7 & 55.5 & 53.0 & 43.1 & 55.6\\
-\hspace{1em}0 & 2,500 & 67.6 & 68.1 & 64.6 & 71.1 & 62.3 & 62.4\\
+\hspace{1em}Overall & Overall & 57.8 & 57.4 & 58.0 & 54.6 & 49.2 & 56.9\\
+\hspace{1em}30 & 500 & 54.3 & 54.1 & 54.8 & 48.2 & 42.7 & 54.9\\
+\hspace{1em}30 & 1,000 & 56.9 & 55.7 & 58.1 & 53.1 & 48.0 & 56.3\\
+\hspace{1em}30 & 2,500 & 61.9 & 58.9 & 64.1 & 61.5 & 60.7 & 60.0\\
+\hspace{1em}15 & 500 & 53.1 & 53.5 & 52.8 & 47.1 & 41.1 & 54.1\\
+\hspace{1em}15 & 1,000 & 55.9 & 55.4 & 56.3 & 52.2 & 45.8 & 55.4\\
+\hspace{1em}15 & 2,500 & 61.0 & 58.6 & 63.0 & 61.0 & 58.9 & 59.9\\
+\hspace{1em}0 & 500 & 52.5 & 53.9 & 52.4 & 44.5 & 40.7 & 53.6\\
+\hspace{1em}0 & 1,000 & 57.2 & 58.6 & 55.8 & 53.1 & 42.8 & 56.1\\
+\hspace{1em}0 & 2,500 & 67.6 & 68.2 & 64.4 & 71.0 & 62.2 & 62.1\\
 \addlinespace[0.3em]
 \multicolumn{8}{l}{\textit{\textbf{Non-linear effects}}}\\
 \hline
-\hspace{1em}Overall & Overall & 71.8 & 69.4 & 67.9 & 65.9 & 60.1 & 61.7\\
-\hspace{1em}30 & 500 & 58.6 & 58.6 & 57.4 & 53.1 & 48.6 & 55.4\\
-\hspace{1em}30 & 1,000 & 61.2 & 59.6 & 58.6 & 57.4 & 52.0 & 55.9\\
-\hspace{1em}30 & 2,500 & 62.1 & 60.1 & 61.0 & 60.1 & 56.4 & 58.1\\
-\hspace{1em}15 & 500 & 63.6 & 61.5 & 60.8 & 54.6 & 49.0 & 57.7\\
-\hspace{1em}15 & 1,000 & 67.6 & 64.9 & 64.8 & 62.4 & 55.8 & 59.1\\
-\hspace{1em}15 & 2,500 & 70.7 & 67.3 & 68.8 & 66.7 & 62.1 & 62.6\\
-\hspace{1em}0 & 500 & 75.6 & 72.5 & 69.3 & 60.0 & 56.2 & 61.2\\
-\hspace{1em}0 & 1,000 & 88.4 & 84.0 & 78.3 & 81.7 & 69.1 & 67.2\\
-\hspace{1em}0 & 2,500 & 98.3 & 96.2 & 91.9 & 97.5 & 91.4 & 78.5\\
+\hspace{1em}Overall & Overall & 71.7 & 69.3 & 67.9 & 66.1 & 60.1 & 61.8\\
+\hspace{1em}30 & 500 & 58.8 & 58.3 & 57.8 & 53.4 & 48.5 & 55.5\\
+\hspace{1em}30 & 1,000 & 61.1 & 59.4 & 59.0 & 57.1 & 52.0 & 56.3\\
+\hspace{1em}30 & 2,500 & 62.1 & 60.2 & 61.1 & 60.0 & 56.4 & 57.9\\
+\hspace{1em}15 & 500 & 63.8 & 61.5 & 60.7 & 55.3 & 49.4 & 57.7\\
+\hspace{1em}15 & 1,000 & 67.5 & 65.1 & 64.6 & 62.5 & 56.0 & 59.8\\
+\hspace{1em}15 & 2,500 & 70.2 & 67.2 & 69.1 & 66.8 & 62.3 & 62.3\\
+\hspace{1em}0 & 500 & 75.5 & 72.3 & 68.5 & 60.1 & 55.8 & 61.1\\
+\hspace{1em}0 & 1,000 & 88.3 & 83.9 & 78.0 & 81.5 & 68.6 & 67.6\\
+\hspace{1em}0 & 2,500 & 98.4 & 96.3 & 91.8 & 97.7 & 91.6 & 78.3\\
 \addlinespace[0.3em]
 \multicolumn{8}{l}{\textit{\textbf{Combination effects}}}\\
 \hline
-\hspace{1em}Overall & Overall & 78.4 & 76.0 & 74.9 & 70.8 & 65.3 & 68.3\\
-\hspace{1em}30 & 500 & 64.8 & 63.8 & 62.7 & 55.6 & 49.8 & 59.3\\
-\hspace{1em}30 & 1,000 & 67.5 & 65.7 & 65.0 & 61.4 & 55.7 & 61.5\\
-\hspace{1em}30 & 2,500 & 69.8 & 67.0 & 68.5 & 65.7 & 62.4 & 64.3\\
-\hspace{1em}15 & 500 & 70.4 & 68.0 & 66.6 & 59.2 & 53.0 & 62.3\\
-\hspace{1em}15 & 1,000 & 75.0 & 71.2 & 71.7 & 66.6 & 59.7 & 64.9\\
-\hspace{1em}15 & 2,500 & 78.9 & 74.8 & 77.1 & 72.9 & 69.0 & 69.9\\
-\hspace{1em}0 & 500 & 84.0 & 81.4 & 76.5 & 66.5 & 61.7 & 67.4\\
-\hspace{1em}0 & 1,000 & 95.4 & 92.4 & 87.8 & 89.4 & 78.6 & 76.3\\
-\hspace{1em}0 & 2,500 & 99.8 & 99.3 & 97.9 & 99.6 & 97.8 & 89.1\\
+\hspace{1em}Overall & Overall & 78.3 & 75.8 & 74.8 & 70.7 & 65.2 & 68.2\\
+\hspace{1em}30 & 500 & 64.8 & 63.5 & 62.5 & 55.6 & 49.8 & 59.2\\
+\hspace{1em}30 & 1,000 & 67.4 & 65.3 & 65.3 & 61.0 & 55.3 & 61.5\\
+\hspace{1em}30 & 2,500 & 69.9 & 67.0 & 68.5 & 65.2 & 61.9 & 63.8\\
+\hspace{1em}15 & 500 & 70.2 & 68.0 & 66.3 & 59.2 & 52.8 & 61.8\\
+\hspace{1em}15 & 1,000 & 74.8 & 71.2 & 71.4 & 66.6 & 59.9 & 65.0\\
+\hspace{1em}15 & 2,500 & 78.6 & 74.6 & 77.1 & 72.6 & 68.6 & 69.1\\
+\hspace{1em}0 & 500 & 84.0 & 81.1 & 76.2 & 66.7 & 61.7 & 67.6\\
+\hspace{1em}0 & 1,000 & 95.4 & 92.4 & 87.8 & 89.4 & 78.7 & 76.3\\
+\hspace{1em}0 & 2,500 & 99.8 & 99.3 & 97.8 & 99.7 & 97.9 & 89.0\\
 \addlinespace[0.3em]
 \multicolumn{8}{l}{\textit{\textbf{Main effects}}}\\
 \hline
-\hspace{1em}Overall & Overall & 91.1 & 89.0 & 88.8 & 85.1 & 82.7 & 83.2\\
-\hspace{1em}30 & 500 & 79.3 & 77.5 & 75.3 & 70.2 & 66.5 & 71.2\\
-\hspace{1em}30 & 1,000 & 83.7 & 80.8 & 80.6 & 77.1 & 74.0 & 74.8\\
-\hspace{1em}30 & 2,500 & 86.7 & 83.7 & 85.2 & 81.8 & 80.5 & 79.3\\
-\hspace{1em}15 & 500 & 86.4 & 83.3 & 81.9 & 75.6 & 71.3 & 75.4\\
-\hspace{1em}15 & 1,000 & 91.3 & 88.2 & 88.7 & 84.9 & 81.6 & 81.0\\
-\hspace{1em}15 & 2,500 & 94.6 & 91.8 & 93.8 & 90.3 & 89.0 & 86.8\\
-\hspace{1em}0 & 500 & 97.7 & 96.2 & 94.1 & 86.2 & 83.6 & 85.7\\
-\hspace{1em}0 & 1,000 & 100.0 & 99.7 & 99.4 & 99.4 & 98.0 & 95.1\\
+\hspace{1em}Overall & Overall & 91.0 & 88.9 & 88.7 & 85.0 & 82.6 & 83.2\\
+\hspace{1em}30 & 500 & 79.3 & 77.3 & 75.5 & 70.3 & 66.5 & 71.2\\
+\hspace{1em}30 & 1,000 & 83.5 & 80.5 & 80.8 & 76.8 & 73.9 & 74.9\\
+\hspace{1em}30 & 2,500 & 86.5 & 83.5 & 85.1 & 81.7 & 80.4 & 79.3\\
+\hspace{1em}15 & 500 & 86.3 & 83.3 & 81.8 & 75.7 & 71.3 & 75.3\\
+\hspace{1em}15 & 1,000 & 91.3 & 88.1 & 88.5 & 84.6 & 81.3 & 81.1\\
+\hspace{1em}15 & 2,500 & 94.5 & 91.6 & 93.7 & 90.2 & 89.0 & 86.5\\
+\hspace{1em}0 & 500 & 97.8 & 96.3 & 94.0 & 86.5 & 83.4 & 85.9\\
+\hspace{1em}0 & 1,000 & 100.0 & 99.7 & 99.4 & 99.4 & 98.0 & 95.2\\
 \hspace{1em}0 & 2,500 & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 & 99.8\\*
 \end{longtable}
 \end{landscape}
 
 \end{knitrout}
-
 
 \vskip 0.2in
 \bibliography{main}
