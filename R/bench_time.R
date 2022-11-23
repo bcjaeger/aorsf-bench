@@ -4,14 +4,28 @@
 #'
 #' @title
 
-bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 50) {
+bench_time <- function(n_obs = 100,
+                       n_ftr = 10,
+                       n_tree = 500,
+                       n_times = NULL) {
 
-  train <- data[seq(n_obs), seq(n_ftr)]
+  data <- read_rds("data/bench_time.rds")[seq(n_obs), ]
 
-  pred_horizon <- median(train$time)
+  if(n_ftr == 10000){
+    for(i in seq(9000)){
+      data[[paste("junk", i, sep="_")]] <- rnorm(n = nrow(data))
+    }
+  }
 
-  node_size <- 10
+  train <- data[, seq(n_ftr + 2)]
+
+  node_size <- round(n_obs / 10)
+
   mtry <- ceiling(sqrt(n_ftr))
+
+  if(!is.null(n_times) && length(unique(train$time)) > n_times){
+    train$time <- 5 * as.numeric(cut(train$time, breaks = n_times)) / n_times
+  }
 
   start_time <- Sys.time()
 
@@ -20,7 +34,8 @@ bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 50) {
     n_tree = n_tree,
     formula = Surv(time, status) ~ .,
     mtry = mtry,
-    n_retry = 3,
+    n_retry = 1,
+    n_split = 5,
     split_min_obs = node_size,
     control = orsf_control_fast(),
     importance = 'none',
@@ -34,12 +49,14 @@ bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 50) {
   start_time <- Sys.time()
 
   rsf_rfsrc <- rfsrc(Surv(time, status) ~ .,
-                        ntree = n_tree,
-                        samptype = 'swr',
-                        perf.type = 'none',
-                        data = train,
-                        mtry = mtry,
-                        nodesize = node_size)
+                     ntree = n_tree,
+                     samptype = 'swr',
+                     perf.type = 'none',
+                     data = train,
+                     mtry = mtry,
+                     nsplit = 5,
+                     ntime = 0,
+                     nodesize = node_size)
 
   end_time <- Sys.time()
 
@@ -53,6 +70,7 @@ bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 50) {
     splitrule = 'extratrees',
     data = train,
     mtry = mtry,
+    num.random.splits = 5,
     oob.error = FALSE,
     min.node.size = node_size
   )
@@ -60,18 +78,6 @@ bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 50) {
   end_time <- Sys.time()
 
   time_fit_ranger <- end_time - start_time
-
-
-  # start_time <- Sys.time()
-  #
-  # cif_party <- cforest(Surv(time, status) ~ .,
-  #                      controls = cforest_unbiased(mtry = mtry),
-  #                      data = train)
-  #
-  # end_time <- Sys.time()
-  #
-  # time_fit_party = end_time - start_time
-
 
   list(
     aorsf_fast = time_fit_aorsf,
@@ -81,7 +87,7 @@ bench_time <- function(data, n_obs=100, n_ftr=10, n_tree = 50) {
   ) %>%
     map(as.numeric, units = 'secs') %>%
     as_tibble() %>%
-    mutate(n_obs = n_obs, n_ftr = n_ftr)
+    mutate(n_obs = n_obs, n_ftr = n_ftr, n_times = n_times)
 
 
 }

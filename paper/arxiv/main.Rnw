@@ -165,7 +165,8 @@ library(kableExtra)
 knitr::opts_chunk$set(echo = FALSE,
                       message = FALSE,
                       dpi = 600,
-                      cache = FALSE)
+                      cache = FALSE,
+                      warning = FALSE)
 
 rspec <- round_spec() %>%
   round_using_magnitude(digits = c(3, 2, 1, 1),
@@ -180,6 +181,7 @@ tar_load(names = c(bm_pred_clean,
                    bm_pred_viz,
                    bm_pred_model_viz,
                    bm_pred_time_viz,
+                   bm_time_viz,
                    clincalc_r2,
                    data_key,
                    model_key))
@@ -213,9 +215,10 @@ pcens_min    <- table_value(100*min(data_key$pcens))
 @
 
 
+
 \begin{abstract}
 
-	The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors to create branches, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles often have higher prediction accuracy than standard RSF ensembles. However, assessing all possible linear combinations of predictors induces significant computational overhead that limits applications to large-scale data sets. In addition, few methods have been developed for interpretation of oblique RSF ensembles, and they remain more difficult to interpret compared to their axis-based counterparts. In this article, we introduce and evaluate a method to increase computational efficiency of the oblique RSF and a method to estimate importance of individual predictor variables with the oblique RSF. Our strategy to reduce computational overhead makes use of Newton-Raphson scoring, a classical optimization technique that we apply to the Cox partial likelihood function within each non-leaf node of decision trees. We estimate the importance of individual predictors for the oblique RSF by negating each coefficient used for the given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In general benchmarking experiments, we find that our implementation of the oblique RSF is approximately 450 times faster with equivalent discrimination and superior Brier score compared to existing software for oblique RSFs. We find in simulation studies that `negation importance' discriminates between relevant and irrelevant predictors more accurately than permutation importance, Shapley additive explanations, and a previously introduced technique to measure variable importance with oblique RSFs based on analysis of variance. All methods pertaining to oblique RSFs in the current study are available in the \texttt{aorsf} R package.
+	The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles have high prediction accuracy, but assessing many linear combinations of predictors induces high computational overhead. In addition, few methods have been developed for estimation of variable importance (VI) with oblique RSFs. We introduce a method to increase computational efficiency of the oblique RSF and a method to estimate VI with the oblique RSF. Our computational approach uses Newton-Raphson scoring in each non-leaf node, We estimate VI by negating each coefficient used for a given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In benchmarking experiments, we find our implementation of the oblique RSF is hundreds of times faster, with equivalent prediction accuracy, compared to existing software for oblique RSFs. We find in simulation studies that `negation VI' discriminates between relevant and irrelevant numeric predictors more accurately than permutation VI, Shapley VI, and a technique to measure VI using analysis of variance. All  oblique RSF methods in the current study are available in the \texttt{aorsf} R package.
 
 \end{abstract}
 
@@ -232,7 +235,7 @@ A potential approach to improve the RSF when predictors are correlated and some 
 
 Despite the potential for higher accuracy, oblique trees have at least two notable drawbacks compared to axis-based trees. First, finding a locally optimal oblique decision rule may require exponentially more computation than an axis-based rule. If $p$ predictors are potentially used to split $n$ observations, up to $\mathcal{O}(n^p)$ oblique splits can be assessed versus $\mathcal{O}(n \cdot p)$ axis-based splits \citep{heath1993induction, murthy1994system}. Second, estimating variable importance (VI) using permutation (a standard method for RFs) may be less effective in ensembles of oblique trees, as permuting the values of one predictor may not destabilize decisions that are based on linear combinations of predictors. Although VI is one of the most widely used strategies to interpret random forests \citep{ishwaran2019standard}, few studies have investigated VI for oblique random forests \citep[see][Section~5]{menze2011oblique}, and fewer have investigated VI specifically for the oblique RSF.
 
-The aim of this paper is to introduce methodology that improves the computational efficiency and interpretation of oblique RSFs. \secref{sec:background} reviews prior studies that have developed methods related to those introduced in the current study. In \secref{sec:aorsf}, we reduce the computational cost of oblique RSFs (\ie, accelerate them) with a scalable algorithm to identify linear combinations of coefficients. In \secref{sec:negation_vi}, we improve the interpretability of oblique RSFs with `negation VI', a method to estimate VI that flips the sign of coefficients in linear combinations of predictors instead of permuting predictor values. We evaluate these methods with general benchmarking experiments and simulation studies in \secref{sec:numeric}. In \secref{sec:discussion}, we summarize results from the current study and present ideas connecting the current work to existing frameworks and methods for RSFs that future studies may engage with.
+The aim of this paper is to introduce methodology that improves the computational efficiency and interpretation of oblique RSFs. \secref{sec:background} reviews prior studies that have developed methods related to those introduced in the current study. In \secref{sec:aorsf}, we reduce the computational cost of oblique RSFs (\ie, accelerate them) with a scalable algorithm to identify linear combinations of coefficients. In \secref{sec:negation_vi}, we improve the interpretability of oblique RSFs with `negation VI', a method to estimate VI that flips the sign of coefficients in linear combinations of predictors instead of permuting predictor values. We evaluate these methods with general benchmarking experiments and simulation studies in \secref{sec:numeric}. In \secref{sec:discussion}, we summarize results from the current study and present ideas connecting the current work to existing frameworks and methods for RSFs that future studies may engage with. All oblique RSF methods introduced are available in the \texttt{aorsf} R package \citep{jaeger2022aorsf}.
 
 
 \section{Related work} \label{sec:background}
@@ -262,12 +265,12 @@ To accelerate the oblique RSF, we propose to identify linear combinations of pre
 \begin{equation}\label{eqn:cox-partial-likelihood}
 L(\bm\beta) = \prod_{i=1}^m \frac{e^{\bm{x}_{j(i)}^T \bm\beta}}{\sum_{j \in R_i} e^{\bm{x}_j^T \bm\beta}},
 \end{equation}
-where $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (\ie, those still at risk at time $t_i$), and $j(i)$ is the index of the observation for which an event occurred at time $t_i$. Newton Raphson scoring is an exceptionally fast estimation procedure, and the \texttt{survival} package \citep{survival} includes documentation that outlines how to efficiently program it \citep{therneau_survival_2022}. Briefly, a vector of estimated regression coefficients, $\hat{\beta}$, is updated in each step of the procedure based on its first derivative, $U(\hat{\beta})$, and second derivative, $H(\hat{\beta})$:
+where $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (\ie, those still at risk at time $t_i$), and $j(i)$ is the index of the observation for which an event occurred at time $t_i$. Newton Raphson scoring is an exceptionally fast estimation procedure, and the \texttt{survival} package \citep{survival} includes documentation that outlines how to efficiently program it \citep{therneau_survival_2022}. Briefly, a vector of length \texttt{mtry} (\ie, the number of randomly selected predictors) with estimated regression coefficients, $\hat{\beta}$, is updated in each step of the procedure based on its first derivative, $U(\hat{\beta})$, and second derivative, $H(\hat{\beta})$:
 $$ \hat{\beta}^{k+1} =  \hat{\beta}^{k} + U(\hat{\beta} = \hat{\beta}^{k})\, H^{-1}(\hat{\beta} = \hat{\beta}^{k}) $$
 
 For statistical inference, it is recommended to continue updating $\hat{\beta}$ by completing additional iterations of Newton Raphson scoring until a convergence threshold is met. However, since an estimate of $\hat{\beta}$ is created by the first iteration of Newton Raphson scoring, only one iteration of Newton Raphson scoring is needed to identify a valid linear combination of predictors. Moreover, computing $U$ and $H$ requires computation and exponentiation of the vector $\bm{x}\hat{\beta}$, but these steps can be skipped on the first iteration of Newton Raphson scoring if an initial value of $\hat{\beta} = 0$ is chosen, allowing for a reduction in computing operations and removing the need to scale predictor values prior to initiating the Newton Raphson algorithm.\footnote{Predictors are scaled prior to initiating the Newton Raphson algorithm to avoid exponentiation of large numbers. However, if only one iteration is completed with an initial value of 0 for $\hat{\beta}$, then $\exp(\bm{x}\hat{\beta}) = 1$.} In \secref{sec:results_pred}, we formally test whether growing oblique survival trees using one iteration of Newton Raphson scoring provides equivalent prediction accuracy compared to trees where iterations are completed until a convergence threshold is met.
 
-Algorithm \ref{alg:aorsf} presents our approach to fitting an oblique survival tree in the accelerated oblique RSF using default values from the \texttt{aorsf} R package. Several steps are taken to reduce computational overhead. First, memory is conserved by conducting bootstrap resampling via randomly generated bootstrap weights rather than making a traditional bootstrap sample. Weights are integer valued, with a weight of $v$ indicating an observation was sampled $v$ times. Second, early stopping is applied to the tree-growing procedure if a statistical criterion is not met. In our case, the criterion is based on the magnitude of a log-rank test statistic corresponding to splitting the data at a current node. Third, instead of greedy recursive partitioning, we use `good enough' partitioning. More specifically, instead of computing a log-rank test statistic for several different linear combinations of variables and proceeding with the highest scoring option, we identify an optimal cut-point for one linear combination of variables and assess whether using this combination will create a split that passes the criterion for splitting a node. If it does not pass the criterion, then another linear combination will be tested, with the maximum number of attempts set by the parameter \texttt{n\_retry}. Often a `good-enough` split can be found in just one attempt when the training set is large, which gives the accelerated oblique RSF a computational advantage in larger training sets compared to greedy partitioning.
+Algorithm \ref{alg:aorsf} presents our approach to fitting an oblique survival tree in the accelerated oblique RSF using default values from the \texttt{aorsf} R package. Several steps are taken to reduce computational overhead. First, memory is conserved by conducting bootstrap resampling via random integer-valued weights, rather than using a bootstrapped copy of the original data. Memory conservation also takes place in terminal nodes, where we restrict estimation of the survival and cumulative hazard function to event times that occur among observations in the node. Second, early stopping is applied to the tree-growing procedure if a statistical criterion is not met. In our case, the criterion is based on the magnitude of a log-rank test statistic corresponding to splitting the data at a current node. Third, instead of greedy recursive partitioning, we use `good enough' partitioning. More specifically, instead of computing a log-rank test statistic for several different linear combinations of variables and proceeding with the highest scoring option, we identify an optimal cut-point for one linear combination of variables and assess whether using this combination will create a split that passes the criterion for splitting a node. If it does not pass the criterion, then another linear combination will be tested, with the maximum number of attempts set by the parameter \texttt{n\_retry}. Often a `good-enough` split can be found in just one attempt when the training set is large, which gives the accelerated oblique RSF a computational advantage in larger training sets compared to greedy partitioning.
 
 \begin{algorithm}
     \caption{Accelerated oblique random survival tree using default parameters.} \label{alg:aorsf}
@@ -315,9 +318,13 @@ Algorithm \ref{alg:aorsf} presents our approach to fitting an oblique survival t
 
 \section{Negation variable importance} \label{sec:negation_vi}
 
-This Section introduces negation VI, which is similar to permutation VI in that it measures how much a model’s prediction error increases when a variable’s role in the model is de-stabilized. Specifically, negation VI measures the increase in an oblique RF's prediction error after flipping the sign of all coefficients linked to a variable (\ie, negating them). As the magnitude of a coefficient increases, so does the probability that negating it will change the oblique RF's predictions. For the current study, we use Harrell's concordance (C)-statistic \citep{harrell1982evaluating} to measure change in prediction error when computing negation VI.
+This Section introduces negation VI, which is similar to permutation VI in that it measures how much a model’s prediction error increases when a variable’s role in the model is de-stabilized. Specifically, negation VI measures the increase in an oblique RF's prediction error after flipping the sign of all coefficients linked to a variable (\ie, negating them). As negating a coefficient effectively flips decision boundaries around the corresponding predictor's axis, scaling numeric predictors to have a mean of zero and standard deviation of one is recommended.\footnote{The \texttt{aorsf} package automatically scales numeric inputs to a mean of zero and standard deviation of one.} For the current study, we use Harrell's concordance (C)-statistic \citep{harrell1982evaluating} to measure change in prediction error when computing negation VI.
 
-Negation VI has several helpful characteristics. First, negation VI generalizes to any oblique RF (\ie, not just RSFs) using any valid error function, making it both general and flexible.\footnote{The \texttt{aorsf} package enables customized functions to be applied in lieu of the default C-statistic (see \texttt{?aorsf::orsf\_vi\_negate})} Second, since the coefficients in each non-leaf node of an oblique tree are adjusted for the accompanying predictors, negation VI may provide better estimation of VI in the presence of correlated variables compared to standard VI techniques. Third, unlike permutation, negation is non-random and hence reproducible without setting a random seed. Additionally, since negation VI does not permute variables, the analyst need not worry about impossible combinations of predictors that may occur when one predictor is randomly permuted, such as having a negative status for type 2 diabetes and having Hemoglobin A1c level $\geq$ 6.5\% (a value indicative of type 2 diabetes) as a result of randomly permuting the values of Hemoglobin A1c.
+% A motivating problem for negation VI is that of correlated, numeric predictors. When two predictors are correlated and only one of them is relevant for prediction of an outcome, VI methods based on permutation are known to have upward bias in estimating the importance of the irrelevant predictor \citep{hooker2021unrestricted}. Permutation may distort the joint distribution of predictors, which may in turn increase a model's estimated prediction error due to extrapolation. On the other hand, negating coefficients modifies the decision rule rather than modifying the data.
+
+To demonstrate the negation VI, consider a classification task where the goal is prediction of penguin species based on bill length and bill depth. Scaling these predictors to be centered at 0, we find decision boundaries from an oblique tree correctly classify
+
+Negation VI has several helpful characteristics. First, negation VI generalizes to any oblique RF (\ie, not just RSFs) using any valid error function, making it both general and flexible.\footnote{The \texttt{aorsf} package enables customized functions to be applied in lieu of the default C-statistic.} Second, negation is non-random and hence reproducible without setting a random seed. Third, since negation VI does not permute variables, the analyst need not worry about impossible combinations of predictors that may occur when one predictor is randomly permuted, such as having a negative status for type 2 diabetes and having Hemoglobin A1c level $\geq$ 6.5\% (a value indicative of type 2 diabetes) as a result of randomly permuting the values of Hemoglobin A1c.
 
 
 \section{Numeric experiments} \label{sec:numeric}
@@ -326,15 +333,15 @@ Negation VI has several helpful characteristics. First, negation VI generalizes 
 r_version <- paste(version$major, version$minor, sep = '.')
 @
 
-Sections \ref{sec:bm_pred} and \ref{sec:bm_vi} present numerical experiments examining the accelerated oblique RSF and negation VI, respectively. The code used to run these experiments is available online at \href{https://github.com/bcjaeger/aorsf-bench}{https://github.com/bcjaeger/aorsf-bench}. All analyses were conducted using R version \Sexpr{r_version} and coordinated by the \texttt{targets} R package \citep{targets}. To standardize comparisons of computational efficiency, all learners and VI techniques used up to 4 processing units.
+Sections \ref{sec:bm_pred} and \ref{sec:bm_vi} present numerical experiments examining the accelerated oblique RSF and negation VI, respectively. The code used to run these experiments is available online at \href{https://github.com/bcjaeger/aorsf-bench}{https://github.com/bcjaeger/aorsf-bench}. All analyses were conducted using R version \Sexpr{r_version} with version 0.0.4 of \texttt{aorsf} \citep{jaeger2022aorsf}, and coordinated by the \texttt{targets} R package \citep{targets}. To standardize comparisons of computational efficiency, all learners and VI techniques used up to 4 processing units.
 
-\subsection{Benchmark of prediction accuracy and computational efficiency} \label{sec:bm_pred}
+\subsection{Benchmark of prediction accuracy} \label{sec:bm_pred}
 
-The aim of this numeric experiment is to evaluate and compare the accelerated oblique RSF with its predecessor (the oblique RSF from the \texttt{obliqueRSF} R package) and with other machine learning algorithms for risk prediction. Inferences drawn from this experiment include equivalence and inferiority tests based on Bayesian linear mixed models.
+The aim of this numeric experiment is to evaluate the prediction accuracy of the accelerated oblique RSF compared to its predecessor (the oblique RSF from the \texttt{obliqueRSF} R package) and to several other machine learning algorithms. Inferences drawn from this experiment include equivalence and inferiority tests based on Bayesian linear mixed models.
 
 \subsubsection{Learners} \label{sec:learners}
 
-We consider four classes of learners: RSFs (both axis-based and oblique), boosting ensembles, regression models, and neural networks. Specific learners from each class are summarized in \tabref{tab:learners}. To facilitate fair comparisons, tuning parameters were harmonized within each class. For example, for RSF learners, we set the minimum node size (a parameter shared by all RSF learners) as 10. Additionally, for RSF learners, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500. For boosting, regression, and neural network learners, nested 10-fold cross-validation was applied to tune relevant model parameters. Specifically, tuning for boosting models included identifying the number of steps to complete. For regression models, tuning was used to identify the magnitude of penalization. For neural networks, the number and density of layers was tuned.
+We consider four classes of learners: RSFs (both axis-based and oblique), boosting ensembles, regression models, and neural networks. Specific learners from each class are summarized in \tabref{tab:learners}. To facilitate fair comparisons, tuning parameters were harmonized within each class. For example, for RSF learners, we set the minimum node size (a parameter shared by all RSF learners) as 10. Additionally, for RSF learners, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500 (a common default value for the number of trees). For boosting, regression, and neural network learners, nested cross-validation was applied to tune relevant model parameters. Specifically, tuning for boosting models included identifying the number of steps to complete. For regression models, tuning was used to identify the magnitude of penalization. For neural networks, the number and density of layers was tuned.
 
 \newgeometry{margin=1cm} % modify this if you need even more space
 \begin{landscape}
@@ -362,7 +369,7 @@ We consider four classes of learners: RSFs (both axis-based and oblique), boosti
  \texttt{cif-rotate} \newline
  \texttt{cif-spacextend} &
 
- \texttt{rsf-standard} grows survival trees following Leo Breiman's original random forest algorithm with variables and cut-points selected to maximize a log-rank statistic. \texttt{rsf-extratrees} grows survival trees with randomly selected features and cut-points. \texttt{cif-standard} uses the framework of conditional inference to grow survival trees. \texttt{cif-rotate} extends \texttt{cif-standard} by applying principal component analysis to random subsets of data prior to growing each survival tree. \texttt{cif-spacextend} derives new predictors for each tree in the ensemble, separately. \\ \hline
+ \texttt{rsf-standard} grows survival trees following Leo Breiman's original random forest algorithm with variables and cut-points selected to maximize a log-rank statistic. \texttt{rsf-extratrees} grows survival trees with randomly selected predictors and cut-points. \texttt{cif-standard} uses the framework of conditional inference to grow survival trees. \texttt{cif-rotate} extends \texttt{cif-standard} by applying principal component analysis to random subsets of data prior to growing each survival tree. \texttt{cif-spacextend} derives new predictors for each tree in the ensemble, separately. \\ \hline
 
 
  Oblique &
@@ -447,11 +454,11 @@ Both the IPA and time-dependent C-statistic generally take values between 0 and 
 
 \subsubsection{Data sets}
 
-We used a collection of \Sexpr{n_data_sets} data sets containing a total of \Sexpr{n_risk_tasks} risk prediction tasks (tasks per data set ranged from one to four) to benchmark the accelerated oblique RSF versus other learners. Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from \Sexpr{nrow_min} to \Sexpr{nrow_max} (median: \Sexpr{nrow_median}), the number of predictors ranged from \Sexpr{ncol_min} to \Sexpr{ncol_max} (median: \Sexpr{ncol_median}), and the percentage of censored observations ranged from \Sexpr{pcens_min} to \Sexpr{pcens_max} (median: \Sexpr{pcens_median}) (\tabrefAppendix{tab:datasets}).
+We used a collection of \Sexpr{n_data_sets} data sets containing a total of \Sexpr{n_risk_tasks} risk prediction tasks (tasks per data set ranged from one to four). Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from \Sexpr{nrow_min} to \Sexpr{nrow_max} (median: \Sexpr{nrow_median}), the number of predictors ranged from \Sexpr{ncol_min} to \Sexpr{ncol_max} (median: \Sexpr{ncol_median}), and the percentage of censored observations ranged from \Sexpr{pcens_min} to \Sexpr{pcens_max} (median: \Sexpr{pcens_median}) (\tabrefAppendix{tab:datasets}).
 
 \subsubsection{Monte-Carlo cross validation}
 
-For each risk prediction task, we completed \Sexpr{bm_pred_n_runs} runs of Monte-Carlo cross validation. In each run, we used a random sample containing 50\% of the available data for training and the remaining 50\% for testing each of the learners described in \secref{sec:learners}. Then, for each learner, we computed the IPA, time-dependent C-statistic, and computational time required to fit a prediction model and compute risk predictions. If any learner failed to obtain predictions on any particular split of data\footnote{For example, when the prediction task was to predict risk of death in the ACTG 320 clinical trial (26 events total), some splits did not leave enough events in the training data to fit complex learners such as the neural network}, the results for that split were omitted from downstream analyses.
+For each risk prediction task, we completed \Sexpr{bm_pred_n_runs} runs of Monte-Carlo cross validation. In each run, we used a random sample containing 50\% of the available data for training and the remaining 50\% for testing each of the learners described in \secref{sec:learners}. Then, for each learner, we computed the IPA and time-dependent C-statistic. If any learner failed to obtain predictions on any particular split of data\footnote{For example, when the prediction task was to predict risk of death in the ACTG 320 clinical trial (26 events total), some splits did not leave enough events in the training data to fit complex learners such as neural networks}, the results for that split were omitted from downstream analyses for all learners.
 
 
 \subsubsection{Statistical analysis}
@@ -469,6 +476,8 @@ n_tasks_complete <- bm_pred_clean %>%
 
 n_tasks_expected <- max(bm_pred_clean$data$run) *
   length(unique(bm_pred_clean$data$data))
+
+# bm_pred_failed_description <- "Nothing to say"
 
 bm_pred_failed_description <-
   bm_pred_clean$omit %>%
@@ -603,36 +612,6 @@ bm_pred_viz$cstat$fig
 bm_pred_model_viz$fig$cstat
 @
 
-<<>>=
-
-times <- bm_pred_time_viz %>%
-  getElement("medians") %>%
-  transmute(
-    model,
-    time,
-    ratio = table_value(
-      time / time[model == 'aorsf-fast']
-    )
-  ) %>%
-  as_inline('model', c('time', 'ratio')) %>%
-  set_names(str_replace(names(.), '-', '_'))
-
-ms_diff <- round(abs(times$glmnet_cox$time - times$aorsf_fast$time)*1000)
-
-@
-
-
-\paragraph{Computational efficiency}
-
-Overall, \texttt{aorsf-fast} was the second fastest learner, with an expected model development and risk prediction time about \Sexpr{ms_diff} milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was \Sexpr{times$obliqueRSF_net$ratio} times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was \Sexpr{times$cif_standard$ratio}, \Sexpr{times$ranger_extratrees$ratio}, and \Sexpr{times$rsf_standard$ratio} faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
-
-
-
-<<bm_pred_time, fig.height=10, fig.width=9, fig.cap="Distribution of time taken to fit a prediction model and compute predicted risk. The median time, in seconds, is printed and annotated for each learner by a vertical line.">>=
-bm_pred_time_viz$fig
-@
-
-
 \subsection{Benchmark of variable importance} \label{sec:bm_vi}
 
 The aim of this experiment is to evaluate negation VI and similar VI methods based on how well they can discriminate between relevant and irrelevant variables, where relevance is defined by having a relationship with the simulated outcome. We consider methods that are intrinsic to the oblique RF (\eg, ANOVA VI), those that are intrinsic to the RF (\eg, permutation VI), and those that are model-agnostic (\eg, SHAP VI). VI methods with unavailable or still developing software were not included.\footnote{Although the \texttt{party} package implements the approach to VI developed by \citet{strobl2007bias}, the developers of the \texttt{party} package note that the implementation of this approach for survival outcomes is ``extremely slow and experimental'' as of version 1.3.10. Therefore, it is not incorporated in the current simulation study.}
@@ -653,7 +632,7 @@ We considered five classes of predictor variables, with each class characterized
 \item \textit{interaction effect} variables were related to the outcome by multiplicative interaction with one other variable, which could have been a main effect, non-linear effect, or combination effect variable.
 \end{itemize}
 
-\subsubsection{Simulated data}
+\subsubsection{Simulated data} \label{sec:data_sim}
 
 We initiated each set of simulated data with a random draw of size $n$ from a $p$-dimensional multivariate normal distribution, yielding $n$ observations of $p$ predictors. Each of $p$ predictor variables had a mean of zero, standard deviation of 1, and correlation with other predictor variables drawn at random between a lower and upper boundary. A time-to-event outcome with roughly 45\% of observations censored was generated using the \texttt{simsurv} package \citep{simsurv, simsurv_paper}. The full predictor matrix (\ie, including interactions, non-linear mappings, and combinations) was used to generate the outcome. Interactions, non-linear mappings, and combinations were dropped from the predictor matrix after the outcome was generated so that VI techniques could be evaluated based on their ability to detect these effects.
 
@@ -754,10 +733,57 @@ The three techniques that used `aorsf' to estimate VI were ranked first (\texttt
 bm_vi_viz$fig
 @
 
+\subsection{Benchmark of computational efficiency} \label{sec:bm_compute}
+
+The aim of this numeric experiment is to evaluate the computational efficiency of the accelerated oblique RSF compared to its predecessor (the oblique RSF from the \texttt{obliqueRSF} R package) and to several other machine learning algorithms.
+
+\subsubsection{Evaluation of computational efficiency}
+
+For each learner discussed in \secref{sec:learners} and for each of the \Sexpr{n_risk_tasks} risk prediction tasks analyzed in \secref{sec:bm_pred}, we tracked the amount of time required to fit a prediction model (including time used to tune parameters) and compute predicted risk.
+
+We performed additional benchmarks on the time required to fit 500 trees using \texttt{aorsf}, \texttt{randomForestSRC}, and \texttt{ranger}. The learners that represented these R packages were \texttt{aorsf-fast}, \texttt{rsf-standard}, and \texttt{rsf-extratrees}, respectively. To allow for controlled comparisons of computational efficiency with varying dimensions of training data, we used the same process to simulate data as described in \secref{sec:data_sim}, varying the number of observations from 100 to 10000 and the number of predictors from 10 to 1000. The minimum node size of trees in this experiment was dynamically set as the nearest integer to the number of observations in the training set divided by 10.
+
+\subsubsection{Results}
+
+<<>>=
+
+times <- bm_pred_time_viz %>%
+  getElement("medians") %>%
+  transmute(
+    model,
+    time,
+    ratio = table_value(
+      time / time[model == 'aorsf-fast']
+    )
+  ) %>%
+  as_inline('model', c('time', 'ratio')) %>%
+  set_names(str_replace(names(.), '-', '_'))
+
+ms_diff <- round(abs(times$glmnet_cox$time - times$aorsf_fast$time)*1000)
+
+@
+
+
+In the analysis of \Sexpr{n_risk_tasks} risk prediction tasks, \texttt{aorsf-fast} was the second fastest learner overall, with a median time to develop a risk prediction model and compute predictions about \Sexpr{ms_diff} milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was \Sexpr{times$obliqueRSF_net$ratio} times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was \Sexpr{times$cif_standard$ratio}, \Sexpr{times$ranger_extratrees$ratio}, and \Sexpr{times$rsf_standard$ratio} faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
+
+<<bm_pred_time, fig.height=10, fig.width=9, fig.cap="Distribution of time taken to fit a prediction model and compute predicted risk. The median time, in seconds, is printed and annotated for each learner by a vertical line.">>=
+bm_pred_time_viz$fig
+@
+
+In the analysis of time to fit 500 trees using simulated data, the \texttt{ranger} package exhibited the fastest computation times overall (Figure \ref{fig:bm_time_viz}). \texttt{aorsf} was the second fastest when the number of predictors was 10 or 100,  and \texttt{randomForestSRC} had similar computation time versus \texttt{aorsf} when 1000 predictors were present.
+
+<<bm_time_viz, fig.height=4, fig.width=10, fig.cap="The expected time, in seconds, to fit an ensemble of 500 axis-based survival trees using the ranger or randomForestSRC package versus 500 oblique survival trees using the aorsf package. The ranger package is the most efficient overall, and aorsf appears to be relatively efficient in larger samples, particularly when 10 or 100 predictors are present in the training data. All three packages appear to scale linearly in computation time with the number of observations in the training data.">>=
+
+bm_time_viz
+
+@
+
 
 \section{Discussion} \label{sec:discussion}
 
 In this paper, we have developed two contributions to the oblique RSF: (1) the accelerated oblique RSF (\ie, \texttt{aorsf-fast}) and (2) negation VI. Our technique to accelerate the oblique RSF reduces the number of operations required to find linear combinations of inputs using a single iteration of Newton Raphson scoring, while our VI technique directly engages with coefficients in linear combinations of inputs to measure importance of individual variables. In numeric experiments, we found that that \texttt{aorsf-fast} is approximately \Sexpr{times$obliqueRSF_net$ratio} times faster than its predecessor, \texttt{obliqueRSF-net}, with a practically equivalent C-statistic. We also found that negation VI, a technique to estimate VI using the oblique RSF, detected non-linear, combination, and main effects more effectively than three standard methods to estimate VI: permutation, ANOVA, and SHAP VI. Overall, we found that estimating VI using negation instead of ANOVA increased the C-statistic for ranking a relevant variable higher than an irrelevant variable by \Sexpr{cstat_aorsf_won_by$absolute}, a relative increase of \Sexpr{cstat_aorsf_won_by$percent}\%.
+
+To understand potential differences in computational efficiency, we reviewed code in the \texttt{aorsf}, \texttt{randomForestSRC}, and \texttt{ranger} packages. We found differences in how survival outcome data are saved in leaf nodes. For each leaf node, \texttt{aorsf} stores data with one row per unique event time using training data that are stored in the leaf, whereas \texttt{randomForestSRC} and \texttt{ranger} store survival outcomes at a fixed grid of event times in each leaf. By default, \texttt{ranger} creates a grid that includes all event times in the training data. The grid strategy can cause higher computing time and memory usage when the grid of event times is large and a large number of leaf nodes are included in each tree, which can occur when minimum node size is small relative to the size of the training data. We kept minimum node size fixed in our benchmark of computational efficiency using real data, and dymanically increased minimum node size based on the size of the training set when we benchmarked computational efficiency using simulated data. Because of this decision, the \texttt{randomForestSRC} and \texttt{ranger} packages ran slower than \texttt{aorsf} in our benchmark of real data but not in the benchmark of simulated data.
 
 \subsection{Implications of our results}
 
@@ -769,7 +795,9 @@ While the current study advances the oblique RSF towards being scalable and inte
 
 % Acknowledgements should go at the end, before appendices and references
 
-Oblique RSFs have exceptional prediction accuracy and this study has shown how they can be fit with computational efficiency that rivals their axis-based counterparts. We have also introduced a general and flexible method to estimate VI with oblique RFs, and demonstrated its effectiveness specifically for the oblique RSF. Code used for the current study is available at \href{https://github.com/bcjaeger/aorsf-bench}{https://github.com/bcjaeger/aorsf-bench}, and the \texttt{aorsf} package is available at \href{https://github.com/bcjaeger/aorsf}{https://github.com/bcjaeger/aorsf}.
+\subsection{Conclusion}
+
+Oblique RSFs have exceptional prediction accuracy and this study has shown how they can be fit with computational efficiency that rivals their axis-based counterparts. We have also introduced a general and flexible method to estimate VI with oblique RFs, and demonstrated its effectiveness for numeric, correlated predictors. Code used for the current study is available at \href{https://github.com/bcjaeger/aorsf-bench}{https://github.com/bcjaeger/aorsf-bench}, and the \texttt{aorsf} package is available at \href{https://github.com/bcjaeger/aorsf}{https://github.com/bcjaeger/aorsf}.
 
 \subsection*{Acknowledgements}
 

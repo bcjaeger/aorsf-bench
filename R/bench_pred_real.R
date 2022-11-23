@@ -117,13 +117,17 @@ bench_pred_real <- function(data_source,
 
   if( !inherits(model, 'try-error') ) {
     out$time_fit <- model$time_fit
+  } else {
+    print(model)
   }
 
   if( !inherits(predictions, 'try-error') ) {
     out$time_pred <- predictions$time
+  } else {
+    print(predictions)
   }
 
-  print(out)
+  # print(out)
 
   out
 

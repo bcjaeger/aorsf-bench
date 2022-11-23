@@ -150,12 +150,12 @@
        Wake Forest University School of Medicine\\
        Winston-Salem, NC 27157, USA
        \AND
-       \name Jaime L Speiser \email jspeiser@wakehealth.edu \\
+       \name Jaime L. Speiser \email jspeiser@wakehealth.edu \\
        \addr Department of Biostatistics and Data Science\\
        Wake Forest University School of Medicine\\
        Winston-Salem, NC 27157, USA
        \AND
-       \name Matthew Segar \email Matthew.Segar@BCM.edu \\
+       \name Matthew W. Segar \email Matthew.Segar@BCM.edu \\
        \addr Department of Cardiology \\
        Texas Heart Institute \\
        Houston, TX 77030, USA
@@ -231,7 +231,7 @@ $$ \hat{\beta}^{k+1} =  \hat{\beta}^{k} + U(\hat{\beta} = \hat{\beta}^{k})\, H^{
 
 For statistical inference, it is recommended to continue updating $\hat{\beta}$ by completing additional iterations of Newton Raphson scoring until a convergence threshold is met. However, since an estimate of $\hat{\beta}$ is created by the first iteration of Newton Raphson scoring, only one iteration of Newton Raphson scoring is needed to identify a valid linear combination of predictors. Moreover, computing $U$ and $H$ requires computation and exponentiation of the vector $\bm{x}\hat{\beta}$, but these steps can be skipped on the first iteration of Newton Raphson scoring if an initial value of $\hat{\beta} = 0$ is chosen, allowing for a reduction in computing operations and removing the need to scale predictor values prior to initiating the Newton Raphson algorithm.\footnote{Predictors are scaled prior to initiating the Newton Raphson algorithm to avoid exponentiation of large numbers. However, if only one iteration is completed with an initial value of 0 for $\hat{\beta}$, then $\exp(\bm{x}\hat{\beta}) = 1$.} In \secref{sec:results_pred}, we formally test whether growing oblique survival trees using one iteration of Newton Raphson scoring provides equivalent prediction accuracy compared to trees where iterations are completed until a convergence threshold is met.
 
-Algorithm \ref{alg:aorsf} presents our approach to fitting an oblique survival tree in the accelerated oblique RSF using default values from the \texttt{aorsf} R package. Several steps are taken to reduce computational overhead. First, memory is conserved by conducting bootstrap resampling via randomly generated bootstrap weights rather than making a traditional bootstrap sample. Weights are integer valued, with a weight of $v$ indicating an observation was sampled $v$ times. Second, early stopping is applied to the tree-growing procedure if a statistical criterion is not met. In our case, the criterion is based on the magnitude of a log-rank test statistic corresponding to splitting the data at a current node. Third, instead of greedy recursive partitioning, we use `good enough' partitioning. More specifically, instead of computing a log-rank test statistic for several different linear combinations of variables and proceeding with the highest scoring option, we identify an optimal cut-point for one linear combination of variables and assess whether using this combination will create a split that passes the criterion for splitting a node. If it does not pass the criterion, then another linear combination will be tested, with the maximum number of attempts set by the parameter \texttt{n\_retry}. Often a `good-enough` split can be found in just one attempt when the training set is large, which gives the accelerated oblique RSF a computational advantage in larger training sets compared to greedy partitioning.
+Algorithm \ref{alg:aorsf} presents our approach to fitting an oblique survival tree in the accelerated oblique RSF using default values from the \texttt{aorsf} R package. Several steps are taken to reduce computational overhead. First, memory is conserved by conducting bootstrap resampling via random integer-valued weights, rather than using a bootstrapped copy of the original data. Memory conservation also takes place in terminal nodes, where we restrict estimation of the survival and cumulative hazard function to event times that occur among observations in the node. Second, early stopping is applied to the tree-growing procedure if a statistical criterion is not met. In our case, the criterion is based on the magnitude of a log-rank test statistic corresponding to splitting the data at a current node. Third, instead of greedy recursive partitioning, we use `good enough' partitioning. More specifically, instead of computing a log-rank test statistic for several different linear combinations of variables and proceeding with the highest scoring option, we identify an optimal cut-point for one linear combination of variables and assess whether using this combination will create a split that passes the criterion for splitting a node. If it does not pass the criterion, then another linear combination will be tested, with the maximum number of attempts set by the parameter \texttt{n\_retry}. Often a `good-enough` split can be found in just one attempt when the training set is large, which gives the accelerated oblique RSF a computational advantage in larger training sets compared to greedy partitioning.
 
 \begin{algorithm}
     \caption{Accelerated oblique random survival tree using default parameters.} \label{alg:aorsf}
@@ -324,7 +324,7 @@ We consider four classes of learners: RSFs (both axis-based and oblique), boosti
  \texttt{cif-rotate} \newline
  \texttt{cif-spacextend} &
 
- \texttt{rsf-standard} grows survival trees following Leo Breiman's original random forest algorithm with variables and cut-points selected to maximize a log-rank statistic. \texttt{rsf-extratrees} grows survival trees with randomly selected features and cut-points. \texttt{cif-standard} uses the framework of conditional inference to grow survival trees. \texttt{cif-rotate} extends \texttt{cif-standard} by applying principal component analysis to random subsets of data prior to growing each survival tree. \texttt{cif-spacextend} derives new predictors for each tree in the ensemble, separately. \\ \hline
+ \texttt{rsf-standard} grows survival trees following Leo Breiman's original random forest algorithm with variables and cut-points selected to maximize a log-rank statistic. \texttt{rsf-extratrees} grows survival trees with randomly selected predictors and cut-points. \texttt{cif-standard} uses the framework of conditional inference to grow survival trees. \texttt{cif-rotate} extends \texttt{cif-standard} by applying principal component analysis to random subsets of data prior to growing each survival tree. \texttt{cif-spacextend} derives new predictors for each tree in the ensemble, separately. \\ \hline
 
 
  Oblique &
@@ -409,7 +409,7 @@ Both the IPA and time-dependent C-statistic generally take values between 0 and 
 
 \subsubsection{Data sets}
 
-We used a collection of 21 data sets containing a total of 35 risk prediction tasks (tasks per data set ranged from one to four) to benchmark the accelerated oblique RSF versus other learners. Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from 137 to 17,549 (median: 1,384), the number of predictors ranged from 7 to 1,692 (median: 41), and the percentage of censored observations ranged from 5.26 to 97.7 (median: 78.1) (\tabrefAppendix{tab:datasets}).
+We used a collection of 21 data sets containing a total of 35 risk prediction tasks (tasks per data set ranged from one to four). Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from 137 to 17,549 (median: 1,384), the number of predictors ranged from 7 to 1,692 (median: 41), and the percentage of censored observations ranged from 5.26 to 97.7 (median: 78.1) (\tabrefAppendix{tab:datasets}).
 
 \subsubsection{Monte-Carlo cross validation}
 
@@ -517,7 +517,7 @@ The three techniques that used `aorsf' to estimate VI were ranked first (\texttt
 
 \end{knitrout}
 
-\subsection{Benchmark of computational efficiency}
+\subsection{Benchmark of computational efficiency} \label{sec:bm_compute}
 
 The aim of this numeric experiment is to evaluate the computational efficiency of the accelerated oblique RSF compared to its predecessor (the oblique RSF from the \texttt{obliqueRSF} R package) and to several other machine learning algorithms.
 
@@ -525,14 +525,14 @@ The aim of this numeric experiment is to evaluate the computational efficiency o
 
 For each learner discussed in \secref{sec:learners} and for each of the 35 risk prediction tasks analyzed in \secref{sec:bm_pred}, we tracked the amount of time required to fit a prediction model (including time used to tune parameters) and compute predicted risk.
 
-We also performed more specific benchmarks on the time required to fit 50 trees\footnote{We decided to use 50 trees for this benchmark rather than 500, as using 500 trees caused excessive memory usage and job failure with larger datasets.} using the three fastest random forest R packages, \texttt{aorsf}, \texttt{randomForestSRC}, and \texttt{ranger}. The learners that represented these R packages, respectively, are \texttt{aorsf-fast}, \texttt{rsf-standard}, and \texttt{rsf-extratrees}. We used the simulated data described in \secref{sec:data_sim} with number of observations in the training data ranging from 100 to 21544 and number of predictors ranging from 10 to 1000.
+We performed additional benchmarks on the time required to fit 500 trees using \texttt{aorsf}, \texttt{randomForestSRC}, and \texttt{ranger}. The learners that represented these R packages were \texttt{aorsf-fast}, \texttt{rsf-standard}, and \texttt{rsf-extratrees}, respectively. To allow for controlled comparisons of computational efficiency with varying dimensions of training data, we used the same process to simulate data as described in \secref{sec:data_sim}, varying the number of observations from 100 to 10000 and the number of predictors from 10 to 1000. The minimum node size of trees in this experiment was dynamically set as the nearest integer to the number of observations in the training set divided by 10.
 
 \subsubsection{Results}
 
 
 
 
-In the analysis of 35 risk prediction tasks, \texttt{aorsf-fast} was the second fastest learner overall, with an expected model development and risk prediction time about 385 milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was 379.8 times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was 16.1, 1.55, and 2.66 faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
+In the analysis of 35 risk prediction tasks, \texttt{aorsf-fast} was the second fastest learner overall, with a median time to develop a risk prediction model and compute predictions about 385 milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was 379.8 times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was 16.1, 1.55, and 2.66 faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
@@ -541,16 +541,14 @@ In the analysis of 35 risk prediction tasks, \texttt{aorsf-fast} was the second 
 
 \end{knitrout}
 
-In the analysis of time to fit 50 trees using simulated data, the \texttt{ranger} package exhibited the fastest computation times for samples with 1000 or fewer observations while \texttt{aorsf} and \texttt{randomForestSRC} were more efficient in larger samples. In particular, \texttt{aorsf} was substantially faster than both \texttt{ranger} and \texttt{randomForestSRC} with 10 or 100 features and over 1000 observations in the training data (see Figure \ref{fig:bm_time_viz}).
+In the analysis of time to fit 500 trees using simulated data, the \texttt{ranger} package exhibited the fastest computation times overall (Figure \ref{fig:bm_time_viz}). \texttt{aorsf} was the second fastest when the number of predictors was 10 or 100,  and \texttt{randomForestSRC} had similar computation time versus \texttt{aorsf} when 1000 predictors were present.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/bm_time_viz-1} \caption[Time, in seconds, to fit an ensemble of 50 survival trees]{Time, in seconds, to fit an ensemble of 50 survival trees. The aorsf package appears to be more efficient in larger samples, particularly when 10 or 100 predictors are present in the training data. All three packages appear to scale linearly in computation time with the number of observations in the training data.}\label{fig:bm_time_viz}
+\includegraphics[width=\maxwidth]{figure/bm_time_viz-1} \caption[The expected time, in seconds, to fit an ensemble of 500 axis-based survival trees using the ranger or randomForestSRC package versus 500 oblique survival trees using the aorsf package]{The expected time, in seconds, to fit an ensemble of 500 axis-based survival trees using the ranger or randomForestSRC package versus 500 oblique survival trees using the aorsf package. The ranger package is the most efficient overall, and aorsf appears to be relatively efficient in larger samples, particularly when 10 or 100 predictors are present in the training data. All three packages appear to scale linearly in computation time with the number of observations in the training data.}\label{fig:bm_time_viz}
 \end{figure}
 
 \end{knitrout}
-
-
 
 
 \section{Discussion} \label{sec:discussion}

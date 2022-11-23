@@ -1,4 +1,4 @@
-\begin{thebibliography}{75}
+\begin{thebibliography}{77}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -51,6 +51,7 @@ Paul Blanche, Jean-Fran{\c{c}}ois Dartigues, and H{\'e}l{\`e}ne Jacqmin-Gadda.
 Leo Breiman.
 \newblock Random forests.
 \newblock \emph{Machine Learning}, 45\penalty0 (1):\penalty0 5--32, 2001.
+\newblock \doi{10.1023/A:1010933404324}.
 
 \bibitem[Breiman et~al.(2017)Breiman, Friedman, Olshen, and
   Stone]{breiman2017classification}
@@ -65,6 +66,15 @@ Sam Brilleman.
 \newblock R package version 0.2.2, available at
   \url{https://CRAN.R-project.org/package=simsurv}.
 
+\bibitem[Brilleman et~al.(2020)Brilleman, Wolfe, Moreno-Betancur, and
+  Crowther]{simsurv_paper}
+Samuel~L. Brilleman, Rory Wolfe, Margarita Moreno-Betancur, and Michael~J.
+  Crowther.
+\newblock Simulating survival data using the {simsurv} {R} package.
+\newblock \emph{Journal of Statistical Software}, 97\penalty0 (3):\penalty0
+  1--27, 2020.
+\newblock \doi{10.18637/jss.v097.i03}.
+
 \bibitem[Casalicchio et~al.(2017)Casalicchio, Bossek, Lang, Kirchhoff,
   Kerschke, Hofner, Seibold, Vanschoren, and Bischl]{OpenML}
 Giuseppe Casalicchio, Jakob Bossek, Michel Lang, Dominik Kirchhoff, Pascal
@@ -75,6 +85,15 @@ Giuseppe Casalicchio, Jakob Bossek, Michel Lang, Dominik Kirchhoff, Pascal
 \newblock \emph{Computational Statistics}, pages 1--15, 2017.
 \newblock \doi{10.1007/s00180-017-0742-2}.
 \newblock URL \url{http://dx.doi.org/10.1007/s00180-017-0742-2}.
+
+\bibitem[Chen et~al.(2022)Chen, He, Benesty, Khotilovich, Tang, Cho, Chen,
+  Mitchell, Cano, Zhou, Li, Xie, Lin, Geng, Li, and Yuan]{xgboost}
+Tianqi Chen, Tong He, Michael Benesty, Vadim Khotilovich, Yuan Tang, Hyunsu
+  Cho, Kailong Chen, Rory Mitchell, Ignacio Cano, Tianyi Zhou, Mu~Li, Junyuan
+  Xie, Min Lin, Yifeng Geng, Yutian Li, and Jiaming Yuan.
+\newblock \emph{xgboost: Extreme Gradient Boosting}, 2022.
+\newblock URL \url{https://CRAN.R-project.org/package=xgboost}.
+\newblock R package version 1.5.2.1.
 
 \bibitem[Cui et~al.(2017)Cui, Zhu, Zhou, and Kosorok]{cui2017consistency}
 Yifan Cui, Ruoqing Zhu, Mai Zhou, and Michael Kosorok.
@@ -252,6 +271,7 @@ Byron~C Jaeger, D~Leann Long, Dustin~M Long, Mario Sims, Jeff~M Szychowski,
 \newblock Oblique random survival forests.
 \newblock \emph{The Annals of Applied Statistics}, 13\penalty0 (3):\penalty0
   1847--1883, 2019.
+\newblock \doi{10.1214/19-AOAS1261}.
 
 \bibitem[Kalbfleisch and Prentice(2011)]{kalbfleisch2011statistical}
 John~D Kalbfleisch and Ross~L Prentice.
@@ -270,6 +290,7 @@ Michael~W Kattan and Thomas~A Gerds.
 Rakesh Katuwal, Ponnuthurai~Nagaratnam Suganthan, and Le~Zhang.
 \newblock Heterogeneous oblique random forest.
 \newblock \emph{Pattern Recognition}, 99:\penalty0 107078, 2020.
+\newblock \doi{10.1016/j.patcog.2019.107078}.
 
 \bibitem[Kuhn and Wickham(2020)]{tidymodels}
 Max Kuhn and Hadley Wickham.

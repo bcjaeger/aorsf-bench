@@ -46,7 +46,7 @@ bench_pred_model_visualize <- function(bm_pred_model,
       ),
       metric = factor(metric,
                       levels = c("ibs_scaled", "cstat"),
-                      labels = c("Scaled integrated Brier score",
+                      labels = c("Index of prediction accuracy",
                                  "Time-dependent C-statistic"))
     )
 
@@ -64,7 +64,7 @@ bench_pred_model_visualize <- function(bm_pred_model,
          mutate(
            metric = recode(
              metric,
-             "Scaled integrated Brier score" = 'ibs_scaled',
+             "Index of prediction accuracy" = 'ibs_scaled',
              "Time-dependent C-statistic" = 'cstat'
            )
          )

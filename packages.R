@@ -38,5 +38,7 @@ library(rstan)
 library(rstanarm)
 library(fastshap)
 
+library(ggforce)
+library(egg)
 
 source("./conflicts.R")

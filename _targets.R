@@ -6,7 +6,7 @@ library(future)
 library(future.callr)
 plan(callr)
 
-tar_config_set(reporter_make = 'summary')
+tar_config_set(reporter_make = 'verbose')
 
 tar_option_set(memory = "transient",
                garbage_collection = TRUE)
@@ -20,7 +20,7 @@ model_fitters <- c(
   'aorsf_fast',
   'aorsf_cph',
   'aorsf_random',
-  'aorsf_net',
+  # 'aorsf_net',
   'rotsf',
   'rsfse',
   'cif',
@@ -95,6 +95,9 @@ analyses_sim_vi <- analyses_sim_pred %>%
   select(-starts_with('model'), -starts_with('data')) %>%
   distinct()
 
+analyses_real_vi <- analyses_real %>%
+  select(data_source, data_load_fun, run_seed) %>%
+  distinct()
 
 tar_plan(
 
@@ -121,22 +124,41 @@ tar_plan(
     )
   ),
 
+  bm_vi_real <- tar_map(
+    values = analyses_real_vi,
+    names = c(data_source, run_seed),
+    tar_target(
+      bm_vi_real,
+      bench_vi_real(data_source = data_source,
+                    data_load_fun = data_load_fun,
+                    run_seed = run_seed),
+      resources = tar_resources(
+        future = tar_resources_future(
+          resources = list(n_cores=1)
+        )
+      ),
+      memory = "transient",
+      garbage_collection = TRUE
+    )
+  ),
+  tar_combine(bm_vi_real_comb, bm_vi_real),
 
-  tar_target(time_runs, seq(10)),
-  tar_target(n_obs, round(10^seq(from = 2, to = 4+1/3, by = 1/6))),
+  tar_target(time_runs, seq(5)),
+  tar_target(n_obs, round(10^seq(from = 2, to = 4, by = 1/3))),
   tar_target(n_ftr, c(10, 100, 1000)),
+  # tar_target(n_times, c(1000, 10000)),
 
-  bm_time_data = sim_surv(n_obs = max(n_obs),
-                          n_pred_main = max(n_ftr)) %>%
-    getElement("data") %>%
-    select(time,
-           status,
-           starts_with("main")),
+  # bm_time_data = sim_surv(n_obs = max(n_obs),
+  #                         n_pred_main = 1000) %>%
+  #   getElement("data") %>%
+  #   select(time,
+  #          status,
+  #          starts_with("main")),
 
   tar_target(
     bm_time,
-    bench_time(data = bm_time_data, n_obs = n_obs, n_ftr = n_ftr),
-    pattern = cross(time_runs, n_obs, n_ftr),
+    bench_time(n_obs = n_obs, n_ftr = n_ftr),# n_times = n_times),
+    pattern = cross(time_runs, n_obs, n_ftr),# n_times),
     resources = tar_resources(
       future = tar_resources_future(
         resources = list(n_cores=4)
@@ -243,6 +265,8 @@ tar_plan(
   tar_target(bm_vi_viz, bench_vi_visualize(bm_vi_comb)),
 
   tar_target(bm_vi_smry, bench_vi_summarize(bm_vi_comb)),
+
+  # tar_target(bm_vi_viz_simple, bench_vi_visualize_simple(bm_vi_comb)),
 
   tar_target(bm_vi_viz_mean, bench_vi_mean_visualize(bm_vi_comb))
 

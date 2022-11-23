@@ -1,2 +1,2 @@
 main:
-  reporter_make: summary
+  reporter_make: verbose

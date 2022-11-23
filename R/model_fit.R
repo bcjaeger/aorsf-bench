@@ -207,7 +207,7 @@ aorsf_net_fit <- function(train, node_size = 10, ...){
 
   mtry <- round(sqrt(ncol(train)-2))
 
-  df_target <- max(mtry - 2, round(mtry/2), 2)
+  df_target <- max(mtry - 2, round(mtry/2), 1+1)
 
   split_min_events <- min( round(sum(train$status) / 5), 5)
 
@@ -356,11 +356,16 @@ obliqueRSF_fit <- function(train, node_size = 10, ...){
 
   start_time <- Sys.time()
 
+
   fit <- ORSF(train,
               ntree = 500,
               mtry = mtry,
               verbose = FALSE,
-              use.cv = nrow(train) < 500,
+              use.cv = TRUE,
+              min_events_in_leaf_node = 1,
+              min_obs_in_leaf_node = 5,
+              min_events_to_split_node = 5,
+              nsplit = 5,
               min_obs_to_split_node = node_size)
 
   end_time <- Sys.time()

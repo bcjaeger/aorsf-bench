@@ -1,0 +1,553 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Allen, Therneau, Larson, Coward, Somers, and
+  Kamath}{Allen et~al.}{2018}]{allen2018nonalcoholic}
+Allen, A.~M., T.~M. Therneau, J.~J. Larson, A.~Coward, V.~K. Somers, and P.~S.
+  Kamath (2018).
+\newblock Nonalcoholic fatty liver disease incidence and impact on metabolic
+  burden and death: a 20 year-community study.
+\newblock {\em Hepatology\/}~{\em 67\/}(5), 1726--1736.
+
+\bibitem[\protect\citeauthoryear{{\nope{ARIC Investigators}ARIC
+  Investigators}}{{\nope{ARIC Investigators}ARIC
+  Investigators}}{1989}]{aric1989atherosclerosis}
+{\nope{ARIC Investigators}ARIC Investigators} (1989).
+\newblock The atherosclerosis risk in communit (aric) study: design and
+  objectives.
+\newblock {\em American journal of epidemiology\/}~{\em 129\/}(4), 687--702.
+
+\bibitem[\protect\citeauthoryear{Benavoli, Corani, Dem{\v{s}}ar, and
+  Zaffalon}{Benavoli et~al.}{2017}]{benavoli2017time}
+Benavoli, A., G.~Corani, J.~Dem{\v{s}}ar, and M.~Zaffalon (2017).
+\newblock Time for a change: a tutorial for comparing multiple classifiers
+  through bayesian analysis.
+\newblock {\em The Journal of Machine Learning Research\/}~{\em 18\/}(1),
+  2653--2688.
+
+\bibitem[\protect\citeauthoryear{Bild, Bluemke, Burke, Detrano, Diez~Roux,
+  Folsom, Greenland, JacobsJr, Kronmal, Liu, et~al.}{Bild
+  et~al.}{2002}]{bild2002multi}
+Bild, D.~E., D.~A. Bluemke, G.~L. Burke, R.~Detrano, A.~V. Diez~Roux, A.~R.
+  Folsom, P.~Greenland, D.~R. JacobsJr, R.~Kronmal, K.~Liu, et~al. (2002).
+\newblock Multi-ethnic study of atherosclerosis: objectives and design.
+\newblock {\em American journal of epidemiology\/}~{\em 156\/}(9), 871--881.
+
+\bibitem[\protect\citeauthoryear{Blanche, Dartigues, and Jacqmin-Gadda}{Blanche
+  et~al.}{2013}]{blanche2013estimating}
+Blanche, P., J.-F. Dartigues, and H.~Jacqmin-Gadda (2013).
+\newblock Estimating and comparing time-dependent areas under receiver
+  operating characteristic curves for censored event times with competing
+  risks.
+\newblock {\em Statistics in medicine\/}~{\em 32\/}(30), 5381--5397.
+
+\bibitem[\protect\citeauthoryear{Breiman}{Breiman}{2001}]{breiman2001random}
+Breiman, L. (2001).
+\newblock Random forests.
+\newblock {\em Machine Learning\/}~{\em 45\/}(1), 5--32.
+
+\bibitem[\protect\citeauthoryear{Breiman, Friedman, Olshen, and Stone}{Breiman
+  et~al.}{2017}]{breiman2017classification}
+Breiman, L., J.~H. Friedman, R.~A. Olshen, and C.~J. Stone (2017).
+\newblock {\em Classification and regression trees}.
+\newblock Routledge.
+
+\bibitem[\protect\citeauthoryear{Brilleman}{Brilleman}{2018}]{simsurv}
+Brilleman, S. (2018).
+\newblock {\em simsurv: Simulate Survival Data}.
+\newblock R package version 0.2.2, available at
+  \url{https://CRAN.R-project.org/package=simsurv}.
+
+\bibitem[\protect\citeauthoryear{Brilleman, Wolfe, Moreno-Betancur, and
+  Crowther}{Brilleman et~al.}{2020}]{simsurv_paper}
+Brilleman, S.~L., R.~Wolfe, M.~Moreno-Betancur, and M.~J. Crowther (2020).
+\newblock Simulating survival data using the {simsurv} {R} package.
+\newblock {\em Journal of Statistical Software\/}~{\em 97\/}(3), 1--27.
+
+\bibitem[\protect\citeauthoryear{Casalicchio, Bossek, Lang, Kirchhoff,
+  Kerschke, Hofner, Seibold, Vanschoren, and Bischl}{Casalicchio
+  et~al.}{2017}]{OpenML}
+Casalicchio, G., J.~Bossek, M.~Lang, D.~Kirchhoff, P.~Kerschke, B.~Hofner,
+  H.~Seibold, J.~Vanschoren, and B.~Bischl (2017).
+\newblock {OpenML}: An {R} package to connect to the machine learning platform
+  {OpenML}.
+\newblock {\em Computational Statistics\/}, 1--15.
+
+\bibitem[\protect\citeauthoryear{Chen, He, Benesty, Khotilovich, Tang, Cho,
+  Chen, Mitchell, Cano, Zhou, Li, Xie, Lin, Geng, Li, and Yuan}{Chen
+  et~al.}{2022}]{xgboost}
+Chen, T., T.~He, M.~Benesty, V.~Khotilovich, Y.~Tang, H.~Cho, K.~Chen,
+  R.~Mitchell, I.~Cano, T.~Zhou, M.~Li, J.~Xie, M.~Lin, Y.~Geng, Y.~Li, and
+  J.~Yuan (2022).
+\newblock {\em xgboost: Extreme Gradient Boosting}.
+\newblock R package version 1.5.2.1.
+
+\bibitem[\protect\citeauthoryear{Cui, Zhu, Zhou, and Kosorok}{Cui
+  et~al.}{2017}]{cui2017consistency}
+Cui, Y., R.~Zhu, M.~Zhou, and M.~Kosorok (2017).
+\newblock Consistency of survival tree and forest models: splitting bias and
+  correction.
+\newblock {\em arXiv preprint arXiv:1707.09631\/}.
+
+\bibitem[\protect\citeauthoryear{Desmedt, Di~Leo, de~Azambuja, Larsimont,
+  Haibe-Kains, Selleslags, Delaloge, Duhem, Kains, Carly, et~al.}{Desmedt
+  et~al.}{2011}]{desmedt2011multifactorial}
+Desmedt, C., A.~Di~Leo, E.~de~Azambuja, D.~Larsimont, B.~Haibe-Kains,
+  J.~Selleslags, S.~Delaloge, C.~Duhem, J.-P. Kains, B.~Carly, et~al. (2011).
+\newblock Multifactorial approach to predicting resistance to anthracyclines.
+\newblock {\em Journal of Clinical Oncology\/}~{\em 29\/}(12), 1578--1586.
+
+\bibitem[\protect\citeauthoryear{{\nope{Director's Challenge Consortium for the
+  Molecular Classification of Lung Adenocarcinoma}Director's Challenge
+  Consortium for the Molecular Classification of Lung
+  Adenocarcinoma}}{{\nope{Director's Challenge Consortium for the Molecular
+  Classification of Lung Adenocarcinoma}Director's Challenge Consortium for the
+  Molecular Classification of Lung Adenocarcinoma}}{2008}]{director2008gene}
+{\nope{Director's Challenge Consortium for the Molecular Classification of Lung
+  Adenocarcinoma}Director's Challenge Consortium for the Molecular
+  Classification of Lung Adenocarcinoma} (2008).
+\newblock Gene expression--based survival prediction in lung adenocarcinoma: a
+  multi-site, blinded validation study.
+\newblock {\em Nature medicine\/}~{\em 14\/}(8), 822--827.
+
+\bibitem[\protect\citeauthoryear{Dispenzieri, Katzmann, Kyle, Larson, Therneau,
+  Colby, Clark, Mead, Kumar, Melton~III, et~al.}{Dispenzieri
+  et~al.}{2012}]{dispenzieri2012use}
+Dispenzieri, A., J.~A. Katzmann, R.~A. Kyle, D.~R. Larson, T.~M. Therneau,
+  C.~L. Colby, R.~J. Clark, G.~P. Mead, S.~Kumar, L.~J. Melton~III, et~al.
+  (2012).
+\newblock Use of nonclonal serum immunoglobulin free light chains to predict
+  overall survival in the general population.
+\newblock In {\em Mayo Clinic Proceedings}, Volume~87, pp.\  517--523.
+  Elsevier.
+
+\bibitem[\protect\citeauthoryear{Felker, Anstrom, Adams, Ezekowitz, Fiuzat,
+  Houston-Miller, Januzzi, Mark, Pi{\~n}a, Passmore, et~al.}{Felker
+  et~al.}{2017}]{felker2017effect}
+Felker, G.~M., K.~J. Anstrom, K.~F. Adams, J.~A. Ezekowitz, M.~Fiuzat,
+  N.~Houston-Miller, J.~L. Januzzi, D.~B. Mark, I.~L. Pi{\~n}a, G.~Passmore,
+  et~al. (2017).
+\newblock Effect of natriuretic peptide--guided therapy on hospitalization or
+  cardiovascular mortality in high-risk patients with heart failure and reduced
+  ejection fraction: a randomized clinical trial.
+\newblock {\em Jama\/}~{\em 318\/}(8), 713--720.
+
+\bibitem[\protect\citeauthoryear{Goodrich, Gabry, Ali, and Brilleman}{Goodrich
+  et~al.}{2022}]{rstanarm}
+Goodrich, B., J.~Gabry, I.~Ali, and S.~Brilleman (2022).
+\newblock rstanarm: {Bayesian} applied regression modeling via {Stan}.
+\newblock R package version 2.21.3.
+
+\bibitem[\protect\citeauthoryear{Graf, Schmoor, Sauerbrei, and Schumacher}{Graf
+  et~al.}{1999}]{graf1999assessment}
+Graf, E., C.~Schmoor, W.~Sauerbrei, and M.~Schumacher (1999).
+\newblock Assessment and comparison of prognostic classification schemes for
+  survival data.
+\newblock {\em Statistics in Medicine\/}~{\em 18\/}(17-18), 2529--2545.
+
+\bibitem[\protect\citeauthoryear{Harrell, Califf, Pryor, Lee, and
+  Rosati}{Harrell et~al.}{1982}]{harrell1982evaluating}
+Harrell, F.~E., R.~M. Califf, D.~B. Pryor, K.~L. Lee, and R.~A. Rosati (1982,
+  05).
+\newblock {Evaluating the Yield of Medical Tests}.
+\newblock {\em JAMA\/}~{\em 247\/}(18), 2543--2546.
+
+\bibitem[\protect\citeauthoryear{Hatzis, Pusztai, Valero, Booser, Esserman,
+  Lluch, Vidaurre, Holmes, Souchon, Wang, et~al.}{Hatzis
+  et~al.}{2011}]{hatzis2011genomic}
+Hatzis, C., L.~Pusztai, V.~Valero, D.~J. Booser, L.~Esserman, A.~Lluch,
+  T.~Vidaurre, F.~Holmes, E.~Souchon, H.~Wang, et~al. (2011).
+\newblock A genomic predictor of response and survival following
+  taxane-anthracycline chemotherapy for invasive breast cancer.
+\newblock {\em Jama\/}~{\em 305\/}(18), 1873--1881.
+
+\bibitem[\protect\citeauthoryear{Heath, Kasif, and Salzberg}{Heath
+  et~al.}{1993}]{heath1993induction}
+Heath, D., S.~Kasif, and S.~Salzberg (1993).
+\newblock Induction of oblique decision trees.
+\newblock In {\em IJCAI}, Volume 1993, pp.\  1002--1007. Citeseer.
+
+\bibitem[\protect\citeauthoryear{Heller}{Heller}{2012}]{heller2012measure}
+Heller, G. (2012).
+\newblock A measure of explained risk in the proportional hazards model.
+\newblock {\em Biostatistics\/}~{\em 13\/}(2), 315--325.
+
+\bibitem[\protect\citeauthoryear{Hooker, Mentch, and Zhou}{Hooker
+  et~al.}{2021}]{hooker2021unrestricted}
+Hooker, G., L.~Mentch, and S.~Zhou (2021).
+\newblock Unrestricted permutation forces extrapolation: variable importance
+  requires at least one more model, or there is no free variable importance.
+\newblock {\em Statistics and Computing\/}~{\em 31\/}(6), 1--16.
+
+\bibitem[\protect\citeauthoryear{Hosmer and Lemeshow}{Hosmer and
+  Lemeshow}{2002}]{hosmer2002applied}
+Hosmer, D.~W. and S.~Lemeshow (2002).
+\newblock {\em Applied survival analysis: regression modelling of time to event
+  data}.
+\newblock Wiley.
+
+\bibitem[\protect\citeauthoryear{Hothorn}{Hothorn}{2022}]{TH.data}
+Hothorn, T. (2022).
+\newblock {\em TH.data: TH's Data Archive}.
+\newblock R package version 1.1-1.
+
+\bibitem[\protect\citeauthoryear{Hothorn, Hornik, Strobl, and Zeileis}{Hothorn
+  et~al.}{2010}]{hothorn2010party}
+Hothorn, T., K.~Hornik, C.~Strobl, and A.~Zeileis (2010).
+\newblock Party: a laboratory for recursive partytioning.
+
+\bibitem[\protect\citeauthoryear{Hothorn, Hornik, and Zeileis}{Hothorn
+  et~al.}{2006}]{hothorn2006unbiased}
+Hothorn, T., K.~Hornik, and A.~Zeileis (2006).
+\newblock Unbiased recursive partitioning: A conditional inference framework.
+\newblock {\em Journal of Computational and Graphical statistics\/}~{\em
+  15\/}(3), 651--674.
+
+\bibitem[\protect\citeauthoryear{Hothorn, Lausen, Benner, and
+  Radespiel-Tr{\"o}ger}{Hothorn et~al.}{2004}]{hothorn2004bagging}
+Hothorn, T., B.~Lausen, A.~Benner, and M.~Radespiel-Tr{\"o}ger (2004).
+\newblock Bagging survival trees.
+\newblock {\em Statistics in medicine\/}~{\em 23\/}(1), 77--91.
+
+\bibitem[\protect\citeauthoryear{Hsich, Gorodeski, Blackstone, Ishwaran, and
+  Lauer}{Hsich et~al.}{2011}]{hsich2011identifying}
+Hsich, E., E.~Z. Gorodeski, E.~H. Blackstone, H.~Ishwaran, and M.~S. Lauer
+  (2011).
+\newblock Identifying important risk factors for survival in patient with
+  systolic heart failure using random survival forests.
+\newblock {\em Circulation: Cardiovascular Quality and Outcomes\/}~{\em
+  4\/}(1), 39--45.
+
+\bibitem[\protect\citeauthoryear{Hvitfeldt and Frick}{Hvitfeldt and
+  Frick}{}]{censored}
+Hvitfeldt, E. and H.~Frick.
+\newblock {\em censored: 'parsnip' Engines for Survival Models}.
+\newblock R package version 0.1.0.9000.
+
+\bibitem[\protect\citeauthoryear{Ishwaran and Kogalur}{Ishwaran and
+  Kogalur}{2019}]{randomForestSRC}
+Ishwaran, H. and U.~Kogalur (2019).
+\newblock {\em Random Forests for Survival, Regression, and Classification
+  (RF-SRC)}.
+\newblock R package version 2.8.0, available at
+  \url{https://cran.r-project.org/package=randomForestSRC}.
+
+\bibitem[\protect\citeauthoryear{Ishwaran and Kogalur}{Ishwaran and
+  Kogalur}{2010}]{ishwaran2010consistency}
+Ishwaran, H. and U.~B. Kogalur (2010).
+\newblock Consistency of random survival forests.
+\newblock {\em Statistics \& probability letters\/}~{\em 80\/}(13-14),
+  1056--1064.
+
+\bibitem[\protect\citeauthoryear{Ishwaran, Kogalur, Blackstone, and
+  Lauer}{Ishwaran et~al.}{2008}]{ishwaran2008random}
+Ishwaran, H., U.~B. Kogalur, E.~H. Blackstone, and M.~S. Lauer (2008).
+\newblock Random survival forests.
+\newblock {\em The Annals of Applied Statistics\/}, 841--860.
+
+\bibitem[\protect\citeauthoryear{Ishwaran and Lu}{Ishwaran and
+  Lu}{2019}]{ishwaran2019standard}
+Ishwaran, H. and M.~Lu (2019).
+\newblock Standard errors and confidence intervals for variable importance in
+  random forest regression, classification, and survival.
+\newblock {\em Statistics in medicine\/}~{\em 38\/}(4), 558--582.
+
+\bibitem[\protect\citeauthoryear{Jaeger}{Jaeger}{2022}]{aorsf}
+Jaeger, B.~C. (2022).
+\newblock {\em aorsf: Accelerated Oblique Random Survival Forests}.
+\newblock R package version 1.0.0.
+
+\bibitem[\protect\citeauthoryear{Jaeger, Long, Long, Sims, Szychowski, Min,
+  Mcclure, Howard, and Simon}{Jaeger et~al.}{2019}]{jaeger2019oblique}
+Jaeger, B.~C., D.~L. Long, D.~M. Long, M.~Sims, J.~M. Szychowski, Y.-I. Min,
+  L.~A. Mcclure, G.~Howard, and N.~Simon (2019).
+\newblock Oblique random survival forests.
+\newblock {\em The Annals of Applied Statistics\/}~{\em 13\/}(3), 1847--1883.
+
+\bibitem[\protect\citeauthoryear{Jaeger, Welden, Lenoir, and Pajewski}{Jaeger
+  et~al.}{2022}]{jaeger2022aorsf}
+Jaeger, B.~C., S.~Welden, K.~Lenoir, and N.~M. Pajewski (2022).
+\newblock aorsf: An {R} package for supervised learning using the oblique
+  random survival forest.
+\newblock {\em Journal of Open Source Software\/}~{\em 7\/}(77), 4705.
+
+\bibitem[\protect\citeauthoryear{Kalbfleisch and Prentice}{Kalbfleisch and
+  Prentice}{2011}]{kalbfleisch2011statistical}
+Kalbfleisch, J.~D. and R.~L. Prentice (2011).
+\newblock {\em The statistical analysis of failure time data}.
+\newblock John Wiley \& Sons.
+
+\bibitem[\protect\citeauthoryear{Kattan and Gerds}{Kattan and
+  Gerds}{2018}]{kattan2018index}
+Kattan, M.~W. and T.~A. Gerds (2018).
+\newblock The index of prediction accuracy: an intuitive measure useful for
+  evaluating risk prediction models.
+\newblock {\em Diagnostic and prognostic research\/}~{\em 2\/}(1), 1--7.
+
+\bibitem[\protect\citeauthoryear{Katuwal, Suganthan, and Zhang}{Katuwal
+  et~al.}{2020}]{katuwal2020heterogeneous}
+Katuwal, R., P.~N. Suganthan, and L.~Zhang (2020).
+\newblock Heterogeneous oblique random forest.
+\newblock {\em Pattern Recognition\/}~{\em 99}, 107078.
+
+\bibitem[\protect\citeauthoryear{Kuhn and Wickham}{Kuhn and
+  Wickham}{2020}]{tidymodels}
+Kuhn, M. and H.~Wickham (2020).
+\newblock {\em Tidymodels: a collection of packages for modeling and machine
+  learning using tidyverse principles.}
+
+\bibitem[\protect\citeauthoryear{Kyle, Therneau, Rajkumar, Larson, Plevak,
+  Offord, Dispenzieri, Katzmann, and Melton~III}{Kyle
+  et~al.}{2006}]{kyle2006prevalence}
+Kyle, R.~A., T.~M. Therneau, S.~V. Rajkumar, D.~R. Larson, M.~F. Plevak, J.~R.
+  Offord, A.~Dispenzieri, J.~A. Katzmann, and L.~J. Melton~III (2006).
+\newblock Prevalence of monoclonal gammopathy of undetermined significance.
+\newblock {\em New England Journal of Medicine\/}~{\em 354\/}(13), 1362--1369.
+
+\bibitem[\protect\citeauthoryear{Kyle, Therneau, Rajkumar, Offord, Larson,
+  Plevak, and Melton~III}{Kyle et~al.}{2002}]{kyle2002long}
+Kyle, R.~A., T.~M. Therneau, S.~V. Rajkumar, J.~R. Offord, D.~R. Larson, M.~F.
+  Plevak, and L.~J. Melton~III (2002).
+\newblock A long-term study of prognosis in monoclonal gammopathy of
+  undetermined significance.
+\newblock {\em New England Journal of Medicine\/}~{\em 346\/}(8), 564--569.
+
+\bibitem[\protect\citeauthoryear{Landau}{Landau}{2021}]{targets}
+Landau, W.~M. (2021).
+\newblock The targets r package: a dynamic make-like function-oriented pipeline
+  toolkit for reproducibility and high-performance computing.
+\newblock {\em Journal of Open Source Software\/}~{\em 6\/}(57), 2959.
+
+\bibitem[\protect\citeauthoryear{Li, Han, Hou, Chen, and Chen}{Li
+  et~al.}{2015}]{li2015statistical}
+Li, H., D.~Han, Y.~Hou, H.~Chen, and Z.~Chen (2015).
+\newblock Statistical inference methods for two crossing survival curves: a
+  comparison of methods.
+\newblock {\em PLoS One\/}~{\em 10\/}(1), e0116774.
+
+\bibitem[\protect\citeauthoryear{Loprinzi, Laurie, Wieand, Krook, Novotny,
+  Kugler, Bartel, Law, Bateman, and Klatt}{Loprinzi
+  et~al.}{1994}]{loprinzi1994prospective}
+Loprinzi, C.~L., J.~A. Laurie, H.~S. Wieand, J.~E. Krook, P.~J. Novotny, J.~W.
+  Kugler, J.~Bartel, M.~Law, M.~Bateman, and N.~E. Klatt (1994).
+\newblock Prospective evaluation of prognostic variables from patient-completed
+  questionnaires. north central cancer treatment group.
+\newblock {\em Journal of Clinical Oncology\/}~{\em 12\/}(3), 601--607.
+
+\bibitem[\protect\citeauthoryear{Lundberg and Lee}{Lundberg and
+  Lee}{2017}]{lundberg2017unified}
+Lundberg, S. and S.-I. Lee (2017).
+\newblock A unified approach to interpreting model predictions.
+
+\bibitem[\protect\citeauthoryear{Lundberg, Erion, and Lee}{Lundberg
+  et~al.}{2018}]{lundberg2018consistent}
+Lundberg, S.~M., G.~G. Erion, and S.-I. Lee (2018).
+\newblock Consistent individualized feature attribution for tree ensembles.
+\newblock {\em arXiv preprint arXiv:1802.03888\/}.
+
+\bibitem[\protect\citeauthoryear{Menze, Kelm, Splitthoff, Koethe, and
+  Hamprecht}{Menze et~al.}{2011}]{menze2011oblique}
+Menze, B.~H., B.~M. Kelm, D.~N. Splitthoff, U.~Koethe, and F.~A. Hamprecht
+  (2011).
+\newblock On oblique random forests.
+\newblock In {\em Joint European Conference on Machine Learning and Knowledge
+  Discovery in Databases}, pp.\  453--469. Springer.
+
+\bibitem[\protect\citeauthoryear{Moertel, Fleming, Macdonald, Haller, Laurie,
+  Tangen, Ungerleider, Emerson, Tormey, Glick, et~al.}{Moertel
+  et~al.}{1995}]{moertel1995fluorouracil}
+Moertel, C.~G., T.~R. Fleming, J.~S. Macdonald, D.~G. Haller, J.~A. Laurie,
+  C.~M. Tangen, J.~S. Ungerleider, W.~A. Emerson, D.~C. Tormey, J.~H. Glick,
+  et~al. (1995).
+\newblock Fluorouracil plus levamisole as effective adjuvant therapy after
+  resection of stage iii colon carcinoma: a final report.
+\newblock {\em Annals of internal medicine\/}~{\em 122\/}(5), 321--326.
+
+\bibitem[\protect\citeauthoryear{Moons, Kengne, Woodward, Royston, Vergouwe,
+  Altman, and Grobbee}{Moons et~al.}{2012}]{moons2012riskI}
+Moons, K.~G., A.~P. Kengne, M.~Woodward, P.~Royston, Y.~Vergouwe, D.~G. Altman,
+  and D.~E. Grobbee (2012).
+\newblock Risk prediction models: {I}. development, internal validation, and
+  assessing the incremental value of a new (bio) marker.
+\newblock {\em Heart\/}~{\em 98\/}(9), 683--690.
+
+\bibitem[\protect\citeauthoryear{Moss, Corsar, Shaw, Piper, and Hawthorne}{Moss
+  et~al.}{2022}]{moss2022demystifying}
+Moss, L., D.~Corsar, M.~Shaw, I.~Piper, and C.~Hawthorne (2022).
+\newblock Demystifying the black box: The importance of interpretability of
+  predictive models in neurocritical care.
+\newblock {\em Neurocritical care\/}, 1--7.
+
+\bibitem[\protect\citeauthoryear{Murthy, Kasif, and Salzberg}{Murthy
+  et~al.}{1994}]{murthy1994system}
+Murthy, S.~K., S.~Kasif, and S.~Salzberg (1994).
+\newblock A system for induction of oblique decision trees.
+\newblock {\em Journal of Artificial Intelligence Research\/}~{\em 2}, 1--32.
+
+\bibitem[\protect\citeauthoryear{Pintilie}{Pintilie}{2006}]{pintilie2006competing}
+Pintilie, M. (2006).
+\newblock {\em Competing risks: a practical perspective}.
+\newblock John Wiley \& Sons.
+
+\bibitem[\protect\citeauthoryear{Poona, Van~Niekerk, and Ismail}{Poona
+  et~al.}{2016}]{poona2016investigating}
+Poona, N., A.~Van~Niekerk, and R.~Ismail (2016).
+\newblock Investigating the utility of oblique tree-based ensembles for the
+  classification of hyperspectral data.
+\newblock {\em Sensors\/}~{\em 16\/}(11), 1918.
+
+\bibitem[\protect\citeauthoryear{Qiu, Zhang, Suganthan, and Amaratunga}{Qiu
+  et~al.}{2017}]{qiu2017oblique}
+Qiu, X., L.~Zhang, P.~N. Suganthan, and G.~A. Amaratunga (2017).
+\newblock Oblique random forest ensemble via least square estimation for time
+  series forecasting.
+\newblock {\em Information Sciences\/}~{\em 420}, 249--262.
+
+\bibitem[\protect\citeauthoryear{Rainforth and Wood}{Rainforth and
+  Wood}{2015}]{rainforth2015canonical}
+Rainforth, T. and F.~Wood (2015).
+\newblock Canonical correlation forests.
+\newblock {\em arXiv preprint arXiv:1507.05444\/}.
+
+\bibitem[\protect\citeauthoryear{Royston and Altman}{Royston and
+  Altman}{2013}]{royston2013external}
+Royston, P. and D.~G. Altman (2013).
+\newblock External validation of a cox prognostic model: principles and
+  methods.
+\newblock {\em BMC medical research methodology\/}~{\em 13\/}(1), 1--15.
+
+\bibitem[\protect\citeauthoryear{Schumacher}{Schumacher}{1994}]{schumacher1994rauschecker}
+Schumacher, M. (1994).
+\newblock Rauschecker for the german breast cancer study group, randomized 2 by
+  2 trial evaluating hormonal treatment and the duration of chemotherapy in
+  node-positive breast cancer patients.
+\newblock {\em Journal of Clinical Oncology\/}~{\em 12}, 2086--2093.
+
+\bibitem[\protect\citeauthoryear{Sonabend, Király, Bender, Bischl, and
+  Lang}{Sonabend et~al.}{2021}]{mlr3proba}
+Sonabend, R., F.~J. Király, A.~Bender, B.~Bischl, and M.~Lang (2021, 02).
+\newblock mlr3proba: An r package for machine learning in survival analysis.
+\newblock {\em Bioinformatics\/}.
+
+\bibitem[\protect\citeauthoryear{{\nope{SPRINT Research Group}SPRINT Research
+  Group}}{{\nope{SPRINT Research Group}SPRINT Research
+  Group}}{2015}]{sprint2015randomized}
+{\nope{SPRINT Research Group}SPRINT Research Group} (2015).
+\newblock A randomized trial of intensive versus standard blood-pressure
+  control.
+\newblock {\em New England Journal of Medicine\/}~{\em 373\/}(22), 2103--2116.
+
+\bibitem[\protect\citeauthoryear{Strobl, Boulesteix, Zeileis, and
+  Hothorn}{Strobl et~al.}{2007}]{strobl2007bias}
+Strobl, C., A.-L. Boulesteix, A.~Zeileis, and T.~Hothorn (2007).
+\newblock Bias in random forest variable importance measures: Illustrations,
+  sources and a solution.
+\newblock {\em BMC bioinformatics\/}~{\em 8\/}(1), 25.
+
+\bibitem[\protect\citeauthoryear{Taylor~Jr, Wilson, Jones, Sarpong, Srinivasan,
+  Garrison, Nelson, and Wyatt}{Taylor~Jr et~al.}{2005}]{taylor2005toward}
+Taylor~Jr, H.~A., J.~G. Wilson, D.~W. Jones, D.~F. Sarpong, A.~Srinivasan,
+  R.~J. Garrison, C.~Nelson, and S.~B. Wyatt (2005).
+\newblock Toward resolution of cardiovascular health disparities in african
+  americans: Design and methods of the jackson heart study.
+\newblock {\em Ethn Dis\/}~{\em 15\/}(4 Suppl 6), S6--4.
+
+\bibitem[\protect\citeauthoryear{Tern{\`e}s, Rotolo, Heinze, and
+  Michiels}{Tern{\`e}s et~al.}{2017}]{ternes2017identification}
+Tern{\`e}s, N., F.~Rotolo, G.~Heinze, and S.~Michiels (2017).
+\newblock Identification of biomarker-by-treatment interactions in randomized
+  clinical trials with survival outcomes and high-dimensional spaces.
+\newblock {\em Biometrical Journal\/}~{\em 59\/}(4), 685--701.
+
+\bibitem[\protect\citeauthoryear{Ternes, Rotolo, and Michiels}{Ternes
+  et~al.}{2018}]{biospear}
+Ternes, N., F.~Rotolo, and S.~Michiels (2018).
+\newblock {\em biospear: Biomarker Selection in Penalized Regression Models}.
+\newblock R package version 1.0.2.
+
+\bibitem[\protect\citeauthoryear{Therneau}{Therneau}{2022a}]{therneau_survival_2022}
+Therneau, T. (2022a, April).
+\newblock Survival package source code documentation.
+\newblock original-date: 2016-04-28.
+
+\bibitem[\protect\citeauthoryear{Therneau}{Therneau}{2022b}]{survival}
+Therneau, T.~M. (2022b).
+\newblock {\em A Package for Survival Analysis in R}.
+\newblock R package version 3.3-1.
+
+\bibitem[\protect\citeauthoryear{Therneau and Grambsch}{Therneau and
+  Grambsch}{2000}]{therneau2000cox}
+Therneau, T.~M. and P.~M. Grambsch (2000).
+\newblock {\em Modeling {S}urvival {D}ata: {E}xtending the {C}ox {M}odel}.
+\newblock Springer.
+
+\bibitem[\protect\citeauthoryear{Tomita, Browne, Shen, Chung, Patsolic, Falk,
+  Priebe, Yim, Burns, Maggioni, et~al.}{Tomita et~al.}{2020}]{tomita2020sparse}
+Tomita, T.~M., J.~Browne, C.~Shen, J.~Chung, J.~L. Patsolic, B.~Falk, C.~E.
+  Priebe, J.~Yim, R.~Burns, M.~Maggioni, et~al. (2020).
+\newblock Sparse projection oblique randomer forests.
+\newblock {\em Journal of machine learning research\/}~{\em 21\/}(104).
+
+\bibitem[\protect\citeauthoryear{Uno, Cai, Pencina, D'Agostino, and Wei}{Uno
+  et~al.}{2011}]{uno2011c}
+Uno, H., T.~Cai, M.~J. Pencina, R.~B. D'Agostino, and L.-J. Wei (2011).
+\newblock On the c-statistics for evaluating overall adequacy of risk
+  prediction procedures with censored survival data.
+\newblock {\em Statistics in medicine\/}~{\em 30\/}(10), 1105--1117.
+
+\bibitem[\protect\citeauthoryear{Van De~Vijver, He, Van't~Veer, Dai, Hart,
+  Voskuil, Schreiber, Peterse, Roberts, Marton, et~al.}{Van De~Vijver
+  et~al.}{2002}]{van2002gene}
+Van De~Vijver, M.~J., Y.~D. He, L.~J. Van't~Veer, H.~Dai, A.~A. Hart, D.~W.
+  Voskuil, G.~J. Schreiber, J.~L. Peterse, C.~Roberts, M.~J. Marton, et~al.
+  (2002).
+\newblock A gene-expression signature as a predictor of survival in breast
+  cancer.
+\newblock {\em New England Journal of Medicine\/}~{\em 347\/}(25), 1999--2009.
+
+\bibitem[\protect\citeauthoryear{Wang and Li}{Wang and
+  Li}{2017}]{wang2017selective}
+Wang, H. and G.~Li (2017).
+\newblock A selective review on random survival forests for high dimensional
+  data.
+\newblock {\em Quantitative bio-science\/}~{\em 36\/}(2), 85.
+
+\bibitem[\protect\citeauthoryear{Wang and Zhou}{Wang and
+  Zhou}{2017}]{wang2017random}
+Wang, H. and L.~Zhou (2017).
+\newblock Random survival forest with space extensions for censored data.
+\newblock {\em Artificial intelligence in medicine\/}~{\em 79}, 52--61.
+
+\bibitem[\protect\citeauthoryear{Wright and Ziegler}{Wright and
+  Ziegler}{2017}]{ranger}
+Wright, M.~N. and A.~Ziegler (2017).
+\newblock ranger: A fast implementation of random forests for high dimensional
+  data in c++ and r.
+\newblock {\em Journal of Statistical Software\/}~{\em 77\/}(1), 1--17.
+
+\bibitem[\protect\citeauthoryear{Zhang and Suganthan}{Zhang and
+  Suganthan}{2014}]{zhang2014oblique}
+Zhang, L. and P.~N. Suganthan (2014).
+\newblock Oblique decision tree ensemble via multisurface proximal support
+  vector machine.
+\newblock {\em IEEE transactions on cybernetics\/}~{\em 45\/}(10), 2165--2176.
+
+\bibitem[\protect\citeauthoryear{Zhou, Wang, and Xu}{Zhou
+  et~al.}{2016}]{zhou2016random}
+Zhou, L., H.~Wang, and Q.~Xu (2016).
+\newblock Random rotation survival forest for high dimensional censored data.
+\newblock {\em SpringerPlus\/}~{\em 5\/}(1), 1--10.
+
+\bibitem[\protect\citeauthoryear{Zhu}{Zhu}{2013}]{zhu2013tree}
+Zhu, R. (2013).
+\newblock {\em Tree-based Methods for Survival Analysis and High-dimensional
+  Data}.
+\newblock Ph.\ D. thesis, The University of North Carolina at Chapel Hill.
+
+\bibitem[\protect\citeauthoryear{Zhu, Zeng, and Kosorok}{Zhu
+  et~al.}{2015}]{zhu2015reinforcement}
+Zhu, R., D.~Zeng, and M.~R. Kosorok (2015).
+\newblock Reinforcement learning trees.
+\newblock {\em Journal of the American Statistical Association\/}~{\em
+  110\/}(512), 1770--1784.
+
+\end{thebibliography}
