@@ -11,6 +11,7 @@ Warning--empty organization in xgboost
 Warning--no number and no volume in cui2017consistency
 Warning--page numbers missing in cui2017consistency
 Warning--can't use both volume and number fields in dispenzieri2012use
+Warning--empty organization in palmerpenguins_rpack
 Warning--empty organization in TH.data
 Warning--empty year in censored
 Warning--empty organization in censored
@@ -30,43 +31,43 @@ Warning--empty organization in survival
 Warning--page numbers missing in tomita2020sparse
 You've used 78 entries,
             2861 wiz_defined-function locations,
-            1061 strings with 21154 characters,
-and the built_in function-call counts, 66299 in all, are:
-= -- 4950
-> -- 6584
+            1059 strings with 21184 characters,
+and the built_in function-call counts, 66131 in all, are:
+= -- 4937
+> -- 6567
 < -- 5
-+ -- 2100
-- -- 2192
-* -- 6835
-:= -- 12397
++ -- 2094
+- -- 2186
+* -- 6811
+:= -- 12371
 add.period$ -- 234
 call.type$ -- 78
-change.case$ -- 702
+change.case$ -- 700
 chr.to.int$ -- 77
-cite$ -- 101
-duplicate$ -- 1389
-empty$ -- 3164
-format.name$ -- 2448
-if$ -- 12057
+cite$ -- 102
+duplicate$ -- 1386
+empty$ -- 3153
+format.name$ -- 2442
+if$ -- 12023
 int.to.chr$ -- 2
 int.to.str$ -- 0
-missing$ -- 69
+missing$ -- 68
 newline$ -- 390
 num.names$ -- 778
-pop$ -- 531
+pop$ -- 530
 preamble$ -- 1
-purify$ -- 1183
+purify$ -- 1182
 quote$ -- 0
-skip$ -- 1471
+skip$ -- 1473
 stack$ -- 0
-substring$ -- 2846
+substring$ -- 2827
 swap$ -- 474
 text.length$ -- 5
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 1506
-warning$ -- 23
-while$ -- 689
+warning$ -- 24
+while$ -- 687
 width$ -- 0
 write$ -- 1018
-(There were 23 warnings)
+(There were 24 warnings)

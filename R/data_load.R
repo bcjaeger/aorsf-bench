@@ -1809,3 +1809,7 @@ jhs_stroke_load <- function(){
 jhs_chd_load <- function(){
   jhs_load("chd")
 }
+
+ehr_hfhosp_load <- function(){
+  fread("D:/aorsf-HF-hospitalization/data/temp.csv")
+}

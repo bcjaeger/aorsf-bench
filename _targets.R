@@ -80,11 +80,37 @@ analyses_real <- expand_grid(
     model_pred_fun = syms(glue("{model_type}_pred"))
   )
 
+analyses_real_public <- analyses_real %>%
+  filter(data_source %in% c("veteran",
+                            "colon_recur",
+                            "colon_acm",
+                            "pbc_orsf",
+                            "time_to_million",
+                            "gbsg2",
+                            "peakV02",
+                            "flchain",
+                            "nafld",
+                            "rotterdam_recur",
+                            "rotterdam_acm",
+                            "actg_aids",
+                            "actg_death",
+                            "breast",
+                            "nki",
+                            "lung",
+                            "lung_ncctg",
+                            "follic_death",
+                            "follic_relapse",
+                            "mgus2_death",
+                            "mgus2_pcm"))
+
+# Uncomment the line below if you would like to use only public data
+# analyses_real <- analyses_real_public
+
 analyses_sim_pred <- expand_grid(data_source = 'sim',
                                  n_obs = c(500, 1000, 2500),
                                  pred_corr_max = c(0, 0.15, 0.30),
                                  run_seed = 1:500,
-                                 model_type = model_fitters) |>
+                                 model_type = model_fitters) %>%
   mutate(
     data_load_fun = syms("sim_surv"),
     model_fit_fun = syms(glue("{model_type}_fit")),
@@ -222,28 +248,11 @@ tar_plan(
 
   tar_target(data_key, summarize_data_source(analyses_real)),
 
-  # readr::write_rds(
-  #   data_key,
-  #   '../seminar-orsf-grandrounds/data_key.rds'
-  # )
-
   tar_target(model_key, make_model_key()),
-
-  # readr::write_rds(
-  #   model_key,
-  #   '../seminar-orsf-grandrounds/model_key.rds'
-  # )
 
   tar_combine(bm_pred_real_comb, bm_pred_real[[1]]),
 
-  # tar_combine(bm_pred_sim_comb, bm_pred_sim[[1]]),
-
   tar_target(bm_pred_clean, clean_bm_pred(bm_pred_real_comb)),
-
-  # readr::write_rds(
-  #   bm_pred_clean$data,
-  #   '../seminar-orsf-grandrounds/bm_pred_clean.rds'
-  # )
 
   tar_target(bm_pred_viz, bench_pred_visualize(bm_pred_clean$data,
                                                data_key,

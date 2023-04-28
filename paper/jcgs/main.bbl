@@ -178,6 +178,12 @@ Hooker, G., L.~Mentch, and S.~Zhou (2021).
   requires at least one more model, or there is no free variable importance.
 \newblock {\em Statistics and Computing\/}~{\em 31\/}(6), 1--16.
 
+\bibitem[\protect\citeauthoryear{Horst, Hill, and Gorman}{Horst
+  et~al.}{2020}]{palmerpenguins_rpack}
+Horst, A.~M., A.~P. Hill, and K.~B. Gorman (2020).
+\newblock {\em palmerpenguins: Palmer Archipelago (Antarctica) penguin data}.
+\newblock R package version 0.1.0.
+
 \bibitem[\protect\citeauthoryear{Hosmer and Lemeshow}{Hosmer and
   Lemeshow}{2002}]{hosmer2002applied}
 Hosmer, D.~W. and S.~Lemeshow (2002).
@@ -201,12 +207,6 @@ Hothorn, T., K.~Hornik, and A.~Zeileis (2006).
 \newblock Unbiased recursive partitioning: A conditional inference framework.
 \newblock {\em Journal of Computational and Graphical statistics\/}~{\em
   15\/}(3), 651--674.
-
-\bibitem[\protect\citeauthoryear{Hothorn, Lausen, Benner, and
-  Radespiel-Tr{\"o}ger}{Hothorn et~al.}{2004}]{hothorn2004bagging}
-Hothorn, T., B.~Lausen, A.~Benner, and M.~Radespiel-Tr{\"o}ger (2004).
-\newblock Bagging survival trees.
-\newblock {\em Statistics in medicine\/}~{\em 23\/}(1), 77--91.
 
 \bibitem[\protect\citeauthoryear{Hsich, Gorodeski, Blackstone, Ishwaran, and
   Lauer}{Hsich et~al.}{2011}]{hsich2011identifying}
