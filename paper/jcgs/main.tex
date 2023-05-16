@@ -447,7 +447,7 @@ Both the IPA and time-dependent C-statistic generally take values between 0 and 
 
 \subsubsection{Data sets}
 
-We used a collection of 16 data sets containing a total of 21 risk prediction tasks (tasks per data set ranged from one to four). Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from 137 to 17,549 (median: 929), the number of predictors ranged from 7 to 1,692 (median: 12), and the percentage of censored observations ranged from 5.26 to 97.7 (median: 57.3) (\tabrefAppendix{tab:datasets}).
+We used a collection of 21 data sets containing a total of 35 risk prediction tasks (tasks per data set ranged from one to four). Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from 137 to 17,549 (median: 1,384), the number of predictors ranged from 7 to 1,692 (median: 41), and the percentage of censored observations ranged from 5.26 to 97.7 (median: 78.1) (\tabrefAppendix{tab:datasets}).
 
 \subsubsection{Monte-Carlo cross validation}
 
@@ -456,7 +456,7 @@ For each risk prediction task, we completed 25 runs of Monte-Carlo cross validat
 
 \subsubsection{Statistical analysis}
 
-After collecting data from 25 replications of Monte-Carlo cross validation for the 14 learners in all 21 risk prediction tasks, we analyzed the resulting 7,350 observations of IPA and, separately, time-dependent C-statistic, using a Bayesian linear mixed model. Our approach follows the ideas described by \citet{benavoli2017time} and \citet{tidymodels}, who developed guidelines on making statistical comparisons between learners using Bayesian models. Specifically, we fit two models: $$\text{IPA} = \widehat{\gamma}_0 + \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run}) $$ and $$\text{C-stat} = \widehat{\gamma}_0 + \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run}).$$ Random intercepts for specific splits of data (\ie, \texttt{run} in the model formula) were nested within datasets. The intercept, $\widehat{\gamma}_0$, was the expected value of the outcome using \texttt{aorsf-fast}, making the coefficients in $\widehat{\gamma}$ the expected differences between \texttt{aorsf-fast} and other learners. Default priors from \texttt{rstanarm} were applied for model fitting \citep{rstanarm}.
+After collecting data from 25 replications of Monte-Carlo cross validation for the 14 learners in all 35 risk prediction tasks, we analyzed the resulting 12,250 observations of IPA and, separately, time-dependent C-statistic, using a Bayesian linear mixed model. Our approach follows the ideas described by \citet{benavoli2017time} and \citet{tidymodels}, who developed guidelines on making statistical comparisons between learners using Bayesian models. Specifically, we fit two models: $$\text{IPA} = \widehat{\gamma}_0 + \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run}) $$ and $$\text{C-stat} = \widehat{\gamma}_0 + \widehat{\gamma} \cdot \text{learner} + (1\,|\, \text{data/run}).$$ Random intercepts for specific splits of data (\ie, \texttt{run} in the model formula) were nested within datasets. The intercept, $\widehat{\gamma}_0$, was the expected value of the outcome using \texttt{aorsf-fast}, making the coefficients in $\widehat{\gamma}$ the expected differences between \texttt{aorsf-fast} and other learners. Default priors from \texttt{rstanarm} were applied for model fitting \citep{rstanarm}.
 
 \paragraph{Hypothesis testing} For both the IPA and time-dependent C-statistic, we conducted equivalence and inferiority tests based on a 1 point region of practical equivalence. More specifically, we concluded that two learners had practically equivalent IPA or time-dependent C-statistic if there was a 95\% or higher posterior probability that the absolute difference in the relevant metric was less than 1. We concluded that one learner was weakly superior when there was $\geq$ 95\% posterior probability that the absolute difference in the relevant metric was non-zero, and concluded superiority when when there was $\geq$ 95\% posterior probability that the absolute difference in the relevant metric was 1 or more.
 
@@ -504,7 +504,7 @@ The aim of this numeric experiment is to evaluate the computational efficiency o
 
 \subsubsection{Evaluation of computational efficiency}
 
-For each learner discussed in \secref{sec:learners} and for each of the 21 risk prediction tasks analyzed in \secref{sec:bm_pred}, we tracked the amount of time required to fit a prediction model (including time used to tune parameters) and compute predicted risk.
+For each learner discussed in \secref{sec:learners} and for each of the 35 risk prediction tasks analyzed in \secref{sec:bm_pred}, we tracked the amount of time required to fit a prediction model (including time used to tune parameters) and compute predicted risk.
 
 We performed additional benchmarks on the time required to fit 500 trees using \texttt{aorsf}, \texttt{randomForestSRC}, and \texttt{ranger}. The learners that represented these R packages were \texttt{aorsf-fast}, \texttt{rsf-standard}, and \texttt{rsf-extratrees}, respectively. To allow for controlled comparisons of computational efficiency with varying dimensions of training data, we used the same process to simulate data as described in \secref{sec:data_sim}, varying the number of observations from 100 to 10000 and the number of predictors from 10 to 1000. The minimum node size of trees in this experiment was dynamically set as the nearest integer to the number of observations in the training set divided by 10.
 
@@ -520,11 +520,11 @@ In \secref{sec:results_pred}, \secref{sec:results_vi}, and \secref{sec:results_c
 
 \subsection{Prediction accuracy} \label{sec:results_pred}
 
-A full summary of all results presented in this Section is provided in \tabrefAppendix{tab:bm_pred_all}. In total, 521 out of 525 Monte-Carlo cross validation runs were completed. On run 13, 18, 24 and 25 for the ACTG 320 data, the \texttt{nn-cox} learner encountered an error during its fitting procedure.
+A full summary of all results presented in this Section is provided in \tabrefAppendix{tab:bm_pred_all}. In total, 871 out of 875 Monte-Carlo cross validation runs were completed. On run 13, 18, 24 and 25 for the ACTG 320 data, the \texttt{nn-cox} learner encountered an error during its fitting procedure.
 
 \paragraph{Index of prediction accuracy}
 
-Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest IPA in 7 out of 21 risk prediction tasks, with an overall mean IPA of 14.1 (Figure \ref{fig:bm_pred_viz_ibs}). Compared to the learner with the second highest mean IPA (\texttt{cif-rotate}), \texttt{aorsf-fast}'s mean was 0.851 points higher, a relative increase of 6.43\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected IPA was 0.89, and the posterior probability of \texttt{aorsf-fast} having a superior IPA to other learners ranged from 0.37 (versus \texttt{cif-rotate}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_ibs})
+Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest IPA in 17 out of 35 risk prediction tasks, with an overall mean IPA of 12.6 (Figure \ref{fig:bm_pred_viz_ibs}). Compared to the learner with the second highest mean IPA (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 1.33 points higher, a relative increase of 11.7\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected IPA was 0.99, and the posterior probability of \texttt{aorsf-fast} having a superior IPA to other learners ranged from 0.80 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_ibs})
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
@@ -546,7 +546,7 @@ Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the hig
 
 
 
-Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest time-dependent C-statistic in 6 out of 21 risk prediction tasks, with an overall mean of 75.8 (Figure \ref{fig:bm_pred_viz_cstat}). Compared to the learner with the second highest mean C-statistic (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 0.903 points higher, a relative increase of 1.20\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected time-dependent C-statistics was 0.96, and the posterior probability of \texttt{aorsf-fast} having a superior time-dependent C-statistic versus other learners ranged from 0.44 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_cstat})
+Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the highest time-dependent C-statistic in 9 out of 35 risk prediction tasks, with an overall mean of 77.2 (Figure \ref{fig:bm_pred_viz_cstat}). Compared to the learner with the second highest mean C-statistic (\texttt{cif-standard}), \texttt{aorsf-fast}'s mean was 0.668 points higher, a relative increase of 0.873\%. The posterior probability of \texttt{aorsf-fast} and \texttt{aorsf-cph} having practically equivalent expected time-dependent C-statistics was $>$ 0.999, and the posterior probability of \texttt{aorsf-fast} having a superior time-dependent C-statistic versus other learners ranged from 0.15 (versus \texttt{cif-standard}) to $>$0.999 (versus several other learners; see Figure \ref{fig:bm_pred_model_viz_cstat})
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
@@ -581,7 +581,7 @@ The three techniques that used `aorsf' to estimate VI were ranked first (\texttt
 
 
 
-In the analysis of 21 risk prediction tasks, \texttt{aorsf-fast} was the second fastest learner overall, with a median time to develop a risk prediction model and compute predictions about 76 milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was 917.1 times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was 16.0, 0.820, and 4.70 faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
+In the analysis of 35 risk prediction tasks, \texttt{aorsf-fast} was the second fastest learner overall, with a median time to develop a risk prediction model and compute predictions about 337 milliseconds longer than \texttt{glmnet-cox} (Figure \ref{fig:bm_pred_time}). Comparing median computing times, \texttt{aorsf-fast} was 1,291.6 times faster than its predecessor, \texttt{obliqueRSF-net}. In addition, \texttt{aorsf-fast} was 19.8, 1.90, and 3.18 faster than axis based forests grown using the \texttt{party}, \texttt{ranger}, and \texttt{randomForestSRC} packages, respectively.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
@@ -602,7 +602,7 @@ In the analysis of time to fit 500 trees using simulated data, the \texttt{range
 
 \section{Discussion} \label{sec:discussion}
 
-In this paper, we have developed two contributions to the oblique RSF: (1) the accelerated oblique RSF (\ie, \texttt{aorsf-fast}) and (2) negation VI. Our technique to accelerate the oblique RSF reduces the number of operations required to find linear combinations of inputs using a single iteration of Newton Raphson scoring, while our VI technique directly engages with coefficients in linear combinations of inputs to measure importance of individual variables. In numeric experiments, we found that \texttt{aorsf-fast} is approximately 917.1 times faster than its predecessor, \texttt{obliqueRSF-net}, with a practically equivalent C-statistic. We also found that negation VI, a technique to estimate VI using the oblique RSF, detected non-linear, combination, and main effects more effectively than three standard methods to estimate VI: permutation, ANOVA, and SHAP VI. Overall, we found that estimating VI using negation instead of ANOVA increased the C-statistic for ranking a relevant variable higher than an irrelevant variable by 2.05, a relative increase of 2.78\%.
+In this paper, we have developed two contributions to the oblique RSF: (1) the accelerated oblique RSF (\ie, \texttt{aorsf-fast}) and (2) negation VI. Our technique to accelerate the oblique RSF reduces the number of operations required to find linear combinations of inputs using a single iteration of Newton Raphson scoring, while our VI technique directly engages with coefficients in linear combinations of inputs to measure importance of individual variables. In numeric experiments, we found that \texttt{aorsf-fast} is approximately 1,291.6 times faster than its predecessor, \texttt{obliqueRSF-net}, with a practically equivalent C-statistic. We also found that negation VI, a technique to estimate VI using the oblique RSF, detected non-linear, combination, and main effects more effectively than three standard methods to estimate VI: permutation, ANOVA, and SHAP VI. Overall, we found that estimating VI using negation instead of ANOVA increased the C-statistic for ranking a relevant variable higher than an irrelevant variable by 2.05, a relative increase of 2.78\%.
 
 To understand potential differences in computational efficiency, we reviewed code in the \texttt{aorsf}, \texttt{randomForestSRC}, and \texttt{ranger} packages. We found differences in how survival outcome data are saved in leaf nodes. For each leaf node, \texttt{aorsf} stores data with one row per unique event time using training data that are stored in the leaf, whereas \texttt{randomForestSRC} and \texttt{ranger} store survival outcomes at a fixed grid of event times in each leaf. By default, \texttt{ranger} creates a grid that includes all event times in the training data. The grid strategy can cause higher computing time and memory usage when the grid of event times is large and a large number of leaf nodes are included in each tree, which can occur when minimum node size is small relative to the size of the training data. We kept minimum node size fixed in our benchmark of computational efficiency using real data, and dymanically increased minimum node size based on the size of the training set when we benchmarked computational efficiency using simulated data. Because of this decision, the \texttt{randomForestSRC} and \texttt{ranger} packages ran slower than \texttt{aorsf} in our benchmark of real data but not in the benchmark of simulated data.
 
@@ -643,12 +643,17 @@ Oblique RSFs have exceptional prediction accuracy and this study has shown how t
  \item The ``Non-alcohol fatty liver disease'' data \citep{allen2018nonalcoholic} were obtained from the \texttt{survival} R package \citep{survival}. 
  \item The ``Rotterdam tumor bank'' data \citep{royston2013external} were obtained from the \texttt{survival} R package \citep{survival}. 
  \item The ``ACTG 320'' data \citep{hosmer2002applied} were obtained from the \texttt{mlr3proba} R package \citep{mlr3proba}. 
+ \item The ``GUIDE-IT'' data \citep{felker2017effect} were obtained from BioLINCC. 
  \item The ``Early breast cancer'' data \citep{desmedt2011multifactorial, hatzis2011genomic, ternes2017identification} were obtained from the \texttt{biospear} R package \citep{biospear}. 
+ \item The ``SPRINT'' data \citep{sprint2015randomized} were obtained from BioLINCC. 
  \item The ``NKI 70 gene signature'' data \citep{van2002gene} were obtained from the \texttt{OpenML} R package \citep{OpenML}. 
  \item The ``Lung cancer'' data \citep{director2008gene} were obtained from the \texttt{OpenML} R package \citep{OpenML}. 
  \item The ``NCCTG Lung Cancer'' data \citep{loprinzi1994prospective} were obtained from the \texttt{survival} R package \citep{survival}. 
  \item The ``FCL'' data \citep{pintilie2006competing} were obtained from the \texttt{randomForestSRC} R package \citep{randomForestSRC}. 
- \item The ``Monoclonal gammopathy'' data \citep{kyle2002long} were obtained from the \texttt{survival} R package \citep{survival}.
+ \item The ``Monoclonal gammopathy'' data \citep{kyle2002long} were obtained from the \texttt{survival} R package \citep{survival}. 
+ \item The ``MESA'' data \citep{bild2002multi} were obtained from BioLINCC. 
+ \item The ``ARIC'' data \citep{aric1989atherosclerosis} were obtained from BioLINCC. 
+ \item The ``JHS'' data \citep{taylor2005toward} were obtained from BioLINCC.
 
 \end{enumerate}
 
@@ -686,7 +691,15 @@ Non-alcohol fatty liver disease & 17,549 & 24 & Death & 1,364 & 92.2\\
 \cmidrule{4-6}\nopagebreak
 \multirow{-2}{*}{\raggedright\arraybackslash ACTG 320} & \multirow{-2}{*}{\centering\arraybackslash 1,151} & \multirow{-2}{*}{\centering\arraybackslash 12} & Death & 26 & 97.7\\
 \cmidrule{1-6}\pagebreak[0]
+ &  &  & Cardiovascular Death & 110 & 87.7\\
+\cmidrule{4-6}\nopagebreak
+\multirow{-2}{*}{\raggedright\arraybackslash GUIDE-IT} & \multirow{-2}{*}{\centering\arraybackslash 894} & \multirow{-2}{*}{\centering\arraybackslash 59} & Hf Hospitalization & 288 & 67.8\\
+\cmidrule{1-6}\pagebreak[0]
 Early breast cancer & 614 & 1,692 & Recurrence Or Death & 134 & 78.2\\
+\cmidrule{1-6}\pagebreak[0]
+ &  &  & Cardiovascular Death & 521 & 94.4\\
+\cmidrule{4-6}\nopagebreak
+\multirow{-2}{*}{\raggedright\arraybackslash SPRINT} & \multirow{-2}{*}{\centering\arraybackslash 9,361} & \multirow{-2}{*}{\centering\arraybackslash 174} & Death & 1,644 & 82.4\\
 \cmidrule{1-6}\pagebreak[0]
 NKI 70 gene signature & 144 & 77 & Death Or Metastasis & 48 & 66.7\\
 \cmidrule{1-6}\pagebreak[0]
@@ -701,6 +714,26 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
  &  &  & Death & 963 & 30.4\\
 \cmidrule{4-6}\nopagebreak
 \multirow{-2}{*}{\raggedright\arraybackslash Monoclonal gammopathy} & \multirow{-2}{*}{\centering\arraybackslash 1,384} & \multirow{-2}{*}{\centering\arraybackslash 8} & Malignancy & 115 & 91.7\\
+\cmidrule{1-6}\pagebreak[0]
+ &  &  & Heart Failure & 339 & 95.0\\
+\cmidrule{4-6}\nopagebreak
+ &  &  & Coronary Heart Disease & 439 & 93.5\\
+\cmidrule{4-6}\nopagebreak
+ &  &  & Stroke & 292 & 95.7\\
+\cmidrule{4-6}\nopagebreak
+\multirow{-4}{*}{\raggedright\arraybackslash MESA} & \multirow{-4}{*}{\centering\arraybackslash 6,783} & \multirow{-4}{*}{\centering\arraybackslash 48} & Death & 1,297 & 80.9\\
+\cmidrule{1-6}\pagebreak[0]
+ &  &  & Heart Failure & 2,981 & 78.1\\
+\cmidrule{4-6}\nopagebreak
+ &  &  & Coronary Heart Disease & 2,282 & 83.2\\
+\cmidrule{4-6}\nopagebreak
+ &  &  & Stroke & 1,323 & 90.3\\
+\cmidrule{4-6}\nopagebreak
+\multirow{-4}{*}{\raggedright\arraybackslash ARIC} & \multirow{-4}{*}{\centering\arraybackslash 13,623} & \multirow{-4}{*}{\centering\arraybackslash 41} & Death & 6,662 & 51.1\\
+\cmidrule{1-6}\pagebreak[0]
+ &  &  & Stroke & 152 & 95.8\\
+\cmidrule{4-6}\nopagebreak
+\multirow{-2}{*}{\raggedright\arraybackslash JHS} & \multirow{-2}{*}{\centering\arraybackslash 3,501} & \multirow{-2}{*}{\centering\arraybackslash 80} & Coronary Heart Disease & 190 & 94.6\\
 \bottomrule
 \end{longtable}
 \end{landscape}
@@ -712,14 +745,14 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
 \begin{longtable}[t]{lcccc}
-\caption{\label{tab:unnamed-chunk-11}Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 21 risk prediction tasks.\label{tab:bm_pred_all}}\\
+\caption{\label{tab:unnamed-chunk-11}Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 35 risk prediction tasks.\label{tab:bm_pred_all}}\\
 \toprule
 \multicolumn{1}{c}{ } & \multicolumn{2}{c}{Performance metric (SD)} & \multicolumn{2}{c}{Computation time, seconds} \\
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
   & Scaled Brier & C-Statistic & Model fitting & Risk prediction\\
 \midrule
 \endfirsthead
-\caption[]{Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 21 risk prediction tasks.\label{tab:bm_pred_all} \textit{(continued)}}\\
+\caption[]{Index of prediction accuracy, time-dependent concordance statistic, and computational time required to fit and compute predictions for several learning algorithms across 35 risk prediction tasks.\label{tab:bm_pred_all} \textit{(continued)}}\\
 \toprule
   & Scaled Brier & C-Statistic & Model fitting & Risk prediction\\
 \midrule
@@ -731,19 +764,19 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Overall}}}\\
 \hline
-\hspace{1em}aorsf-cph & 0.142 (0.129) & 0.759 (0.083) & 0.598 & 0.042\\
-\hspace{1em}aorsf-fast & 0.141 (0.129) & 0.758 (0.084) & 0.200 & 0.043\\
-\hspace{1em}cif-rotate & 0.132 (0.153) & 0.741 (0.096) & 14.486 & 3.435\\
-\hspace{1em}cif-standard & 0.127 (0.116) & 0.749 (0.082) & 0.939 & 3.370\\
-\hspace{1em}glmnet-cox & 0.124 (0.144) & 0.746 (0.087) & 0.183 & 0.002\\
-\hspace{1em}rsf-standard & 0.124 (0.135) & 0.741 (0.088) & 1.103 & 0.105\\
-\hspace{1em}obliqueRSF-net & 0.121 (0.094) & 0.760 (0.081) & 211.788 & 20.351\\
-\hspace{1em}cif-extension & 0.119 (0.111) & 0.749 (0.086) & 8.578 & 3.809\\
-\hspace{1em}aorsf-random & 0.111 (0.092) & 0.742 (0.076) & 0.915 & 0.040\\
-\hspace{1em}ranger-extratrees & 0.111 (0.101) & 0.749 (0.079) & 0.057 & 0.143\\
-\hspace{1em}xgboost-cox & 0.081 (0.121) & 0.722 (0.108) & 3.406 & 0.003\\
-\hspace{1em}nn-cox & 0.028 (0.124) & 0.584 (0.126) & 9.229 & 0.680\\
-\hspace{1em}xgboost-aft & --- & 0.745 (0.088) & 11.525 & 0.006\\
+\hspace{1em}aorsf-fast & 0.126 (0.109) & 0.772 (0.071) & 0.527 & 0.138\\
+\hspace{1em}aorsf-cph & 0.126 (0.109) & 0.771 (0.070) & 1.750 & 0.140\\
+\hspace{1em}cif-standard & 0.113 (0.098) & 0.765 (0.071) & 3.792 & 6.448\\
+\hspace{1em}rsf-standard & 0.113 (0.114) & 0.755 (0.075) & 1.945 & 0.196\\
+\hspace{1em}cif-rotate & 0.112 (0.124) & 0.755 (0.081) & 36.928 & 8.194\\
+\hspace{1em}obliqueRSF-net & 0.109 (0.081) & 0.773 (0.069) & 552.335 & 84.685\\
+\hspace{1em}glmnet-cox & 0.108 (0.119) & 0.757 (0.077) & 0.326 & 0.003\\
+\hspace{1em}ranger-extratrees & 0.099 (0.085) & 0.762 (0.067) & 0.790 & 1.109\\
+\hspace{1em}cif-extension & 0.095 (0.092) & 0.761 (0.072) & 21.977 & 6.922\\
+\hspace{1em}aorsf-random & 0.092 (0.079) & 0.744 (0.065) & 1.717 & 0.149\\
+\hspace{1em}xgboost-cox & 0.064 (0.100) & 0.749 (0.094) & 4.394 & 0.004\\
+\hspace{1em}nn-cox & 0.048 (0.106) & 0.657 (0.136) & 11.377 & 1.705\\
+\hspace{1em}xgboost-aft & --- & 0.762 (0.076) & 15.031 & 0.007\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{ACTG 320; AIDS diagnosis, n = 1151, p = 12}}}\\
 \hline
@@ -776,6 +809,70 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}cif-rotate & -0.037 (0.049) & 0.707 (0.090) & 13.163 & 3.201\\
 \hspace{1em}glmnet-cox & -0.065 (0.095) & 0.746 (0.098) & 0.286 & 0.002\\
 \hspace{1em}xgboost-aft & --- & 0.774 (0.070) & 10.124 & 0.005\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{ARIC; coronary heart disease, n = 13623, p = 41}}}\\
+\hline
+\hspace{1em}aorsf-fast & 0.156 (0.007) & 0.810 (0.007) & 4.590 & 1.434\\
+\hspace{1em}aorsf-cph & 0.153 (0.006) & 0.809 (0.007) & 14.582 & 1.450\\
+\hspace{1em}rsf-standard & 0.150 (0.007) & 0.801 (0.007) & 8.222 & 0.981\\
+\hspace{1em}obliqueRSF-net & 0.133 (0.005) & 0.811 (0.008) & 4468.696 & 1359.275\\
+\hspace{1em}cif-standard & 0.132 (0.005) & 0.809 (0.007) & 70.462 & 358.273\\
+\hspace{1em}glmnet-cox & 0.129 (0.011) & 0.795 (0.008) & 1.873 & 0.010\\
+\hspace{1em}nn-cox & 0.126 (0.012) & 0.795 (0.007) & 43.144 & 86.104\\
+\hspace{1em}ranger-extratrees & 0.112 (0.005) & 0.795 (0.009) & 283.364 & 69.939\\
+\hspace{1em}aorsf-random & 0.104 (0.005) & 0.771 (0.008) & 11.343 & 1.420\\
+\hspace{1em}cif-rotate & 0.104 (0.004) & 0.783 (0.009) & 558.249 & 68.510\\
+\hspace{1em}cif-extension & 0.069 (0.002) & 0.786 (0.009) & 164.161 & 50.420\\
+\hspace{1em}xgboost-cox & 0.064 (0.017) & 0.813 (0.006) & 9.660 & 0.015\\
+\hspace{1em}xgboost-aft & --- & 0.814 (0.006) & 29.321 & 0.013\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{ARIC; death, n = 13623, p = 41}}}\\
+\hline
+\hspace{1em}rsf-standard & 0.216 (0.006) & 0.789 (0.004) & 12.352 & 1.162\\
+\hspace{1em}aorsf-fast & 0.216 (0.006) & 0.792 (0.004) & 7.463 & 2.519\\
+\hspace{1em}aorsf-cph & 0.215 (0.006) & 0.792 (0.004) & 22.389 & 2.569\\
+\hspace{1em}cif-standard & 0.201 (0.004) & 0.790 (0.004) & 68.083 & 373.333\\
+\hspace{1em}obliqueRSF-net & 0.195 (0.004) & 0.789 (0.004) & 7373.936 & 1276.463\\
+\hspace{1em}nn-cox & 0.191 (0.008) & 0.779 (0.005) & 83.418 & 84.770\\
+\hspace{1em}glmnet-cox & 0.191 (0.015) & 0.777 (0.007) & 2.282 & 0.011\\
+\hspace{1em}ranger-extratrees & 0.181 (0.004) & 0.780 (0.005) & 356.276 & 61.525\\
+\hspace{1em}cif-rotate & 0.151 (0.007) & 0.757 (0.006) & 563.575 & 64.849\\
+\hspace{1em}xgboost-cox & 0.131 (0.012) & 0.794 (0.004) & 12.568 & 0.015\\
+\hspace{1em}aorsf-random & 0.128 (0.006) & 0.725 (0.005) & 20.291 & 2.298\\
+\hspace{1em}cif-extension & 0.113 (0.002) & 0.775 (0.005) & 176.867 & 50.345\\
+\hspace{1em}xgboost-aft & --- & 0.794 (0.004) & 35.380 & 0.013\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{ARIC; heart failure, n = 13623, p = 41}}}\\
+\hline
+\hspace{1em}aorsf-fast & 0.233 (0.006) & 0.841 (0.005) & 5.478 & 1.709\\
+\hspace{1em}rsf-standard & 0.229 (0.006) & 0.835 (0.005) & 10.326 & 1.039\\
+\hspace{1em}aorsf-cph & 0.229 (0.006) & 0.840 (0.005) & 17.063 & 1.730\\
+\hspace{1em}cif-standard & 0.199 (0.005) & 0.839 (0.005) & 68.929 & 364.202\\
+\hspace{1em}obliqueRSF-net & 0.198 (0.005) & 0.839 (0.005) & 5341.195 & 1624.560\\
+\hspace{1em}nn-cox & 0.188 (0.018) & 0.826 (0.006) & 58.351 & 89.012\\
+\hspace{1em}cif-rotate & 0.172 (0.006) & 0.806 (0.007) & 569.166 & 67.654\\
+\hspace{1em}ranger-extratrees & 0.170 (0.004) & 0.824 (0.005) & 411.253 & 73.737\\
+\hspace{1em}glmnet-cox & 0.167 (0.044) & 0.817 (0.018) & 2.257 & 0.010\\
+\hspace{1em}aorsf-random & 0.151 (0.006) & 0.792 (0.007) & 14.023 & 1.686\\
+\hspace{1em}xgboost-cox & 0.122 (0.017) & 0.845 (0.005) & 11.985 & 0.015\\
+\hspace{1em}cif-extension & 0.109 (0.003) & 0.808 (0.006) & 169.620 & 49.957\\
+\hspace{1em}xgboost-aft & --- & 0.844 (0.005) & 30.837 & 0.012\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{ARIC; stroke, n = 13623, p = 41}}}\\
+\hline
+\hspace{1em}aorsf-fast & 0.093 (0.004) & 0.793 (0.007) & 3.625 & 1.205\\
+\hspace{1em}aorsf-cph & 0.090 (0.004) & 0.792 (0.007) & 12.691 & 1.331\\
+\hspace{1em}rsf-standard & 0.090 (0.006) & 0.784 (0.006) & 8.134 & 0.916\\
+\hspace{1em}glmnet-cox & 0.078 (0.004) & 0.787 (0.007) & 1.781 & 0.010\\
+\hspace{1em}obliqueRSF-net & 0.073 (0.003) & 0.789 (0.008) & 3058.459 & 2338.694\\
+\hspace{1em}cif-standard & 0.073 (0.003) & 0.787 (0.007) & 69.723 & 355.372\\
+\hspace{1em}nn-cox & 0.068 (0.016) & 0.781 (0.012) & 29.662 & 78.191\\
+\hspace{1em}ranger-extratrees & 0.067 (0.003) & 0.779 (0.008) & 219.331 & 61.397\\
+\hspace{1em}aorsf-random & 0.061 (0.005) & 0.750 (0.009) & 9.153 & 1.186\\
+\hspace{1em}cif-rotate & 0.052 (0.003) & 0.768 (0.009) & 573.621 & 66.723\\
+\hspace{1em}xgboost-cox & 0.047 (0.014) & 0.794 (0.006) & 7.662 & 0.014\\
+\hspace{1em}cif-extension & 0.036 (0.002) & 0.769 (0.009) & 167.033 & 51.074\\
+\hspace{1em}xgboost-aft & --- & 0.793 (0.006) & 25.321 & 0.012\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Colon cancer; death, n = 929, p = 12}}}\\
 \hline
@@ -873,6 +970,70 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}nn-cox & -0.015 (0.048) & 0.504 (0.037) & 8.139 & 0.727\\
 \hspace{1em}xgboost-aft & --- & 0.729 (0.021) & 12.179 & 0.006\\
 \addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{GUIDE-IT; CVD death, n = 894, p = 59}}}\\
+\hline
+\hspace{1em}aorsf-fast & 0.075 (0.018) & 0.745 (0.028) & 0.154 & 0.036\\
+\hspace{1em}aorsf-cph & 0.071 (0.018) & 0.742 (0.027) & 0.386 & 0.037\\
+\hspace{1em}glmnet-cox & 0.063 (0.041) & 0.715 (0.091) & 0.489 & 0.003\\
+\hspace{1em}obliqueRSF-net & 0.060 (0.013) & 0.741 (0.027) & 209.529 & 11.066\\
+\hspace{1em}cif-rotate & 0.059 (0.016) & 0.721 (0.025) & 34.549 & 4.966\\
+\hspace{1em}cif-standard & 0.058 (0.014) & 0.738 (0.022) & 1.380 & 3.350\\
+\hspace{1em}ranger-extratrees & 0.054 (0.013) & 0.737 (0.029) & 0.082 & 0.196\\
+\hspace{1em}cif-extension & 0.052 (0.011) & 0.730 (0.022) & 13.080 & 5.523\\
+\hspace{1em}rsf-standard & 0.046 (0.023) & 0.705 (0.025) & 0.174 & 0.061\\
+\hspace{1em}xgboost-cox & 0.044 (0.041) & 0.747 (0.020) & 3.880 & 0.003\\
+\hspace{1em}aorsf-random & 0.030 (0.011) & 0.675 (0.035) & 0.510 & 0.038\\
+\hspace{1em}nn-cox & 0.022 (0.036) & 0.673 (0.089) & 8.663 & 0.566\\
+\hspace{1em}xgboost-aft & --- & 0.734 (0.020) & 11.747 & 0.006\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{GUIDE-IT; HF hospitalization, n = 894, p = 59}}}\\
+\hline
+\hspace{1em}aorsf-fast & 0.081 (0.019) & 0.723 (0.024) & 0.239 & 0.054\\
+\hspace{1em}aorsf-cph & 0.080 (0.018) & 0.722 (0.024) & 0.682 & 0.055\\
+\hspace{1em}ranger-extratrees & 0.073 (0.010) & 0.722 (0.022) & 0.243 & 0.187\\
+\hspace{1em}obliqueRSF-net & 0.071 (0.009) & 0.721 (0.022) & 354.417 & 22.308\\
+\hspace{1em}cif-standard & 0.070 (0.010) & 0.716 (0.023) & 1.282 & 3.415\\
+\hspace{1em}cif-rotate & 0.067 (0.019) & 0.708 (0.029) & 40.978 & 4.799\\
+\hspace{1em}cif-extension & 0.064 (0.009) & 0.714 (0.022) & 14.406 & 5.796\\
+\hspace{1em}glmnet-cox & 0.058 (0.020) & 0.699 (0.025) & 0.391 & 0.002\\
+\hspace{1em}rsf-standard & 0.058 (0.022) & 0.694 (0.026) & 1.601 & 0.122\\
+\hspace{1em}nn-cox & 0.051 (0.026) & 0.701 (0.038) & 9.103 & 0.579\\
+\hspace{1em}xgboost-cox & 0.040 (0.016) & 0.699 (0.026) & 3.449 & 0.003\\
+\hspace{1em}aorsf-random & 0.039 (0.012) & 0.668 (0.028) & 0.889 & 0.053\\
+\hspace{1em}xgboost-aft & --- & 0.697 (0.025) & 13.258 & 0.006\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{JHS; coronary heart disease, n = 3501, p = 80}}}\\
+\hline
+\hspace{1em}aorsf-cph & 0.040 (0.007) & 0.778 (0.014) & 2.083 & 0.144\\
+\hspace{1em}aorsf-fast & 0.039 (0.007) & 0.777 (0.015) & 0.557 & 0.141\\
+\hspace{1em}obliqueRSF-net & 0.038 (0.005) & 0.784 (0.017) & 592.769 & 868.718\\
+\hspace{1em}cif-standard & 0.038 (0.006) & 0.779 (0.017) & 9.787 & 30.975\\
+\hspace{1em}cif-extension & 0.036 (0.004) & 0.781 (0.019) & 56.440 & 20.992\\
+\hspace{1em}ranger-extratrees & 0.035 (0.005) & 0.777 (0.017) & 3.678 & 2.536\\
+\hspace{1em}cif-rotate & 0.034 (0.010) & 0.769 (0.018) & 187.605 & 23.593\\
+\hspace{1em}glmnet-cox & 0.031 (0.010) & 0.774 (0.020) & 2.237 & 0.004\\
+\hspace{1em}rsf-standard & 0.031 (0.011) & 0.752 (0.016) & 2.011 & 0.215\\
+\hspace{1em}nn-cox & 0.025 (0.020) & 0.745 (0.029) & 10.189 & 6.685\\
+\hspace{1em}aorsf-random & 0.021 (0.004) & 0.746 (0.021) & 1.800 & 0.163\\
+\hspace{1em}xgboost-cox & 0.010 (0.023) & 0.785 (0.022) & 4.562 & 0.006\\
+\hspace{1em}xgboost-aft & --- & 0.782 (0.017) & 18.309 & 0.007\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{JHS; stroke, n = 3639, p = 80}}}\\
+\hline
+\hspace{1em}aorsf-cph & 0.035 (0.006) & 0.805 (0.017) & 2.137 & 0.141\\
+\hspace{1em}aorsf-fast & 0.035 (0.007) & 0.807 (0.018) & 0.527 & 0.139\\
+\hspace{1em}obliqueRSF-net & 0.028 (0.004) & 0.810 (0.016) & 528.781 & 577.511\\
+\hspace{1em}glmnet-cox & 0.028 (0.008) & 0.798 (0.017) & 2.915 & 0.004\\
+\hspace{1em}cif-standard & 0.028 (0.005) & 0.803 (0.016) & 10.497 & 32.921\\
+\hspace{1em}rsf-standard & 0.027 (0.010) & 0.782 (0.018) & 1.632 & 0.159\\
+\hspace{1em}cif-extension & 0.025 (0.003) & 0.797 (0.018) & 56.277 & 22.158\\
+\hspace{1em}aorsf-random & 0.024 (0.005) & 0.770 (0.023) & 1.726 & 0.158\\
+\hspace{1em}ranger-extratrees & 0.023 (0.005) & 0.791 (0.016) & 3.510 & 2.689\\
+\hspace{1em}cif-rotate & 0.023 (0.009) & 0.785 (0.017) & 186.661 & 24.918\\
+\hspace{1em}nn-cox & 0.014 (0.022) & 0.763 (0.045) & 9.541 & 6.840\\
+\hspace{1em}xgboost-cox & 0.002 (0.028) & 0.775 (0.023) & 3.500 & 0.005\\
+\hspace{1em}xgboost-aft & --- & 0.784 (0.018) & 16.110 & 0.007\\
+\addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Lung cancer; death, n = 442, p = 24}}}\\
 \hline
 \hspace{1em}aorsf-cph & 0.063 (0.031) & 0.691 (0.019) & 0.308 & 0.030\\
@@ -888,6 +1049,70 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}nn-cox & 0.019 (0.038) & 0.625 (0.062) & 9.211 & 0.291\\
 \hspace{1em}xgboost-cox & 0.018 (0.019) & 0.644 (0.027) & 1.583 & 0.002\\
 \hspace{1em}xgboost-aft & --- & 0.652 (0.026) & 8.520 & 0.005\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{MESA; coronary heart disease, n = 6785, p = 48}}}\\
+\hline
+\hspace{1em}aorsf-fast & 0.064 (0.010) & 0.807 (0.011) & 1.213 & 0.363\\
+\hspace{1em}aorsf-cph & 0.061 (0.010) & 0.802 (0.012) & 5.020 & 0.374\\
+\hspace{1em}cif-standard & 0.059 (0.007) & 0.803 (0.013) & 23.531 & 96.894\\
+\hspace{1em}obliqueRSF-net & 0.058 (0.006) & 0.809 (0.012) & 1296.402 & 747.185\\
+\hspace{1em}cif-rotate & 0.058 (0.009) & 0.802 (0.013) & 284.179 & 37.551\\
+\hspace{1em}rsf-standard & 0.057 (0.012) & 0.795 (0.013) & 3.455 & 1.337\\
+\hspace{1em}ranger-extratrees & 0.047 (0.004) & 0.794 (0.011) & 7.979 & 6.588\\
+\hspace{1em}cif-extension & 0.047 (0.003) & 0.805 (0.013) & 97.660 & 28.300\\
+\hspace{1em}aorsf-random & 0.041 (0.008) & 0.760 (0.015) & 2.930 & 0.404\\
+\hspace{1em}glmnet-cox & 0.038 (0.017) & 0.775 (0.016) & 4.514 & 0.006\\
+\hspace{1em}nn-cox & 0.035 (0.016) & 0.766 (0.019) & 13.123 & 15.303\\
+\hspace{1em}xgboost-cox & 0.014 (0.027) & 0.802 (0.013) & 5.344 & 0.008\\
+\hspace{1em}xgboost-aft & --- & 0.802 (0.012) & 20.582 & 0.009\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{MESA; death, n = 6793, p = 48}}}\\
+\hline
+\hspace{1em}aorsf-fast & 0.144 (0.008) & 0.792 (0.008) & 1.725 & 0.541\\
+\hspace{1em}aorsf-cph & 0.143 (0.008) & 0.791 (0.008) & 6.596 & 0.543\\
+\hspace{1em}rsf-standard & 0.140 (0.008) & 0.784 (0.009) & 4.936 & 0.480\\
+\hspace{1em}cif-standard & 0.134 (0.007) & 0.788 (0.009) & 23.408 & 98.656\\
+\hspace{1em}obliqueRSF-net & 0.132 (0.006) & 0.790 (0.009) & 2468.159 & 526.499\\
+\hspace{1em}glmnet-cox & 0.131 (0.026) & 0.789 (0.012) & 1.373 & 0.006\\
+\hspace{1em}nn-cox & 0.129 (0.019) & 0.788 (0.010) & 24.110 & 17.345\\
+\hspace{1em}cif-rotate & 0.126 (0.007) & 0.783 (0.010) & 319.531 & 37.277\\
+\hspace{1em}ranger-extratrees & 0.113 (0.004) & 0.784 (0.008) & 9.502 & 6.313\\
+\hspace{1em}cif-extension & 0.092 (0.003) & 0.781 (0.009) & 108.674 & 28.132\\
+\hspace{1em}aorsf-random & 0.086 (0.006) & 0.741 (0.009) & 5.817 & 0.577\\
+\hspace{1em}xgboost-cox & 0.057 (0.029) & 0.794 (0.009) & 8.811 & 0.009\\
+\hspace{1em}xgboost-aft & --- & 0.793 (0.009) & 24.056 & 0.009\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{MESA; heart failure, n = 6785, p = 48}}}\\
+\hline
+\hspace{1em}aorsf-fast & 0.115 (0.010) & 0.866 (0.012) & 1.118 & 0.321\\
+\hspace{1em}aorsf-cph & 0.109 (0.011) & 0.858 (0.013) & 4.817 & 0.334\\
+\hspace{1em}rsf-standard & 0.108 (0.012) & 0.856 (0.012) & 3.228 & 1.248\\
+\hspace{1em}cif-rotate & 0.105 (0.010) & 0.869 (0.013) & 254.592 & 36.536\\
+\hspace{1em}cif-standard & 0.102 (0.009) & 0.864 (0.013) & 23.983 & 97.903\\
+\hspace{1em}obliqueRSF-net & 0.099 (0.007) & 0.870 (0.012) & 1112.448 & 1225.449\\
+\hspace{1em}aorsf-random & 0.082 (0.009) & 0.819 (0.016) & 2.432 & 0.372\\
+\hspace{1em}cif-extension & 0.077 (0.005) & 0.864 (0.011) & 91.356 & 28.914\\
+\hspace{1em}nn-cox & 0.075 (0.021) & 0.832 (0.015) & 12.343 & 14.955\\
+\hspace{1em}ranger-extratrees & 0.075 (0.005) & 0.849 (0.015) & 7.105 & 6.412\\
+\hspace{1em}glmnet-cox & 0.043 (0.044) & 0.767 (0.139) & 3.485 & 0.006\\
+\hspace{1em}xgboost-cox & -0.011 (0.019) & 0.869 (0.011) & 7.135 & 0.009\\
+\hspace{1em}xgboost-aft & --- & 0.870 (0.012) & 22.191 & 0.008\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{MESA; stroke, n = 6783, p = 48}}}\\
+\hline
+\hspace{1em}cif-rotate & 0.025 (0.004) & 0.764 (0.017) & 267.261 & 37.143\\
+\hspace{1em}aorsf-fast & 0.025 (0.006) & 0.764 (0.016) & 1.087 & 0.318\\
+\hspace{1em}cif-standard & 0.025 (0.004) & 0.762 (0.017) & 23.820 & 97.317\\
+\hspace{1em}obliqueRSF-net & 0.024 (0.003) & 0.772 (0.017) & 975.645 & 1212.002\\
+\hspace{1em}aorsf-cph & 0.024 (0.006) & 0.760 (0.018) & 4.270 & 0.315\\
+\hspace{1em}ranger-extratrees & 0.022 (0.003) & 0.759 (0.016) & 7.125 & 6.067\\
+\hspace{1em}glmnet-cox & 0.021 (0.009) & 0.765 (0.017) & 3.417 & 0.006\\
+\hspace{1em}cif-extension & 0.021 (0.002) & 0.768 (0.017) & 93.628 & 27.983\\
+\hspace{1em}rsf-standard & 0.019 (0.009) & 0.745 (0.018) & 3.032 & 1.194\\
+\hspace{1em}aorsf-random & 0.016 (0.004) & 0.725 (0.023) & 2.309 & 0.342\\
+\hspace{1em}nn-cox & 0.016 (0.008) & 0.734 (0.040) & 11.686 & 18.015\\
+\hspace{1em}xgboost-cox & 0.000 (0.027) & 0.763 (0.016) & 4.469 & 0.008\\
+\hspace{1em}xgboost-aft & --- & 0.764 (0.015) & 20.407 & 0.008\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Monoclonal gammopathy; death, n = 1384, p = 8}}}\\
 \hline
@@ -1048,6 +1273,38 @@ NCCTG Lung Cancer & 228 & 9 & Death & 165 & 27.6\\
 \hspace{1em}xgboost-cox & 0.095 (0.038) & 0.824 (0.007) & 6.464 & 0.008\\
 \hspace{1em}nn-cox & 0.001 (0.003) & 0.576 (0.111) & 19.271 & 22.093\\
 \hspace{1em}xgboost-aft & --- & 0.823 (0.008) & 21.594 & 0.008\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{SPRINT; CVD death, n = 9361, p = 174}}}\\
+\hline
+\hspace{1em}glmnet-cox & 0.071 (0.011) & 0.795 (0.011) & 13.048 & 0.010\\
+\hspace{1em}aorsf-cph & 0.070 (0.006) & 0.797 (0.011) & 8.638 & 0.627\\
+\hspace{1em}aorsf-fast & 0.069 (0.006) & 0.797 (0.011) & 2.365 & 0.643\\
+\hspace{1em}rsf-standard & 0.065 (0.007) & 0.788 (0.014) & 4.277 & 1.394\\
+\hspace{1em}obliqueRSF-net & 0.064 (0.004) & 0.799 (0.011) & 2639.976 & 3402.983\\
+\hspace{1em}cif-standard & 0.061 (0.003) & 0.798 (0.011) & 49.621 & 182.059\\
+\hspace{1em}cif-rotate & 0.060 (0.005) & 0.791 (0.012) & 924.836 & 113.844\\
+\hspace{1em}ranger-extratrees & 0.054 (0.003) & 0.791 (0.012) & 8.222 & 7.874\\
+\hspace{1em}nn-cox & 0.040 (0.015) & 0.763 (0.022) & 16.891 & 22.686\\
+\hspace{1em}aorsf-random & 0.038 (0.003) & 0.768 (0.013) & 5.475 & 0.742\\
+\hspace{1em}cif-extension & 0.034 (0.002) & 0.789 (0.011) & 120.288 & 32.189\\
+\hspace{1em}xgboost-cox & 0.004 (0.019) & 0.800 (0.011) & 7.700 & 0.013\\
+\hspace{1em}xgboost-aft & --- & 0.796 (0.012) & 25.017 & 0.012\\
+\addlinespace[0.3em]
+\multicolumn{5}{l}{\textit{\textbf{SPRINT; death, n = 9361, p = 174}}}\\
+\hline
+\hspace{1em}glmnet-cox & 0.123 (0.012) & 0.771 (0.009) & 5.430 & 0.010\\
+\hspace{1em}aorsf-cph & 0.117 (0.008) & 0.770 (0.008) & 12.921 & 0.996\\
+\hspace{1em}aorsf-fast & 0.115 (0.008) & 0.770 (0.008) & 4.217 & 0.977\\
+\hspace{1em}rsf-standard & 0.110 (0.008) & 0.763 (0.009) & 7.137 & 0.691\\
+\hspace{1em}obliqueRSF-net & 0.108 (0.006) & 0.766 (0.008) & 4500.673 & 664.611\\
+\hspace{1em}cif-standard & 0.106 (0.006) & 0.764 (0.008) & 49.263 & 185.385\\
+\hspace{1em}nn-cox & 0.097 (0.012) & 0.755 (0.011) & 28.348 & 28.860\\
+\hspace{1em}ranger-extratrees & 0.096 (0.005) & 0.756 (0.009) & 9.647 & 8.153\\
+\hspace{1em}cif-rotate & 0.090 (0.007) & 0.745 (0.009) & 1039.879 & 113.336\\
+\hspace{1em}aorsf-random & 0.072 (0.003) & 0.741 (0.009) & 8.907 & 1.067\\
+\hspace{1em}cif-extension & 0.055 (0.002) & 0.747 (0.009) & 135.763 & 32.580\\
+\hspace{1em}xgboost-cox & 0.030 (0.022) & 0.772 (0.008) & 10.871 & 0.013\\
+\hspace{1em}xgboost-aft & --- & 0.772 (0.007) & 27.708 & 0.012\\
 \addlinespace[0.3em]
 \multicolumn{5}{l}{\textit{\textbf{Systolic Heart Failure; death, n = 2231, p = 41}}}\\
 \hline
