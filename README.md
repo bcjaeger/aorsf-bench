@@ -19,38 +19,44 @@ The entire project is summarized in a paper: `paper/arxix/main.pdf`.
 
 In case you want a much quicker summary of the paper:
 
--   We made oblique RSFs faster and also developed a new method to
-    estimate importance of individual predictors with them. These
-    methods are available in the `aorsf` R package.
+- We made oblique RSFs faster and also developed a new method to
+  estimate importance of individual predictors with them. These methods
+  are available in the `aorsf` R package.
 
--   We find that the accelerated oblique RSF (`aorsf-fast` in the paper)
-    is very fast. In fact, in a benchmark with 35 different risk
-    prediction tasks, `aorsf-fast` was faster than all of the learners
-    we analyzed, except for penalized Cox regression models
-    (`glmnet-cox` in the paper). **Figure**: Distribution of time taken
-    to fit a prediction model and compute predicted risk. The median
-    time, in seconds, is printed and annotated for each learner by a
-    vertical line.
+- We find that the accelerated oblique RSF (`aorsf-fast` in the paper)
+  is very fast. In fact, in a benchmark with 35 different risk
+  prediction tasks, `aorsf-fast` was faster than all of the learners we
+  analyzed, except for penalized Cox regression models (`glmnet-cox` in
+  the paper). **Figure**: Distribution of time taken to fit a prediction
+  model and compute predicted risk. The median time, in seconds, is
+  printed and annotated for each learner by a vertical line.
+
+<!-- -->
+
+    #> Warning: Using the `size` aesthetic with geom_segment was deprecated in ggplot2 3.4.0.
+    #> i Please use the `linewidth` aesthetic instead.
+    #> This warning is displayed once every 8 hours.
+    #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    #> generated.
 
 <img src="README_files/figure-gfm/fig-bm-time-1.png" style="display: block; margin: auto;" />
 
--   We find that `aorsf-fast` has the best index of prediction accuracy
-    out of all the learners we evaluated: **Figure**: Expected
-    differences in index of prediction accuracy between the accelerated
-    oblique random survival forest and other learning algorithms. A
-    region of practical equivalence is shown by purple dotted lines, and
-    a boundary of non-zero difference is shown by an orange dotted line
-    at the origin.
+- We find that `aorsf-fast` has the best index of prediction accuracy
+  out of all the learners we evaluated: **Figure**: Expected differences
+  in index of prediction accuracy between the accelerated oblique random
+  survival forest and other learning algorithms. A region of practical
+  equivalence is shown by purple dotted lines, and a boundary of
+  non-zero difference is shown by an orange dotted line at the origin.
 
 <img src="README_files/figure-gfm/fig-bm-ibs-1.png" style="display: block; margin: auto;" />
 
--   We find that negation variable importance improves the chances of
-    ranking a relevant variable as more important than an irrelevant
-    variable when using an oblique RSF to estimate variable importance.
-    **Figure**: Concordance statistic for assigning higher importance to
-    relevant versus irrelevant variables. Text appears in rows where
-    negation importance obtained the highest concordance, showing
-    absolute and percent improvement over the second best technique.
+- We find that negation variable importance improves the chances of
+  ranking a relevant variable as more important than an irrelevant
+  variable when using an oblique RSF to estimate variable importance.
+  **Figure**: Concordance statistic for assigning higher importance to
+  relevant versus irrelevant variables. Text appears in rows where
+  negation importance obtained the highest concordance, showing absolute
+  and percent improvement over the second best technique.
 
 <img src="README_files/figure-gfm/fig-bm-vi-1.png" style="display: block; margin: auto;" />
 
@@ -69,6 +75,7 @@ edit the vector of datasets passed into our `targets` pipeline (see
 a code chunk showing which datasets you need to comment out:
 
 ``` r
+
 data_source = c(
   "veteran",
   "colon_recur",
@@ -123,6 +130,7 @@ commenting out the ones you don’t want to run. Here is what I’d
 recommend if you’d like to speed up the pipeline:
 
 ``` r
+
 # slower model fitters are commented out
 
 model_fitters <- c(
