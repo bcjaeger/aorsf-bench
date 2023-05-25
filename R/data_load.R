@@ -1,9 +1,11 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param data_source
+# These functions each load a dataset relevant for numeric experiments
+# in the aorsf-bench paper. The nafld data are very large and take
+# extra time to process, so I wrote a separate function (see nafld_build)
+# that saves a local copy of the pre-processed data and makes it so
+# you won't have to pre-process them every time you ran an experiment
+# with them. Notably, some data are not publicly available, and those
+# can only be accessed if you are on the relevant IRBs with access to
+# the specific shared drive where they are stored.
 
 nki_load <- function(...){
 

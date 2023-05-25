@@ -1,4 +1,7 @@
 
+# this function creates the nafld data. It takes awhile to run, so I
+# found it more convenient to save the output in a flat file and then
+# read that file into R whenever the nafld data were needed.
 
 nafld_build <- function(){
 

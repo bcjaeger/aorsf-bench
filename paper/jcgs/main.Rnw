@@ -297,14 +297,14 @@ p2 <- ggplot(data = penguins_scaled) +
         legend.position = '',
         text = element_text(size = 12))
 
-p3 <- ggarrange(tag_facet(p1, tag_pool = "A", vjust = 2.5),
-                tag_facet(p2, tag_pool = "B", vjust = 2.5),
-                nrow = 1)
-
-p3
+ggarrange(tag_facet(p1, tag_pool = "A", vjust = 2.5),
+          tag_facet(p2, tag_pool = "B", vjust = 2.5),
+          nrow = 1)
 
 @
 
+
+Conceptually, oblique trees are similar to methods that use covariate rotation or extension to generate linear combinations of predictors prior to growing axis-based trees \citep{zhou2016random, wang2017random}. The difference is that oblique trees generate linear combinations of predictors within each non-leaf node, using only the data and predictors associated with that node, instead of generating the linear combinations prior to growing the tree. This ``node-specific'' approach to creating linear combinations of predictors leads to greater diversity in oblique tree ensembles, which may lead to greater prediction accuracy \citep{breiman2001random}.
 
 Despite the potential for higher accuracy, oblique trees have at least two notable drawbacks compared to axis-based trees. First, finding a locally optimal oblique decision rule may require exponentially more computation than an axis-based rule. If $p$ predictors are potentially used to split $n$ observations, up to $\mathcal{O}(n^p)$ oblique splits can be assessed versus $\mathcal{O}(n \cdot p)$ axis-based splits \citep{heath1993induction, murthy1994system}. Second, although variable importance (VI) is one of the most widely used strategies to interpret RFs \citep{ishwaran2019standard}, few studies have investigated VI for oblique RFs \citep[see][Section~5]{menze2011oblique}, and fewer have investigated VI specifically for the oblique RSF. Without general methodology to estimate VI, interpretation of oblique RFs is challenging.
 
@@ -336,10 +336,10 @@ To accelerate the oblique RSF, we propose to identify linear combinations of pre
 \begin{equation}\label{eqn:cox-partial-likelihood}
 L(\bm\beta) = \prod_{i=1}^m \frac{e^{\bm{x}_{j(i)}^T \bm\beta}}{\sum_{j \in R_i} e^{\bm{x}_j^T \bm\beta}},
 \end{equation}
-where $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (\ie, those still at risk at time $t_i$), and $j(i)$ is the index of the observation for which an event occurred at time $t_i$. Newton Raphson scoring is an exceptionally fast estimation procedure, and the \texttt{survival} package \citep{survival} includes documentation that outlines how to efficiently program it \citep{therneau_survival_2022}. Briefly, a vector of length \texttt{mtry} (\ie, the number of randomly selected predictors) with estimated regression coefficients, $\hat{\beta}$, is updated in each step of the procedure based on its first derivative, $U(\hat{\beta})$, and second derivative, $H(\hat{\beta})$:
-$$ \hat{\beta}^{k+1} =  \hat{\beta}^{k} + U(\hat{\beta} = \hat{\beta}^{k})\, H^{-1}(\hat{\beta} = \hat{\beta}^{k}) $$
+where $R_i$ is the set of indices, $j$, with $T_j \geq t_i$ (\ie, those still at risk at time $t_i$), and $j(i)$ is the index of the observation for which an event occurred at time $t_i$. Newton Raphson scoring is an exceptionally fast estimation procedure, and the \texttt{survival} package \citep{survival} includes documentation that outlines how to efficiently program it \citep{therneau_survival_2022}. As described in \cite{therneau2000cox}, a vector of estimated regression coefficients, $\hat{\bm{\beta}}$, is updated in each step of the procedure: $$\hat{\bm{\beta}}^{k+1} =  \hat{\bm{\beta}}^{k} + U(\hat{\bm{\beta}} = \hat{\bm{\beta}}^{k})\, \mathcal{I}^{-1}(\hat{\bm{\beta}} = \hat{\bm{\beta}}^{k}),$$ where $U(\hat{\bm{\beta}})$ is the score vector and $\mathcal{I}^{-1}(\hat{\bm{\beta}})$ is the inverse of the observed information matrix. After obtaining $\hat{\bm\beta}$, a linear combination of variables, $\eta$, is obtained by computing $\eta = \bm{x}^T \hat{\bm{\beta}}$.
 
-For statistical inference, it is recommended to continue updating $\hat{\beta}$ by completing additional iterations of Newton Raphson scoring until a convergence threshold is met. However, since an estimate of $\hat{\beta}$ is created by the first iteration of Newton Raphson scoring, only one iteration of Newton Raphson scoring is needed to identify a valid linear combination of predictors. Moreover, computing $U$ and $H$ requires computation and exponentiation of the vector $\bm{x}\hat{\beta}$, but these steps can be skipped on the first iteration of Newton Raphson scoring if an initial value of $\hat{\beta} = 0$ is chosen, allowing for a reduction in computing operations and removing the need to scale predictor values prior to initiating the Newton Raphson algorithm.\footnote{Predictors are scaled prior to initiating the Newton Raphson algorithm to avoid exponentiation of large numbers. However, if only one iteration is completed with an initial value of 0 for $\hat{\beta}$, then $\exp(\bm{x}\hat{\beta}) = 1$.} In \secref{sec:results_pred}, we formally test whether growing oblique survival trees using one iteration of Newton Raphson scoring provides equivalent prediction accuracy compared to trees where iterations are completed until a convergence threshold is met.
+
+For statistical inference, it is recommended to continue updating $\hat{\bm{\beta}}$ by completing additional iterations of Newton Raphson scoring until a convergence threshold is met. However, since an estimate of $\hat{\bm{\beta}}$ is created by the first iteration of Newton Raphson scoring, only one iteration of Newton Raphson scoring is needed to identify a valid linear combination of predictors. In \secref{sec:results_pred}, we formally test whether growing oblique survival trees using one iteration of Newton Raphson scoring provides equivalent prediction accuracy compared to trees where iterations are completed until a convergence threshold is met.
 
 Algorithm \ref{alg:aorsf} presents our approach to fitting an oblique survival tree in the accelerated oblique RSF using default values from the \texttt{aorsf} R package. Several steps are taken to reduce computational overhead. First, memory is conserved by conducting bootstrap resampling via random integer-valued weights, rather than using a bootstrapped copy of the original data. Memory conservation also takes place in terminal nodes, where we restrict estimation of the survival and cumulative hazard function to event times that occur among observations in the node. Second, early stopping is applied to the tree-growing procedure if a statistical criterion is not met. In our case, the criterion is based on the magnitude of a log-rank test statistic corresponding to splitting the data at a current node. Third, instead of greedy recursive partitioning, we use `good enough' partitioning. More specifically, instead of computing a log-rank test statistic for several different linear combinations of variables and proceeding with the highest scoring option, we identify an optimal cut-point for one linear combination of variables and assess whether using this combination will create a split that passes the criterion for splitting a node. If it does not pass the criterion, then another linear combination will be tested, with the maximum number of attempts set by the parameter \texttt{n\_retry}. Often a `good-enough` split can be found in just one attempt when the training set is large, which gives the accelerated oblique RSF a computational advantage in larger training sets compared to greedy partitioning.
 
@@ -361,7 +361,7 @@ Algorithm \ref{alg:aorsf} presents our approach to fitting an oblique survival t
        \State $\text{node\_cols} \gets \text{sample}(\text{from} = \left\{1, \ldots, \text{ncol}(\bm{x})\right\},\, \text{size} = \text{mtry},\,\text{replace} = \text{F})$ \label{marker}
        \State $\dataset_{\text{node}} \gets \text{subset}(\dataset_{\text{in-bag}},\,\text{rows} = \text{node\_rows},\,\text{columns} = \text{node\_cols})$
        \State $\beta \gets \text{newt\_raph}(\dataset_{\text{node}},\, \text{weights} = \text{subset}(w, \text{node\_rows}),\, \text{max\_iter} = 1)$
-       \State $\eta \gets \bm{x}_{\text{node}} \times \beta$
+       \State $\eta \gets \bm{x}^T_{\text{node}} \times \beta$
        \State $\mathcal{C} \gets \text{sample}(\text{from} = \text{unique}(\eta),\, \text{size} = \text{n\_split},\,\text{replace} = \text{F})$
        \State $c \gets \argmax_{c^* \in \mathcal{C}} \left\{ \text{log\_rank\_stat}(\eta, c^*) \right\}$
        \If{$\text{log\_rank\_stat}(\eta, c) \geq \text{split\_min\_stat}$}
@@ -504,7 +504,7 @@ The aim of this numeric experiment is to evaluate the prediction accuracy of the
 
 \subsubsection{Learners} \label{sec:learners}
 
-We consider four classes of learners: RSFs (both axis-based and oblique), boosting ensembles, regression models, and neural networks. Specific learners from each class are summarized in \tabref{tab:learners}. To facilitate fair comparisons, tuning parameters were harmonized within each class. For example, for RSF learners, we set the minimum node size (a parameter shared by all RSF learners) as 10. Additionally, for RSF learners, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500 (a common default value for the number of trees). For boosting, regression, and neural network learners, nested cross-validation was applied to tune relevant model parameters. Specifically, tuning for boosting models included identifying the number of steps to complete. For regression models, tuning was used to identify the magnitude of penalization. For neural networks, the number and density of layers was tuned.
+We consider four classes of learners: RSFs (both axis-based and oblique), boosting ensembles, regression models, and neural networks. Specific learners from each class are summarized in \tabref{tab:learners}. To facilitate fair comparisons, tuning parameters were harmonized within each class. For example, for RSF learners, we set the minimum node size (a parameter shared by all RSF learners) as 10. Additionally, for RSF learners, the number of randomly selected predictors was the square root of the total number of predictors rounded to the nearest integer, and the number of trees in the ensemble was 500 (a common default value for the number of trees). For boosting, regression, and neural network learners, nested cross-validation was applied to tune relevant model parameters. Nested cross-validation includes an `inner' cross-validation loop to evaluate different specifications of tuning parameters and an `outer' loop that evaluates the tuned model, providing an unbiased estimate of the underlying model and its tuning procedure. Specifically, tuning for boosting models included identifying the number of steps to complete. The maximum number of steps was 5000, the learning rate was fixed at 0.01, and early stopping was applied if there was no improvement in cross-validated negative log-likelihood for 25 steps. For regression models, tuning was used to identify the magnitude of penalization. For neural networks, the number of layers (\ie, length) and number of nodes in the layers (\ie, width) was tuned, while dropout rate was fixed at 10\%, batch size was fixed at 32 observations, and the rectified linear unit activation function was applied. In addition, neural networks completed a maximum of 500 epochs, with possible early stopping based on prediction accuracy in a validation set comprising 25\% of its training data..
 
 \newgeometry{margin=1cm} % modify this if you need even more space
 \begin{landscape}
@@ -999,9 +999,14 @@ data_key_tbl %>%
     source = if_else(
       is.na(rpack),
       'BioLINCC',
-      paste0('the \\texttt{', rpack, '} R package \\citep{', rpack, '}'))
+      paste0('the \\texttt{', rpack, '} R package \\citep{', rpack, '}')),
+    preproc = if_else(
+      preproc == 'none',
+      "No relevant pre-processing steps were taken",
+      paste0("In pre-processing steps, ", preproc)
+    )
   ) %>%
-  glue_data(" \\item The ``{label}'' data \\citep{{{cite}}} were obtained from {source}") %>%
+  glue_data(" \\item The ``{label}'' data \\citep{{{cite}}} were obtained from {source}. {preproc}") %>%
   unique() %>%
   paste(collapse = '. \n') %>%
   # removes just the first occurrence, which is not needed.

@@ -4,7 +4,9 @@ perc_diff <- function(a,b){
 
 bench_pred_visualize <- function(bm_pred_clean,
                                  data_key,
-                                 model_key){
+                                 model_key,
+                                 ymax_scale_ibs = 1.15,
+                                 ymax_scale_cstat = 1.15){
 
 
   data_recoder <- data_key |>
@@ -23,7 +25,8 @@ bench_pred_visualize <- function(bm_pred_clean,
       y_col_1 = -0.4,
       y_min = 0,
       y_breaks = seq(0, .6, by = .1),
-      eval_label = 'Index of Prediction Accuracy'
+      eval_label = 'Index of Prediction Accuracy',
+      ymax_scale = ymax_scale_ibs
     ),
     cstat = bench_pred_visualize_(
       filter(bm_pred_clean, data != 'sim'),
@@ -34,7 +37,8 @@ bench_pred_visualize <- function(bm_pred_clean,
       y_col_1 = 0.35,
       y_min = .55,
       y_breaks = seq(.7, 1, by = .1),
-      eval_label = 'C-statistic'
+      eval_label = 'C-statistic',
+      ymax_scale = ymax_scale_cstat
     )
   )
 
@@ -50,7 +54,8 @@ bench_pred_visualize_ <- function(
     y_col_1 = -0.4,
     y_min = 0,
     y_breaks = seq(0, .6, by = .1),
-    eval_label = 'Index of Prediction Accuracy'
+    eval_label = 'Index of Prediction Accuracy',
+    ymax_scale = 1.15
 ){
 
   bm_pred_inner <- bm_pred_clean |>
@@ -229,7 +234,7 @@ bench_pred_visualize_ <- function(
           axis.text.y = element_blank(),
           legend.position = '') +
     scale_fill_manual(values = oranges) +
-    scale_y_continuous(limits = c(y_col_1, max(data_fig$eval)*1.15),
+    scale_y_continuous(limits = c(y_col_1, max(data_fig$eval)*ymax_scale),
                        expand = c(0, 0),
                        breaks = y_breaks,
                        labels = function(x) x * 100) +

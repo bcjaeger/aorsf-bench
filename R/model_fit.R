@@ -1,26 +1,10 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param type
-#' @param train
-
-
-# template to be used for writing specific functions
-# model_fit <- function(train, node_size = 10){
-#
-  # mtry <- round(sqrt(ncol(train)-2))
-  #
-  # start_time <- Sys.time()
-  #
-  # # code for fitting
-  #
-  # end_time <- Sys.time()
-  #
-  # list(fit = fit, time_fit = end_time - start_time)
-#
-# }
+# These functions are used to tune and fit competing learners in the
+# aorsf-bench paper. Each function requires training data and some
+# specification of node_size, which means different things depending
+# on the learner. In addition, functions like cox_net_fit and xgb_cox_fit
+# require the prediction horizon to be specified during model fitting
+# so that an appropriate estimate of baseline hazard can be stored
+# for computing predictions later on.
 
 rotsf_fit <- function(train, node_size = 10, ...){
 
