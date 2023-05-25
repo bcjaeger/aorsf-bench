@@ -31,14 +31,6 @@ In case you want a much quicker summary of the paper:
   model and compute predicted risk. The median time, in seconds, is
   printed and annotated for each learner by a vertical line.
 
-<!-- -->
-
-    #> Warning: Using the `size` aesthetic with geom_segment was deprecated in ggplot2 3.4.0.
-    #> i Please use the `linewidth` aesthetic instead.
-    #> This warning is displayed once every 8 hours.
-    #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    #> generated.
-
 <img src="README_files/figure-gfm/fig-bm-time-1.png" style="display: block; margin: auto;" />
 
 - We find that `aorsf-fast` has the best index of prediction accuracy

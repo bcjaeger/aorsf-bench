@@ -8,6 +8,7 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   dpi = 300,
+  warning = FALSE,
   echo = FALSE,
   comment = "#>"
 )
