@@ -29,45 +29,45 @@ Warning--page numbers missing in mlr3proba
 Warning--empty organization in biospear
 Warning--empty organization in survival
 Warning--page numbers missing in tomita2020sparse
-You've used 78 entries,
+You've used 79 entries,
             2861 wiz_defined-function locations,
-            1059 strings with 21184 characters,
-and the built_in function-call counts, 66131 in all, are:
-= -- 4937
-> -- 6567
+            1065 strings with 21445 characters,
+and the built_in function-call counts, 66979 in all, are:
+= -- 5003
+> -- 6645
 < -- 5
-+ -- 2094
-- -- 2186
-* -- 6811
-:= -- 12371
-add.period$ -- 234
-call.type$ -- 78
-change.case$ -- 700
-chr.to.int$ -- 77
-cite$ -- 102
-duplicate$ -- 1386
-empty$ -- 3153
-format.name$ -- 2442
-if$ -- 12023
++ -- 2120
+- -- 2210
+* -- 6903
+:= -- 12523
+add.period$ -- 237
+call.type$ -- 79
+change.case$ -- 709
+chr.to.int$ -- 78
+cite$ -- 103
+duplicate$ -- 1404
+empty$ -- 3197
+format.name$ -- 2470
+if$ -- 12180
 int.to.chr$ -- 2
 int.to.str$ -- 0
-missing$ -- 68
-newline$ -- 390
-num.names$ -- 778
-pop$ -- 530
+missing$ -- 69
+newline$ -- 395
+num.names$ -- 788
+pop$ -- 536
 preamble$ -- 1
-purify$ -- 1182
+purify$ -- 1197
 quote$ -- 0
-skip$ -- 1473
+skip$ -- 1490
 stack$ -- 0
-substring$ -- 2827
-swap$ -- 474
+substring$ -- 2874
+swap$ -- 480
 text.length$ -- 5
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 1506
+type$ -- 1526
 warning$ -- 24
-while$ -- 687
+while$ -- 695
 width$ -- 0
-write$ -- 1018
+write$ -- 1031
 (There were 24 warnings)

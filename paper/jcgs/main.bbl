@@ -160,6 +160,13 @@ Hatzis, C., L.~Pusztai, V.~Valero, D.~J. Booser, L.~Esserman, A.~Lluch,
   taxane-anthracycline chemotherapy for invasive breast cancer.
 \newblock {\em Jama\/}~{\em 305\/}(18), 1873--1881.
 
+\bibitem[\protect\citeauthoryear{He, Eriksson, Scheike, and Zhang}{He
+  et~al.}{2016}]{he2016proportional}
+He, P., F.~Eriksson, T.~H. Scheike, and M.-J. Zhang (2016).
+\newblock A proportional hazards regression model for the subdistribution with
+  covariates-adjusted censoring weight for competing risks data.
+\newblock {\em Scandinavian Journal of Statistics\/}~{\em 43\/}(1), 103--122.
+
 \bibitem[\protect\citeauthoryear{Heath, Kasif, and Salzberg}{Heath
   et~al.}{1993}]{heath1993induction}
 Heath, D., S.~Kasif, and S.~Salzberg (1993).
