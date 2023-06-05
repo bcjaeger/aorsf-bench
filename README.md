@@ -17,24 +17,22 @@ The entire project is summarized in a paper: `paper/arxix/main.pdf`.
 
 ## tl;dr
 
-In case you want a much quicker summary of the paper:
-
 - We made oblique RSFs faster and also developed a new method to
   estimate importance of individual predictors with them. These methods
   are available in the `aorsf` R package.
 
 - We find that the accelerated oblique RSF (`aorsf-fast` in the paper)
-  is very fast. In fact, in a benchmark with 35 different risk
-  prediction tasks, `aorsf-fast` was faster than all of the learners we
-  analyzed, except for penalized Cox regression models (`glmnet-cox` in
-  the paper). **Figure**: Distribution of time taken to fit a prediction
+  is fast and accurate. In a benchmark with 35 different risk prediction
+  tasks, `aorsf-fast` was faster than all of the learners we analyzed
+  except for penalized Cox regression models (`glmnet-cox` in the
+  paper). **Figure**: Distribution of time taken to fit a prediction
   model and compute predicted risk. The median time, in seconds, is
   printed and annotated for each learner by a vertical line.
 
 <img src="README_files/figure-gfm/fig-bm-time-1.png" style="display: block; margin: auto;" />
 
 - We find that `aorsf-fast` has the best index of prediction accuracy
-  out of all the learners we evaluated: **Figure**: Expected differences
+  out of all the learners we evaluated. **Figure**: Expected differences
   in index of prediction accuracy between the accelerated oblique random
   survival forest and other learning algorithms. A region of practical
   equivalence is shown by purple dotted lines, and a boundary of
@@ -54,17 +52,20 @@ In case you want a much quicker summary of the paper:
 
 ## Reproducing this paper
 
-We use `targets` to coordinate the general benchmark experiment and
-simulation study that are presented in this research, and hope that our
-use of `targets` also makes it easier for others to engage with our
-code.
+We use `targets` to coordinate our numerical experiments. Thus, our
+results on publicly available data can be reproduced by cloning our repo
+and running `tar_make()` with only publicly available data requested in
+the `targets` pipeline. Below are the steps involved:
 
-Our work can be reproduced, mostly. The only thing that can’t be
-reproduced are the results based on datasets that we can’t share with
-you. To replicate our work using publicly available data, you need to
-edit the vector of datasets passed into our `targets` pipeline (see
-`_targets.R`) so that it only contains publicly available data. Below is
-a code chunk showing which datasets you need to comment out:
+1.  Clone our repo and open the associated Rstudio project.
+
+2.  Open `packages.R` and ensure you have installed the R packages
+    listed in this file.
+
+3.  In `_targets.R`, edit the vector of datasets passed into our
+    `targets` pipeline so that it only contains publicly available data.
+    Below is a code chunk showing which datasets you need to comment out
+    to request only the publicly available ones:
 
 ``` r
 
@@ -107,19 +108,18 @@ data_source = c(
 )
 ```
 
-You’ll still need to create the `nafld` data by running `nafld_build()`,
-which is an R function included in `R/nafld_build.R` that combines
-multiple datasets in the `survival` package into a dataset we analyzed
-in the current study.
+4.  Create the `nafld` data by running `nafld_build()`, which is an R
+    function included in `R/nafld_build.R` that combines multiple
+    datasets in the `survival` package into a dataset we analyzed in the
+    current study. An example of how this can be done is below:
 
-Once you’ve completed these steps and installed the packages listed in
-`packages.R`, all you need to do is run `targets::tar_make()`. However,
-it will take a very long time to make the pipeline as-is and I recommend
-setting `run_seed` to be `1:3` (see `_targets.R` to modify this value)
-to request only 3 replications of Monte-Carlo cross validation be
-completed. Also, you are free to use only a subset of the learners by
-commenting out the ones you don’t want to run. Here is what I’d
-recommend if you’d like to speed up the pipeline:
+5.  Run `targets::tar_make()` to make the targets pipeline, but be aware
+    that it will take a very long time to make the pipeline as-is.
+
+To make the process run quickly, I recommend setting `run_seed` to be
+`1:3` in `_targets.R` to request only 3 replications of Monte-Carlo
+cross validation be completed. Also in `_targets.R`, use a subset of the
+faster learners by commenting out the slower ones:
 
 ``` r
 
