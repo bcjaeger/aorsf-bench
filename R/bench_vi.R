@@ -1,10 +1,16 @@
-#' .. content for \description{} (no empty lines) ..
 #'
-#' .. content for \details{} ..
 #'
-#' @title
-#' @param data_source
-#' @param run_seed
+#' @description
+#'  run a benchmark of variable importance. The idea here is to make a
+#'  dataset with some signal and noise variables, then see how well a
+#'  variable importance technique does in identifying which variable
+#'  is signal and which variable is noise.
+#'
+#' @param n_obs number of observations in the training data
+#' @param pred_corr_max maximum correlation between predictors
+#' @param run_seed random seed value
+#'
+#'
 bench_vi <- function(n_obs = 1000,
                      pred_corr_max = 0.3,
                      run_seed) {

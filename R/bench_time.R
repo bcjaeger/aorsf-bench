@@ -1,13 +1,27 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
 
+
+#' Benchmark of prediction time based on simulated data
+#'
+#' @param n_obs number of observations in the data
+#' @param n_ftr number of predictors in the data
+#' @param n_tree number of trees on the ensemble
+#' @param n_times number of times to measure computing time
+#'
+#' @details
+#' Added this experiment to the paper after a productive
+#'  conversation with reviewers on rOpenSci.
+#'  https://github.com/ropensci/software-review/issues/532/#issuecomment-1238748885
+#'
 bench_time <- function(n_obs = 100,
                        n_ftr = 10,
                        n_tree = 500,
                        n_times = NULL) {
+
+  # I made this data with sim_surv() and saved it in data/ to make
+  # this experiment run faster. I.e., instead of calling sim_surv()
+  # every time I call bench_time(), I just make one really big data
+  # set with sim_surv(), save it, and then read in subsets of it
+  # for time benchmarking with different data dimensions.
 
   data <- read_rds("data/bench_time.rds")[seq(n_obs), ]
 

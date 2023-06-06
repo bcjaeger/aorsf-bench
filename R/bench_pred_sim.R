@@ -1,5 +1,16 @@
 
 
+#' @description benchmark experiment with simulated data
+#'
+#' @param data_source character value indicating which dataset to load
+#' @param model_type character value indicating which model to use
+#' @param data_load_fun function for loading data
+#' @param model_fit_fun function for model fitting
+#' @param model_pred_fun function for model predictions
+#' @param n_obs number of observations in training data
+#' @param pred_corr_max maximum correlation magnitude between predictors
+#' @param run_seed random seed value
+
 bench_pred_sim <- function(data_source,
                            model_type,
                            data_load_fun,

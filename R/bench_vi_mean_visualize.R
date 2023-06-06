@@ -1,9 +1,9 @@
-#' .. content for \description{} (no empty lines) ..
+
+#' Visualize the results from benchmark of variable importance
 #'
-#' .. content for \details{} ..
+#' @param bm_vi_comb the combined variable importance benchmark results
 #'
-#' @title
-#' @param bm_vi_comb
+
 bench_vi_mean_visualize <- function(bm_vi_comb) {
 
   vars_vi <- c('main', 'cmbn', 'nlin', 'intr', 'junk')

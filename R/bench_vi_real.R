@@ -1,12 +1,29 @@
 
 
-#' .. content for \description{} (no empty lines) ..
+
+#' @description
+#' A benchmark of prediction accuracy where variable importance
+#'   is used as a variable selection step prior to fitting a
+#'   learning algorithm. This is unfinished but may be used in
+#'   later work. The issues to address are mostly computational.
+#'   I.e., need to run this experiment with each learner paired
+#'   to each variable selection method. In addition, each method
+#'   should be allowed to select 2, 3, ... k predictors and have
+#'   learners fitted to each of those sets to get a sense of the
+#'   overall performance of the variable selection instead of just
+#'   the performance with an arbitrary number of predictors (e.g., 10).
+#'   So, lots of work to do, and it should probably go into a paper
+#'   with more of a focus on variable selection.
 #'
-#' .. content for \details{} ..
+#' @param data_source character value indicating which data to load
+#' @param data_load_fun function to load data with
+#' @param run_seed random seed value
+#' @param test_prop proportion of data to hold out as a test set
 #'
-#' @title
-#' @param data_source
-#' @param run_seed
+#' @return
+#' @export
+#'
+#' @examples
 bench_vi_real <- function(data_source,
                           data_load_fun,
                           run_seed,

@@ -1,4 +1,8 @@
 
+# this function creates the guide-it data used in the benchmark
+# of prediction accuracy. It gets a subset of predictors from the
+# guide-it data sheets and then merges them. Also, it sets dosage
+# of drugs to 0 for people who were not taking that drug.
 
 guide_it_build <- function(){
 

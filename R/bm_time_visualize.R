@@ -1,9 +1,8 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param bm_time
+
+#'  Added this visualiztion to the paper after a productive
+#'  conversation with reviewers on rOpenSci.
+#'  https://github.com/ropensci/software-review/issues/532/#issuecomment-1238748885
+
 bm_time_visualize <- function(bm_time) {
 
   bm_time_smry <- bm_time %>%

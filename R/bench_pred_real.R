@@ -1,10 +1,14 @@
-#' .. content for \description{} (no empty lines) ..
+
+#' @description benchmark experiment with real data
 #'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param data_source
-#' @param run_seed
+#' @param data_source character value indicating which dataset to load
+#' @param model_type character value indicating which model to use
+#' @param data_load_fun function for loading data
+#' @param model_fit_fun function for model fitting
+#' @param model_pred_fun function for model predictions
+#' @param run_seed random seed value
+#' @param test_prop what proportion of data to set aside for testing
+
 bench_pred_real <- function(data_source,
                             model_type,
                             data_load_fun,

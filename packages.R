@@ -1,4 +1,4 @@
-## library() calls go here
+## Be sure these packages are installed prior to running tar_make()
 library(conflicted)
 library(dotenv)
 library(targets)

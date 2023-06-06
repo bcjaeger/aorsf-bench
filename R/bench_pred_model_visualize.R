@@ -2,8 +2,12 @@
 #'
 #' @details Inference on equivalence and superiority.
 #'
-#' @title
-#' @param bm_pred_model
+#' @param bm_pred_model a target created from the benchmark experiment
+#' @param model_key a target with labels about model information
+#' @param equiv_bound a number specifying the boundary for equivalence.
+#'   E.g., equiv_bound of 0.01 means anything within 0.01 of a given
+#'   reference value is considered practically equivalent.
+#'
 bench_pred_model_visualize <- function(bm_pred_model,
                                        model_key,
                                        equiv_bound = 0.01) {
@@ -73,7 +77,8 @@ bench_pred_model_visualize <- function(bm_pred_model,
 
 }
 
-
+# simplifying the function above by separating most of the work
+# into its own function
 bench_pred_model_visualize_worker <- function(.gg_data,
                                               equiv_bound){
 
@@ -178,7 +183,7 @@ bench_pred_model_visualize_worker <- function(.gg_data,
 
 }
 
-
+# a smaller version of the function above for simpler figures
 bench_pred_model_visualize_smol <- function(.gg_data,
                                             equiv_bound){
 

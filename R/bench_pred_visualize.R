@@ -1,7 +1,26 @@
+# helper function for computing percent difference
 perc_diff <- function(a,b){
   100 * (a-b) / b
 }
 
+#' @description visualize prediction error from benchmark experiment
+#'
+#' @param bm_pred_clean cleaned results from benchmark experiment
+#' @param data_key information about data in benchmark
+#' @param model_key information about modeling algos
+#' @param ymax_scale_ibs how much to scale the maximum y value by in
+#'   the figure with IBS (integrated brier score) values.
+#' @param ymax_scale_cstat how much to scale the maximum y value by in
+#'   the figure with C-statistic values.
+#'
+#' @note
+#' integrated brier score is the same thing as index of prediction accuracy
+#'
+#' @details
+#' I scale the y axis to be a little higher than the maximum y value
+#'   to give the plots a little bit of white space near the boundaries.
+#'
+#'
 bench_pred_visualize <- function(bm_pred_clean,
                                  data_key,
                                  model_key,
@@ -45,6 +64,7 @@ bench_pred_visualize <- function(bm_pred_clean,
 
 }
 
+# worker function to simplify the function above.
 bench_pred_visualize_ <- function(
     bm_pred_clean,
     data_recoder,

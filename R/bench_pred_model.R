@@ -1,15 +1,11 @@
-#' .. content for \description{} (no empty lines) ..
+#' @description fits bayesian linear mixed models to the benchmark
+#'   results to conduct inference on model performance.
 #'
-#' .. content for \details{} ..
+#' @param bm_pred_clean a target with cleaned benchmark results.
+#' @param data_key a target with information about data sets.
+#' @param model_key a target with information about modeling algos.
 #'
-#' @title
-#' @param bm_pred_clean
-#' @param data_key
-#' @param model_key
 bench_pred_model <- function(bm_pred_clean, data_key, model_key) {
-
-  # fit <- stan_glmer(data = bm_pred_clean,
-  #                   formula = ibs_scaled ~ model + (1|data/run))
 
   bm_pred_mdat <- bm_pred_clean |>
     select(data, run, model, cstat, ibs_scaled) |>
@@ -70,20 +66,3 @@ bench_pred_model <- function(bm_pred_clean, data_key, model_key) {
   list(model = mdl, posterior = data_infer)
 
 }
-
-
-# data_gg <- split(data_infer$ibs_scaled$value,
-#                  data_infer$ibs_scaled$model)
-#
-# mdl_levels <- levels(data_infer$ibs_scaled$model)
-#
-# inline_plot <-
-#   tibble(
-#     model = recode(mdl_levels, !!!deframe(model_key)),
-#     box = ""
-#   )
-#
-# inline_plot |>
-#   kbl(booktabs = TRUE) |>
-#   kable_paper(full_width=TRUE) |>
-#   column_spec(2, image = spec_boxplot(data_gg, width = 1000))

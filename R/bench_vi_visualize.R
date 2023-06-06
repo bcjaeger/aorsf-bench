@@ -1,9 +1,11 @@
-#' .. content for \description{} (no empty lines) ..
+
+#' @description
+#'   visualization of the results from the variable importance benchmark.
+#'   Output is a racing dot plot with sections for different variable types.
 #'
-#' .. content for \details{} ..
 #'
-#' @title
-#' @param bm_vi_comb
+#' @param bm_vi_comb the combined results from the benchmark of variable
+#'   importance
 bench_vi_visualize <- function(bm_vi_comb) {
 
   bm_vi_smry <- bm_vi_comb %>%

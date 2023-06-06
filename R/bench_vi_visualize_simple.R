@@ -1,9 +1,13 @@
-#' .. content for \description{} (no empty lines) ..
+
+#' @description
+#'   a simplified visualization of results from the benchmark of variable
+#'   importance. Output is a bar chart instead of a racing dot plot.
+#'   This visual works nicely on a poster since people can see the bars
+#'   from a long ways off. Dots are less helpful in posters.
 #'
-#' .. content for \details{} ..
+#' @param bm_vi_smry the summarized results from the variable importance
+#'   benchmark.
 #'
-#' @title
-#' @param bm_vi_comb
 bench_vi_visualize_simple <- function(bm_vi_smry) {
 
   fig_data <- bm_vi_smry %>%
