@@ -1,10 +1,17 @@
-#' .. content for \description{} (no empty lines) ..
+#' @description
+#'   this function is the main step in our benchmark of variable
+#'   importance. It computes variable importance for a given
+#'   model and returns the sorted importance values along with
+#'   info about how long it took to compute those values.
 #'
-#' .. content for \details{} ..
+#'   The conditional logic in this function is needed b/c xgboost
+#'   handles one-hot or dummy coded data whereas aorsf and the other
+#'   packages don't require this additional processing step. Some
+#'   care is needed to harmonize these two approaches.
 #'
-#' @title
-#' @param model
-#' @param train
+#' @param model a character value indicating the model fitting approach
+#' @param train a dataset for training the model.
+#'
 model_varsel <- function(model, train) {
 
   stopifnot(ncol(train) > 2)

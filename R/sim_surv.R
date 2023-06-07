@@ -1,8 +1,40 @@
-#' .. content for \description{} (no empty lines) ..
+
+
+#' @description
+#'   Generate simulated survival data with signal and noise variables.
+#'   The signal variables come in several types:
+#'   - main effect (a has linear relationship w/the outcome)
+#'   - non-linear effect (a has non-linear relationship w/the outcome)
+#'   - combination effect (a, b are noise, but a x c1 + b x c2 is signal)
+#'   - interaction effect (a, b are noise, but a * b is signal)
 #'
-#' .. content for \details{} ..
+#' @note
+#'   interaction variables can interact with any of the other types of
+#'   variables, but each interaction effect is linear.
 #'
-#' @title
+#' @param n_obs number of observations in training data
+#' @param n_pred_junk number of noise predictors
+#' @param n_pred_main number of main effects
+#' @param n_intr_main number of interactions with main effect predictors
+#' @param n_pred_nlin number of nonlinear predictors
+#' @param n_intr_nlin number of interactions with non-linear effect predictors
+#' @param n_pred_cmbn number of combination effects
+#' @param n_intr_cmbn number of interactions with combination effect predictors
+#' @param eff_size_pred_main effect size of each main effect predictor
+#' @param eff_size_intr_main effect size of each interaction with main effect
+#'   predictors
+#' @param eff_size_pred_nlin effect size of each non-linear effect predictor
+#' @param eff_size_intr_nlin effect size of each interaction with non-linear
+#'   effect predictors
+#' @param eff_size_pred_cmbn effect size of each combination effect predictor
+#' @param eff_size_intr_cmbn effect size of each interaction with combination
+#'   effect predictors
+#' @param pred_corr_min minimum correlation between predictors
+#' @param pred_corr_max maximum correlation between predictors
+#' @param pred_horiz the time that predictions will be computed for. This
+#'   is arbitrary. A default value of 2.5 is used but it does not impact
+#'   results if you change it to something else.
+#'
 
 sim_surv <- function(n_obs = 500,
                      n_pred_junk = 15,

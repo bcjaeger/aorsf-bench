@@ -1,8 +1,9 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
+#' this function creates a tibble that contains information
+#' about modeling algos used in the benchmark. It's single
+#' purpose is to translate the terms I use for models in my code
+#' to the terms that I use in my paper. For example, in my code,
+#' I refer to the fast aorsf algo as 'aorsf_fast', but in the
+#' paper it is 'aorsf-fast'.
 
 make_model_key <- function() {
 

@@ -1,11 +1,22 @@
-#' .. content for \description{} (no empty lines) ..
+#' @description
+#'   These functions are used to compute predictions for
+#'   the different learners that are used in the prediction
+#'   accuracy benchmark. Each function corresponds to a
+#'   specific learner, which may seem unnecessary, but is
+#'   actually a nice system to use when the targets package
+#'   dictates your computation.
 #'
-#' .. content for \details{} ..
+#' @note
+#'   After this code was developed, glmnet had a nice release
+#'   that included some functions to compute survival probs.
+#'   I've checked to make sure the approach I take in
+#'   cox_net_pred() below gives similar results as glmnet's
+#'   new approach, but I highly recommend future work use the
+#'   glmnet:::survfit.coxnet approach.
 #'
-#' @title
-#' @param fit
-#' @param type
-#' @param test
+#' @param object the model object to compute predictions with
+#' @param test the data to compute predictions for
+#' @param pred_horizon the time(s) to compute predictions at
 
 
 rotsf_pred <- function(object, test, pred_horizon){
@@ -48,9 +59,6 @@ rsfse_pred <- function(object, test, pred_horizon){
 
 }
 
-
-
-
 aorsf_pred <- function(object, test, pred_horizon){
 
 
@@ -70,10 +78,6 @@ aorsf_pred <- function(object, test, pred_horizon){
 }
 
 aorsf_random_pred <- function(object, test, pred_horizon){
-  aorsf_pred(object, test, pred_horizon)
-}
-
-aorsf_fast_filter_pred <- function(object, test, pred_horizon){
   aorsf_pred(object, test, pred_horizon)
 }
 

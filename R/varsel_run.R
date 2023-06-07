@@ -1,10 +1,17 @@
-#' .. content for \description{} (no empty lines) ..
+#' @description
+#'   this is sort of an alpha version of a function that attempts to
+#'   run a variable selection step prior to fitting a model and then
+#'   validating it in external data. It isn't included in my main analysis
+#'   but I keep it here in case it would be useful to flesh it out in
+#'   other projects that are more focused on variable selection.
 #'
-#' .. content for \details{} ..
 #'
-#' @title
-#' @param source
-#' @param run_seed
+#' @param source the data to be used for the experiment. Valid options
+#'   are 'pbc_orsf', 'rotterdam', and 'sim'.
+#' @param test_prop proportion of data to be held out for testing.
+#' @param keep_prop proportion of predictors to keep in selection step.
+#' @param run_seed random seed value.
+#'
 varsel_run <- function(source = source,
                        run_seed = run_seed,
                        test_prop = 1/2,

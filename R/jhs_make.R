@@ -1,4 +1,15 @@
 
+#' helper function to make the jhs data. It pulls in data from
+#' the JHS data sheets downloaded from BIOLINCC, which are
+#' theoretically publicly available but getting them is a little
+#' involved. What this function does is:
+#' - reads the JHS event files for CHD, HF, stroke events
+#' - combines them with a pre-built analysis dataset for visit 1
+#' - coalesces creatinine and albumin 24 hr tests with spot tests
+#'   - this is done b/c a few ppl had 24 hr tests and most
+#'     had spot tests, which approximate the 24 hr test.
+#' - retains outcomes and predictors to be used in benchmarks.
+
 
 jhs_make <- function(){
 

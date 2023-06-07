@@ -1,9 +1,15 @@
-#' .. content for \description{} (no empty lines) ..
+#' @description
+#'   this function is used to crate a target that in turn contains
+#'   relevant information about our datasets. It is very helpful to
+#'   keep this function and use it in papers/posters/presentations
+#'   to ensure that our descriptions of the data is consistent in each
+#'   deliverable and we don't have to update multiple outputs whenever
+#'   we update the data descriptions.
 #'
-#' .. content for \details{} ..
+#' @param analyses_real the analyses that are selected for running our
+#'   benchmark on real data. This is a dataset that is created at the
+#'   beginning of _targets.R
 #'
-#' @title
-#' @param x
 summarize_data_source <- function(analyses_real) {
 
 
@@ -253,27 +259,4 @@ is_double_ish <- function(x){
 
 }
 
-
-# data_info |>
-#   mutate(
-#     label = recode(
-#       data,
-#       vdv = "Van't Veer LJ (2002); breast cancer",
-#       veteran = "Kalbfleisch JD (1980); lung cancer",
-#       colon = "Laurie JA (1989); colon cancer",
-#       pbc_orsf = "Therneau T (2000); Primary biliary cholangitis",
-#       time_to_million = "Hvitfeldt E (2022), Movie grosses 1M USD",
-#       gbsg2 = "Schumacher M (1994); breast cancer",
-#       peakV02 = "Hsich E (2011); Systolic heart failure",
-#       flchain = "Dispenzieri A (2012); serum free light chain",
-#       nafld = "Allen AM (2018); Non-alcohol fatty liver disease",
-#       rotterdam = "Royston P (2013); breast cancer",
-#       actg = "Hosmer DW (2008); ACTG 320",
-#       guide_it = "Felker GM (2017); GUIDE-IT",
-#       breast = "Desmedt C (2011); breast cancer",
-#       sprint_cvd = "Jaeger BC (2022); cardiovascular mortality",
-#       sprint_acm = "Jaeger BC (2022); all-cause mortality"
-#     ),
-#     tbl_label = glue("{label}; n = {nrow}, p = {ncol}")
-#   )
 
