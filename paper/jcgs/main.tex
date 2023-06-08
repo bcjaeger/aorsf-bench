@@ -190,7 +190,7 @@
 
 \newpage
 \begin{abstract}
-	The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles have high prediction accuracy, but assessing many linear combinations of predictors induces high computational overhead. In addition, few methods have been developed for estimation of variable importance (VI) with oblique RSFs. We introduce a method to increase computational efficiency of the oblique RSF and a method to estimate VI with the oblique RSF. Our computational approach uses Newton-Raphson scoring in each non-leaf node, We estimate VI by negating each coefficient used for a given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In benchmarking experiments, we find our implementation of the oblique RSF is hundreds of times faster, with equivalent prediction accuracy, compared to existing software for oblique RSFs. We find in simulation studies that `negation VI' discriminates between relevant and irrelevant numeric predictors more accurately than permutation VI, Shapley VI, and a technique to measure VI using analysis of variance. All  oblique RSF methods in the current study are available in the \texttt{aorsf} R package.
+	The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles have high prediction accuracy, but assessing many linear combinations of predictors induces high computational overhead. In addition, few methods have been developed for estimation of variable importance (VI) with oblique RSFs. We introduce a method to increase computational efficiency of the oblique RSF and a method to estimate VI with the oblique RSF. Our computational approach uses Newton-Raphson scoring in each non-leaf node, We estimate VI by negating each coefficient used for a given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In benchmarking experiments, we find our implementation of the oblique RSF is hundreds of times faster, with equivalent prediction accuracy, compared to existing software for oblique RSFs. We find in simulation studies that `negation VI' discriminates between relevant and irrelevant numeric predictors more accurately than permutation VI, Shapley VI, and a technique to measure VI using analysis of variance. All  oblique RSF methods in the current study are available in the \texttt{aorsf} R package, and additional supplemental materials are available online.
 \end{abstract}
 
 \noindent%
@@ -445,7 +445,7 @@ Both the IPA and time-dependent C-statistic generally take values between 0 and 
 
 \subsubsection{Data sets}
 
-We used a collection of 21 data sets containing a total of 35 risk prediction tasks (tasks per data set ranged from one to four). Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from 137 to 17,549 (median: 1,384), the number of predictors ranged from 7 to 1,692 (median: 41), and the percentage of censored observations ranged from 5.26 to 97.7 (median: 78.1) (\tabrefAppendix{tab:datasets}).
+We used a collection of 21 data sets containing a total of 35 risk prediction tasks (tasks per data set ranged from one to four). Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1 in Supplementary Materials). Across all prediction tasks, the number of observations ranged from 137 to 17,549 (median: 1,384), the number of predictors ranged from 7 to 1,692 (median: 41), and the percentage of censored observations ranged from 5.26 to 97.7 (median: 78.1) (\tabrefAppendix{tab:datasets} in Supplementary Materials).
 
 \subsubsection{Monte-Carlo cross validation}
 
@@ -518,7 +518,7 @@ In \secref{sec:results_pred}, \secref{sec:results_vi}, and \secref{sec:results_c
 
 \subsection{Prediction accuracy} \label{sec:results_pred}
 
-A full summary of all results presented in this Section is provided in \tabrefAppendix{tab:bm_pred_all}. In total, 871 out of 875 Monte-Carlo cross validation runs were completed. On run 13, 18, 24 and 25 for the ACTG 320 data, the \texttt{nn-cox} learner encountered an error during its fitting procedure.
+A full summary of all results presented in this Section is provided in \tabrefAppendix{tab:bm_pred_all} in Supplementary Materials. In total, 871 out of 875 Monte-Carlo cross validation runs were completed. On run 13, 18, 24 and 25 for the ACTG 320 data, the \texttt{nn-cox} learner encountered an error during its fitting procedure.
 
 \paragraph{Index of prediction accuracy}
 
@@ -565,7 +565,7 @@ Compared to learners that were not oblique RSFs, \texttt{aorsf-fast} had the hig
 
 
 
-The three techniques that used `aorsf' to estimate VI were ranked first (\texttt{aorsf-negate}; $C = 75.9$), second (\texttt{aorsf-anova}; $C = 73.9$), and third (\texttt{aorsf-permute}; $C = 73.2$) in overall mean C-statistic across all of the simulation scenarios, with \texttt{aorsf-negate} obtaining the highest C-statistic in 26 out of 36 VI tasks (Figure \ref{fig:bm_vi_viz}). Among the four relevant variable classes, \texttt{aorsf-negate} had the highest mean C-statistic for main effects, combination effects, and non-linear effects, with the greatest advantage of using \texttt{aorsf-negate} occurring among non-linear and combination variables. Full results from the experiment are provided in \tabrefAppendix{tab:bm_vi}. Computationally, ANOVA VI was faster than negation and permutation VI, with a median time of 2.88 seconds versus 20.4 and 21.8 seconds, respectively.
+The three techniques that used `aorsf' to estimate VI were ranked first (\texttt{aorsf-negate}; $C = 75.9$), second (\texttt{aorsf-anova}; $C = 73.9$), and third (\texttt{aorsf-permute}; $C = 73.2$) in overall mean C-statistic across all of the simulation scenarios, with \texttt{aorsf-negate} obtaining the highest C-statistic in 26 out of 36 VI tasks (Figure \ref{fig:bm_vi_viz}). Among the four relevant variable classes, \texttt{aorsf-negate} had the highest mean C-statistic for main effects, combination effects, and non-linear effects, with the greatest advantage of using \texttt{aorsf-negate} occurring among non-linear and combination variables. Full results from the experiment are provided in \tabrefAppendix{tab:bm_vi} in Supplementary Materials. Computationally, ANOVA VI was faster than negation and permutation VI, with a median time of 2.88 seconds versus 20.4 and 21.8 seconds, respectively.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{figure}
@@ -617,6 +617,26 @@ While the current study advances the oblique RSF towards being scalable and inte
 \subsection{Conclusion}
 
 Oblique RSFs have exceptional prediction accuracy and this study has shown how they can be fit with computational efficiency that rivals their axis-based counterparts. We have also introduced a general and flexible method to estimate VI with oblique RFs, and demonstrated its effectiveness for numeric, correlated predictors.
+
+\section{Supplementary Materials}
+
+Supplemental materials for the current analysis are available online.
+
+\begin{description}
+
+\item[Code] The code used to generate results in the current analysis are available online at \newline https://github.com/bcjaeger/aorsf-bench and provided as supplemental material (aorsf\_bench.zip).
+
+\item[aorsf] The R package used to fit oblique RSFs in the current analysis is available online at \newline https://github.com/ropensci/aorsf and version 0.0.7.9000 is provided as supplemental material (aorsf\_package.zip).
+
+\item[Appendix] Additional details on data used in the current analysis as well as additional details for numeric experiments (aorsf\_appendix.pdf).
+
+\end{description}
+
+\bibliographystyle{Chicago}
+
+\bibliography{main}
+
+\newpage
 
 \appendix
 
@@ -1418,7 +1438,4 @@ Overall & Overall & 75.9 & 73.9 & 73.2 & 69.6 & 64.6 & 67.7\\
 \end{knitrout}
 
 
-\bibliographystyle{Chicago}
-
-\bibliography{main}
 \end{document}

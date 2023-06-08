@@ -196,7 +196,7 @@ pcens_min    <- table_value(100*min(data_key$pcens))
 
 \newpage
 \begin{abstract}
-	The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles have high prediction accuracy, but assessing many linear combinations of predictors induces high computational overhead. In addition, few methods have been developed for estimation of variable importance (VI) with oblique RSFs. We introduce a method to increase computational efficiency of the oblique RSF and a method to estimate VI with the oblique RSF. Our computational approach uses Newton-Raphson scoring in each non-leaf node, We estimate VI by negating each coefficient used for a given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In benchmarking experiments, we find our implementation of the oblique RSF is hundreds of times faster, with equivalent prediction accuracy, compared to existing software for oblique RSFs. We find in simulation studies that `negation VI' discriminates between relevant and irrelevant numeric predictors more accurately than permutation VI, Shapley VI, and a technique to measure VI using analysis of variance. All  oblique RSF methods in the current study are available in the \texttt{aorsf} R package.
+	The oblique random survival forest (RSF) is an ensemble supervised learning method for right-censored outcomes. Trees in the oblique RSF are grown using linear combinations of predictors, whereas in the standard RSF, a single predictor is used. Oblique RSF ensembles have high prediction accuracy, but assessing many linear combinations of predictors induces high computational overhead. In addition, few methods have been developed for estimation of variable importance (VI) with oblique RSFs. We introduce a method to increase computational efficiency of the oblique RSF and a method to estimate VI with the oblique RSF. Our computational approach uses Newton-Raphson scoring in each non-leaf node, We estimate VI by negating each coefficient used for a given predictor in linear combinations, and then computing the reduction in out-of-bag accuracy. In benchmarking experiments, we find our implementation of the oblique RSF is hundreds of times faster, with equivalent prediction accuracy, compared to existing software for oblique RSFs. We find in simulation studies that `negation VI' discriminates between relevant and irrelevant numeric predictors more accurately than permutation VI, Shapley VI, and a technique to measure VI using analysis of variance. All  oblique RSF methods in the current study are available in the \texttt{aorsf} R package, and additional supplemental materials are available online.
 \end{abstract}
 
 \noindent%
@@ -617,7 +617,7 @@ Both the IPA and time-dependent C-statistic generally take values between 0 and 
 
 \subsubsection{Data sets}
 
-We used a collection of \Sexpr{n_data_sets} data sets containing a total of \Sexpr{n_risk_tasks} risk prediction tasks (tasks per data set ranged from one to four). Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1). Across all prediction tasks, the number of observations ranged from \Sexpr{nrow_min} to \Sexpr{nrow_max} (median: \Sexpr{nrow_median}), the number of predictors ranged from \Sexpr{ncol_min} to \Sexpr{ncol_max} (median: \Sexpr{ncol_median}), and the percentage of censored observations ranged from \Sexpr{pcens_min} to \Sexpr{pcens_max} (median: \Sexpr{pcens_median}) (\tabrefAppendix{tab:datasets}).
+We used a collection of \Sexpr{n_data_sets} data sets containing a total of \Sexpr{n_risk_tasks} risk prediction tasks (tasks per data set ranged from one to four). Participant-level data from the GUIDE-IT and SPRINT clinical trials and the ARIC, MESA, and JHS community cohort studies was obtained from the National Institute of Health Biologic Specimen and Data Repository Coordinating Center (BioLINCC). Designs and protocols for these studies have been made available \citep{aric1989atherosclerosis, bild2002multi, felker2017effect, sprint2015randomized, taylor2005toward}. All other datasets were publicly available and obtained through R packages (see Appendix A.1 in Supplementary Materials). Across all prediction tasks, the number of observations ranged from \Sexpr{nrow_min} to \Sexpr{nrow_max} (median: \Sexpr{nrow_median}), the number of predictors ranged from \Sexpr{ncol_min} to \Sexpr{ncol_max} (median: \Sexpr{ncol_median}), and the percentage of censored observations ranged from \Sexpr{pcens_min} to \Sexpr{pcens_max} (median: \Sexpr{pcens_median}) (\tabrefAppendix{tab:datasets} in Supplementary Materials).
 
 \subsubsection{Monte-Carlo cross validation}
 
@@ -781,7 +781,7 @@ In \secref{sec:results_pred}, \secref{sec:results_vi}, and \secref{sec:results_c
 
 \subsection{Prediction accuracy} \label{sec:results_pred}
 
-A full summary of all results presented in this Section is provided in \tabrefAppendix{tab:bm_pred_all}. In total, \Sexpr{n_tasks_complete} out of \Sexpr{n_tasks_expected} Monte-Carlo cross validation runs were completed. \Sexpr{bm_pred_failed_description}.
+A full summary of all results presented in this Section is provided in \tabrefAppendix{tab:bm_pred_all} in Supplementary Materials. In total, \Sexpr{n_tasks_complete} out of \Sexpr{n_tasks_expected} Monte-Carlo cross validation runs were completed. \Sexpr{bm_pred_failed_description}.
 
 \paragraph{Index of prediction accuracy}
 
@@ -911,7 +911,7 @@ vi_times <- bm_vi_viz$times %>%
 
 @
 
-The three techniques that used `aorsf' to estimate VI were ranked first (\texttt{aorsf-negate}; $C = \Sexpr{cstat_mean_aorsf}$), second (\texttt{aorsf-anova}; $C = \Sexpr{cstat_mean_anova}$), and third (\texttt{aorsf-permute}; $C = \Sexpr{cstat_mean_permute}$) in overall mean C-statistic across all of the simulation scenarios, with \texttt{aorsf-negate} obtaining the highest C-statistic in \Sexpr{n_wins_aorsf} out of \Sexpr{n_vi_tasks} VI tasks (Figure \ref{fig:bm_vi_viz}). Among the four relevant variable classes, \texttt{aorsf-negate} had the highest mean C-statistic for main effects, combination effects, and non-linear effects, with the greatest advantage of using \texttt{aorsf-negate} occurring among non-linear and combination variables. Full results from the experiment are provided in \tabrefAppendix{tab:bm_vi}. Computationally, ANOVA VI was faster than negation and permutation VI, with a median time of \Sexpr{vi_times$aorsf_anova} seconds versus \Sexpr{vi_times$aorsf_negate} and \Sexpr{vi_times$aorsf_permute} seconds, respectively.
+The three techniques that used `aorsf' to estimate VI were ranked first (\texttt{aorsf-negate}; $C = \Sexpr{cstat_mean_aorsf}$), second (\texttt{aorsf-anova}; $C = \Sexpr{cstat_mean_anova}$), and third (\texttt{aorsf-permute}; $C = \Sexpr{cstat_mean_permute}$) in overall mean C-statistic across all of the simulation scenarios, with \texttt{aorsf-negate} obtaining the highest C-statistic in \Sexpr{n_wins_aorsf} out of \Sexpr{n_vi_tasks} VI tasks (Figure \ref{fig:bm_vi_viz}). Among the four relevant variable classes, \texttt{aorsf-negate} had the highest mean C-statistic for main effects, combination effects, and non-linear effects, with the greatest advantage of using \texttt{aorsf-negate} occurring among non-linear and combination variables. Full results from the experiment are provided in \tabrefAppendix{tab:bm_vi} in Supplementary Materials. Computationally, ANOVA VI was faster than negation and permutation VI, with a median time of \Sexpr{vi_times$aorsf_anova} seconds versus \Sexpr{vi_times$aorsf_negate} and \Sexpr{vi_times$aorsf_permute} seconds, respectively.
 
 <<bm_vi_viz, fig.height=10, fig.width=9, fig.cap="Concordance statistic for assigning higher importance to relevant versus irrelevant variables. Text appears in rows where negation importance obtained the highest concordance, showing absolute and percent improvement over the second best technique.">>=
 bm_vi_viz$fig
@@ -972,6 +972,26 @@ While the current study advances the oblique RSF towards being scalable and inte
 \subsection{Conclusion}
 
 Oblique RSFs have exceptional prediction accuracy and this study has shown how they can be fit with computational efficiency that rivals their axis-based counterparts. We have also introduced a general and flexible method to estimate VI with oblique RFs, and demonstrated its effectiveness for numeric, correlated predictors.
+
+\section{Supplementary Materials}
+
+Supplemental materials for the current analysis are available online.
+
+\begin{description}
+
+\item[Code] The code used to generate results in the current analysis are available online at \newline https://github.com/bcjaeger/aorsf-bench and provided as supplemental material (aorsf\_bench.zip).
+
+\item[aorsf] The R package used to fit oblique RSFs in the current analysis is available online at \newline https://github.com/ropensci/aorsf and version 0.0.7.9000 is provided as supplemental material (aorsf\_package.zip).
+
+\item[Appendix] Additional details on data used in the current analysis as well as additional details for numeric experiments (aorsf\_appendix.pdf).
+
+\end{description}
+
+\bibliographystyle{Chicago}
+
+\bibliography{main}
+
+\newpage
 
 \appendix
 
@@ -1252,7 +1272,4 @@ pack_rows(group_label = 'Combination effects',
 @
 
 
-\bibliographystyle{Chicago}
-
-\bibliography{main}
 \end{document}
