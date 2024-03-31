@@ -206,7 +206,7 @@ xgb_cox_pred <- function(object, test, pred_horizon){
 
   start_time <- Sys.time()
 
-  lin_preds <- predict(object$fit, newdata = .test)
+  lin_preds <- predict(object$fit, newdata = .test, outputmargin = TRUE)
 
   for(i in seq_along(pred_horizon)){
     res[, i] <- exp(exp(lin_preds) * -object$base_haz[i])

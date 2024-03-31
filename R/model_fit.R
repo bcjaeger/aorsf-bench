@@ -395,7 +395,7 @@ xgb_cox_fit <- function(train,
                    nrounds = cv_fit$best_iteration)
 
   # baseline hazard estimate at pred horizon
-  lin_preds <- predict(fit, newdata = xmat)
+  lin_preds <- predict(fit, newdata = xmat, outputmargin = TRUE)
 
   base_haz <-
     gbm::basehaz.gbm(t = train[, 'time'],
